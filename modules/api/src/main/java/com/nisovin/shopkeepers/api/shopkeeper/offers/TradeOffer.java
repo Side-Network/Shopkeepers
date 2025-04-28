@@ -128,4 +128,10 @@ public interface TradeOffer {
 	 * @return <code>true</code> if the items are equal
 	 */
 	public boolean areItemsEqual(TradingRecipe tradingRecipe);
+
+	//
+
+	public int getStock();
+
+	public void setStock(int stock);
 }

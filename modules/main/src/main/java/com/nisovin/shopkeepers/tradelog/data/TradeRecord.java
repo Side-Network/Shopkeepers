@@ -77,7 +77,7 @@ public class TradeRecord {
 	// Note: We only record the trade's original trading recipe items currently. If any plugins
 	// modified the received or result items, those changes are not captured by the trade log.
 	private final UnmodifiableItemStack resultItem; // Not null
-	private final UnmodifiableItemStack item1; // Not null
+	private final UnmodifiableItemStack  item1; // Not null
 	private final @Nullable UnmodifiableItemStack item2; // Can be null
 	private final int tradeCount; // > 0
 

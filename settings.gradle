@@ -1,4 +1,4 @@
-rootProject.name = 'Shopkeepers'
+rootProject.name = 'shopkeepers'
 
 def subprojects = [
 	'external-annotations',

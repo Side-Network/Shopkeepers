@@ -6,6 +6,9 @@ import java.util.List;
 import com.nisovin.shopkeepers.api.ShopkeepersPlugin;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.admin.AbstractAdminShopType;
+import org.bukkit.Bukkit;
+
+import static com.nisovin.shopkeepers.lang.Messages.shopSetupDescAdminRegular;
 
 public final class RegularAdminShopType
 		extends AbstractAdminShopType<SKRegularAdminShopkeeper> {
@@ -31,7 +34,8 @@ public final class RegularAdminShopType
 
 	@Override
 	public String getSetupDescription() {
-		return Messages.shopSetupDescAdminRegular;
+		Bukkit.broadcastMessage("getSetupDescription");
+		return shopSetupDescAdminRegular;
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.nisovin.shopkeepers.util.data.serialization.java.NumberSerializers;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -35,6 +36,8 @@ import com.nisovin.shopkeepers.util.logging.Log;
 
 // Shares its implementation with SKTradingRecipe, but always reports to not be out of stock.
 public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
+
+	private int stock = 0;
 
 	/**
 	 * Creates a new {@link SKTradeOffer}.
@@ -69,12 +72,23 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 	 * @param item2
 	 *            the second buy item, can be empty
 	 */
+
 	public SKTradeOffer(
 			UnmodifiableItemStack resultItem,
 			UnmodifiableItemStack item1,
 			@Nullable UnmodifiableItemStack item2
 	) {
 		super(resultItem, item1, item2);
+	}
+
+	public SKTradeOffer(
+			UnmodifiableItemStack resultItem,
+			UnmodifiableItemStack item1,
+			@Nullable UnmodifiableItemStack item2,
+			int _stock
+	) {
+		super(resultItem, item1, item2);
+		this.stock = _stock;
 	}
 
 	@Override
@@ -126,6 +140,9 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 		);
 	}
 
+	public static final Property<Integer> STOCK = new BasicProperty<Integer>()
+			.dataKeyAccessor("stock", NumberSerializers.INTEGER)
+			.build();
 	private static final Property<UnmodifiableItemStack> RESULT_ITEM = new BasicProperty<UnmodifiableItemStack>()
 			.dataKeyAccessor("resultItem", ItemStackSerializers.UNMODIFIABLE)
 			.validator(ItemStackValidators.Unmodifiable.NON_EMPTY)
@@ -151,6 +168,7 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 			DataContainer offerData = DataContainer.create();
 			// The items are assumed to be immutable.
 			offerData.set(RESULT_ITEM, value.getResultItem());
+			offerData.set(STOCK, value.getStock()); // Can be null
 			offerData.set(ITEM1, value.getItem1());
 			offerData.set(ITEM2, value.getItem2()); // Can be null
 			return offerData.serialize();
@@ -164,8 +182,9 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 				// copied.
 				UnmodifiableItemStack resultItem = offerData.get(RESULT_ITEM);
 				UnmodifiableItemStack item1 = offerData.get(ITEM1);
+				int stock = offerData.getInt("stock");
 				UnmodifiableItemStack item2 = offerData.get(ITEM2); // Can be null
-				return new SKTradeOffer(resultItem, item1, item2);
+				return new SKTradeOffer(resultItem, item1, item2, stock);
 			} catch (MissingDataException e) {
 				throw new InvalidDataException(e.getMessage(), e);
 			}
@@ -410,5 +429,15 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 		}
 
 		return updatedItems;
+	}
+
+	@Override
+	public int getStock() {
+		return stock;
+	}
+
+	@Override
+	public void setStock(int _stock) {
+		stock = _stock;
 	}
 }
