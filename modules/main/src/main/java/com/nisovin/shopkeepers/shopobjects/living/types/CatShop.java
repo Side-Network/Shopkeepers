@@ -116,44 +116,31 @@ public class CatShop extends SittableShop<Cat> {
 
 	private ItemStack getCatTypeEditorItem() {
 		ItemStack iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
-		switch (this.getCatType()) {
-		case TABBY:
+		if (this.getCatType() == Cat.Type.TABBY) {
 			ItemUtils.setLeatherColor(iconItem, Color.BLACK.mixColors(Color.ORANGE));
-			break;
-		case ALL_BLACK:
+		} else if (this.getCatType() == Cat.Type.ALL_BLACK) {
 			ItemUtils.setLeatherColor(iconItem, Color.BLACK);
-			break;
-		case BLACK:
+		} else if (this.getCatType() == Cat.Type.BLACK) {
 			ItemUtils.setLeatherColor(iconItem, Color.BLACK.mixDyes(DyeColor.GRAY));
-			break;
-		case BRITISH_SHORTHAIR:
+		} else if (this.getCatType() == Cat.Type.BRITISH_SHORTHAIR) {
 			ItemUtils.setLeatherColor(iconItem, Color.SILVER);
-			break;
-		case CALICO:
+		} else if (this.getCatType() == Cat.Type.CALICO) {
 			ItemUtils.setLeatherColor(iconItem, Color.ORANGE.mixDyes(DyeColor.BROWN));
-			break;
-		case JELLIE:
+		} else if (this.getCatType() == Cat.Type.JELLIE) {
 			ItemUtils.setLeatherColor(iconItem, Color.GRAY);
-			break;
-		case PERSIAN:
+		} else if (this.getCatType() == Cat.Type.PERSIAN) {
 			ItemUtils.setLeatherColor(iconItem, Color.WHITE.mixDyes(DyeColor.ORANGE));
-			break;
-		case RAGDOLL:
+		} else if (this.getCatType() == Cat.Type.RAGDOLL) {
 			ItemUtils.setLeatherColor(iconItem, Color.WHITE.mixDyes(DyeColor.BROWN));
-			break;
-		case RED:
+		} else if (this.getCatType() == Cat.Type.RED) {
 			ItemUtils.setLeatherColor(iconItem, Color.ORANGE);
-			break;
-		case SIAMESE:
+		} else if (this.getCatType() == Cat.Type.SIAMESE) {
 			ItemUtils.setLeatherColor(iconItem, Color.GRAY.mixDyes(DyeColor.BROWN));
-			break;
-		case WHITE:
+		} else if (this.getCatType() == Cat.Type.WHITE) {
 			ItemUtils.setLeatherColor(iconItem, Color.WHITE);
-			break;
-		default:
+		} else {
 			// Unknown type:
 			ItemUtils.setLeatherColor(iconItem, Color.PURPLE);
-			break;
 		}
 		ItemUtils.setDisplayNameAndLore(iconItem,
 				Messages.buttonCatVariant,

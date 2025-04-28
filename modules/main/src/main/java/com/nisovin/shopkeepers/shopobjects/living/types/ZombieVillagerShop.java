@@ -101,56 +101,39 @@ public class ZombieVillagerShop extends ZombieShop<ZombieVillager> {
 
 	private ItemStack getProfessionEditorItem() {
 		ItemStack iconItem;
-		switch (this.getProfession()) {
-		case ARMORER:
-			iconItem = new ItemStack(Material.BLAST_FURNACE);
-			break;
-		case BUTCHER:
-			iconItem = new ItemStack(Material.SMOKER);
-			break;
-		case CARTOGRAPHER:
-			iconItem = new ItemStack(Material.CARTOGRAPHY_TABLE);
-			break;
-		case CLERIC:
-			iconItem = new ItemStack(Material.BREWING_STAND);
-			break;
-		case FARMER:
-			iconItem = new ItemStack(Material.WHEAT); // Instead of COMPOSTER
-			break;
-		case FISHERMAN:
-			iconItem = new ItemStack(Material.FISHING_ROD); // Instead of BARREL
-			break;
-		case FLETCHER:
-			iconItem = new ItemStack(Material.FLETCHING_TABLE);
-			break;
-		case LEATHERWORKER:
-			iconItem = new ItemStack(Material.LEATHER); // Instead of CAULDRON
-			break;
-		case LIBRARIAN:
-			iconItem = new ItemStack(Material.LECTERN);
-			break;
-		case MASON:
-			iconItem = new ItemStack(Material.STONECUTTER);
-			break;
-		case SHEPHERD:
-			iconItem = new ItemStack(Material.LOOM);
-			break;
-		case TOOLSMITH:
-			iconItem = new ItemStack(Material.SMITHING_TABLE);
-			break;
-		case WEAPONSMITH:
-			iconItem = new ItemStack(Material.GRINDSTONE);
-			break;
-		case NITWIT:
-			iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
-			ItemUtils.setLeatherColor(iconItem, Color.GREEN);
-			break;
-		case NONE:
-		default:
-			iconItem = new ItemStack(Material.BARRIER);
-			break;
-		}
-		assert iconItem != null;
+        Profession profession = this.getProfession();
+        if (profession == Profession.ARMORER) {
+            iconItem = new ItemStack(Material.BLAST_FURNACE);
+        } else if (profession == Profession.BUTCHER) {
+            iconItem = new ItemStack(Material.SMOKER);
+        } else if (profession == Profession.CARTOGRAPHER) {
+            iconItem = new ItemStack(Material.CARTOGRAPHY_TABLE);
+        } else if (profession == Profession.CLERIC) {
+            iconItem = new ItemStack(Material.BREWING_STAND);
+        } else if (profession == Profession.FARMER) {
+            iconItem = new ItemStack(Material.WHEAT); // Instead of COMPOSTER
+        } else if (profession == Profession.FISHERMAN) {
+            iconItem = new ItemStack(Material.FISHING_ROD); // Instead of BARREL
+        } else if (profession == Profession.FLETCHER) {
+            iconItem = new ItemStack(Material.FLETCHING_TABLE);
+        } else if (profession == Profession.LEATHERWORKER) {
+            iconItem = new ItemStack(Material.LEATHER); // Instead of CAULDRON
+        } else if (profession == Profession.LIBRARIAN) {
+            iconItem = new ItemStack(Material.LECTERN);
+        } else if (profession == Profession.MASON) {
+            iconItem = new ItemStack(Material.STONECUTTER);
+        } else if (profession == Profession.SHEPHERD) {
+            iconItem = new ItemStack(Material.LOOM);
+        } else if (profession == Profession.TOOLSMITH) {
+            iconItem = new ItemStack(Material.SMITHING_TABLE);
+        } else if (profession == Profession.WEAPONSMITH) {
+            iconItem = new ItemStack(Material.GRINDSTONE);
+        } else if (profession == Profession.NITWIT) {
+            iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
+            ItemUtils.setLeatherColor(iconItem, Color.GREEN);
+        } else {
+            iconItem = new ItemStack(Material.BARRIER);
+        }
 		ItemUtils.setDisplayNameAndLore(iconItem,
 				Messages.buttonZombieVillagerProfession,
 				Messages.buttonZombieVillagerProfessionLore

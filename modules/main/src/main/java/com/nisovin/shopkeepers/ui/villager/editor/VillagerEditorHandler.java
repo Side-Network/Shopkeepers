@@ -491,56 +491,38 @@ public final class VillagerEditorHandler extends AbstractEditorHandler {
 			@Override
 			public @Nullable ItemStack getIcon(EditorSession editorSession) {
 				ItemStack iconItem;
-				switch (profession) {
-				case ARMORER:
-					iconItem = new ItemStack(Material.BLAST_FURNACE);
-					break;
-				case BUTCHER:
-					iconItem = new ItemStack(Material.SMOKER);
-					break;
-				case CARTOGRAPHER:
-					iconItem = new ItemStack(Material.CARTOGRAPHY_TABLE);
-					break;
-				case CLERIC:
-					iconItem = new ItemStack(Material.BREWING_STAND);
-					break;
-				case FARMER:
-					iconItem = new ItemStack(Material.WHEAT); // Instead of COMPOSTER
-					break;
-				case FISHERMAN:
-					iconItem = new ItemStack(Material.FISHING_ROD); // Instead of BARREL
-					break;
-				case FLETCHER:
-					iconItem = new ItemStack(Material.FLETCHING_TABLE);
-					break;
-				case LEATHERWORKER:
-					iconItem = new ItemStack(Material.LEATHER); // Instead of CAULDRON
-					break;
-				case LIBRARIAN:
-					iconItem = new ItemStack(Material.LECTERN);
-					break;
-				case MASON:
-					iconItem = new ItemStack(Material.STONECUTTER);
-					break;
-				case SHEPHERD:
-					iconItem = new ItemStack(Material.LOOM);
-					break;
-				case TOOLSMITH:
-					iconItem = new ItemStack(Material.SMITHING_TABLE);
-					break;
-				case WEAPONSMITH:
-					iconItem = new ItemStack(Material.GRINDSTONE);
-					break;
-				case NITWIT:
-					iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
-					ItemUtils.setLeatherColor(iconItem, Color.GREEN);
-					break;
-				case NONE:
-				default:
-					iconItem = new ItemStack(Material.BARRIER);
-					break;
-				}
-				assert iconItem != null;
+                if (profession == Profession.ARMORER) {
+                    iconItem = new ItemStack(Material.BLAST_FURNACE);
+                } else if (profession == Profession.BUTCHER) {
+                    iconItem = new ItemStack(Material.SMOKER);
+                } else if (profession == Profession.CARTOGRAPHER) {
+                    iconItem = new ItemStack(Material.CARTOGRAPHY_TABLE);
+                } else if (profession == Profession.CLERIC) {
+                    iconItem = new ItemStack(Material.BREWING_STAND);
+                } else if (profession == Profession.FARMER) {
+                    iconItem = new ItemStack(Material.WHEAT); // Instead of COMPOSTER
+                } else if (profession == Profession.FISHERMAN) {
+                    iconItem = new ItemStack(Material.FISHING_ROD); // Instead of BARREL
+                } else if (profession == Profession.FLETCHER) {
+                    iconItem = new ItemStack(Material.FLETCHING_TABLE);
+                } else if (profession == Profession.LEATHERWORKER) {
+                    iconItem = new ItemStack(Material.LEATHER); // Instead of CAULDRON
+                } else if (profession == Profession.LIBRARIAN) {
+                    iconItem = new ItemStack(Material.LECTERN);
+                } else if (profession == Profession.MASON) {
+                    iconItem = new ItemStack(Material.STONECUTTER);
+                } else if (profession == Profession.SHEPHERD) {
+                    iconItem = new ItemStack(Material.LOOM);
+                } else if (profession == Profession.TOOLSMITH) {
+                    iconItem = new ItemStack(Material.SMITHING_TABLE);
+                } else if (profession == Profession.WEAPONSMITH) {
+                    iconItem = new ItemStack(Material.GRINDSTONE);
+                } else if (profession == Profession.NITWIT) {
+                    iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
+                    ItemUtils.setLeatherColor(iconItem, Color.GREEN);
+                } else {
+                    iconItem = new ItemStack(Material.BARRIER);
+                }
 				ItemUtils.setDisplayNameAndLore(iconItem,
 						Messages.buttonVillagerProfession,
 						Messages.buttonVillagerProfessionLore
@@ -593,30 +575,19 @@ public final class VillagerEditorHandler extends AbstractEditorHandler {
 			@Override
 			public @Nullable ItemStack getIcon(EditorSession editorSession) {
 				ItemStack iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
-				switch (villagerType) {
-				default:
-				case PLAINS:
-					// Default brown color:
-					break;
-				case DESERT:
-					ItemUtils.setLeatherColor(iconItem, Color.ORANGE);
-					break;
-				case JUNGLE:
-					ItemUtils.setLeatherColor(iconItem, Color.YELLOW.mixColors(Color.ORANGE));
-					break;
-				case SAVANNA:
-					ItemUtils.setLeatherColor(iconItem, Color.RED);
-					break;
-				case SNOW:
-					ItemUtils.setLeatherColor(iconItem, DyeColor.CYAN.getColor());
-					break;
-				case SWAMP:
-					ItemUtils.setLeatherColor(iconItem, DyeColor.PURPLE.getColor());
-					break;
-				case TAIGA:
-					ItemUtils.setLeatherColor(iconItem, Color.WHITE.mixDyes(DyeColor.BROWN));
-					break;
-				}
+                if (villagerType == Villager.Type.DESERT) {
+                    ItemUtils.setLeatherColor(iconItem, Color.ORANGE);
+                } else if (villagerType == Villager.Type.JUNGLE) {
+                    ItemUtils.setLeatherColor(iconItem, Color.YELLOW.mixColors(Color.ORANGE));
+                } else if (villagerType == Villager.Type.SAVANNA) {
+                    ItemUtils.setLeatherColor(iconItem, Color.RED);
+                } else if (villagerType == Villager.Type.SNOW) {
+                    ItemUtils.setLeatherColor(iconItem, DyeColor.CYAN.getColor());
+                } else if (villagerType == Villager.Type.SWAMP) {
+                    ItemUtils.setLeatherColor(iconItem, DyeColor.PURPLE.getColor());
+                } else if (villagerType == Villager.Type.TAIGA) {
+                    ItemUtils.setLeatherColor(iconItem, Color.WHITE.mixDyes(DyeColor.BROWN));
+                }
 				ItemUtils.setDisplayNameAndLore(iconItem,
 						Messages.buttonVillagerVariant,
 						Messages.buttonVillagerVariantLore
