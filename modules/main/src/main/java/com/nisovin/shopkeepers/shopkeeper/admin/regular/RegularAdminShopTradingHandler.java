@@ -2,6 +2,7 @@ package com.nisovin.shopkeepers.shopkeeper.admin.regular;
 
 import com.nisovin.shopkeepers.api.shopkeeper.TradingRecipe;
 import com.nisovin.shopkeepers.api.shopkeeper.offers.TradeOffer;
+import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.admin.AbstractAdminShopkeeper;
 import com.nisovin.shopkeepers.shopkeeper.admin.AdminShopTradingHandler;
@@ -41,6 +42,7 @@ public class RegularAdminShopTradingHandler extends AdminShopTradingHandler {
         TradingRecipe tradingRecipe = trade.getTradingRecipe();
 
         // Find offer:
+        UnmodifiableItemStack resultItem = tradingRecipe.getResultItem();
         TradeOffer offer = shopkeeper.getOffer(tradingRecipe);
         if (offer == null) {
             // Unexpected, because the recipes were created based on the shopkeeper's offers.
@@ -52,16 +54,18 @@ public class RegularAdminShopTradingHandler extends AdminShopTradingHandler {
             return false;
         }
 
-        if (offer.getStock() <= 0) {
+        if(offer.getStock() < resultItem.getAmount()) {
             TextUtils.sendMessage(tradingPlayer, Messages.cannotTradeUnexpectedTrade);
             this.debugPreventedTrade(
                     tradingPlayer,
-                    "The offer has no stock left!"
+                    "Not enough stock for the offer!"
             );
             return false;
         }
 
-        offer.setStock(offer.getStock() - 1);
+        offer.setStock(offer.getStock() - resultItem.getAmount());
+
+        Bukkit.broadcastMessage("Stock: " + offer.getStock());
 
         return true;
     }
