@@ -57,6 +57,9 @@ public class SKRegularAdminShopkeeper
 		this.registerUIHandlerIfMissing(DefaultUITypes.EDITOR(), () -> {
 			return new RegularAdminShopEditorHandler(this);
 		});
+		this.registerUIHandlerIfMissing(DefaultUITypes.TRADING(), () -> {
+			return new RegularAdminShopTradingHandler(this);
+		});
 		super.setup();
 	}
 
@@ -76,14 +79,12 @@ public class SKRegularAdminShopkeeper
 
 	@Override
 	protected int updateItems(String logPrefix, @ReadWrite ShopkeeperData shopkeeperData) {
-		Bukkit.broadcastMessage("SKRegularAdminShopkeeper.updateItems");
 		int updatedItems = super.updateItems(logPrefix, shopkeeperData);
 		updatedItems += updateOfferItems(logPrefix, shopkeeperData);
 		return updatedItems;
 	}
 
 	private static int updateOfferItems(String logPrefix, @ReadWrite ShopkeeperData shopkeeperData) {
-		Bukkit.broadcastMessage("SKRegularAdminShopkeeper.updateOfferItems");
 		try {
 			var updatedOffers = new ArrayList<TradeOffer>(shopkeeperData.get(OFFERS));
 			var updatedItems = SKTradeOffer.updateItems(updatedOffers, logPrefix);
@@ -97,8 +98,6 @@ public class SKRegularAdminShopkeeper
 		return 0;
 	}
 
-	//
-
 	@Override
 	public RegularAdminShopType getType() {
 		return SKDefaultShopTypes.ADMIN_REGULAR();
@@ -109,101 +108,17 @@ public class SKRegularAdminShopkeeper
 		return !this.getOffers().isEmpty();
 	}
 
-	private static int getMaximumSellingPrice() {
-		// Combined value of two stacks of the two highest valued currencies:
-		// TODO In the future: Two stacks of the single highest valued currency.
-		int maxPrice = 0;
-		int currenciesCount = Currencies.getAll().size();
-		Currency currency1 = Currencies.getAll().get(currenciesCount - 1);
-		maxPrice += currency1.getStackValue();
-
-		if (currenciesCount > 1) {
-			Currency currency2 = Currencies.getAll().get(currenciesCount - 2);
-			maxPrice += currency2.getStackValue();
-		}
-		return maxPrice;
-	}
-
-	protected final @Nullable TradingRecipe createSellingRecipe(
-			UnmodifiableItemStack itemBeingSold,
-			int price,
-			boolean outOfStock
-	) {
-		Validate.notNull(itemBeingSold, "itemBeingSold is null");
-		Validate.isTrue(price > 0, "price has to be positive");
-
-		UnmodifiableItemStack item1 = null;
-		UnmodifiableItemStack item2 = null;
-
-		int remainingPrice = price;
-		if (Currencies.isHighCurrencyEnabled() && price > Settings.highCurrencyMinCost) {
-			Currency highCurrency = Currencies.getHigh();
-			int highCurrencyAmount = Math.min(
-					price / highCurrency.getValue(),
-					highCurrency.getMaxStackSize()
-			);
-			if (highCurrencyAmount > 0) {
-				remainingPrice -= (highCurrencyAmount * highCurrency.getValue());
-				UnmodifiableItemStack highCurrencyItem = highCurrency.getItemData().createUnmodifiableItemStack(highCurrencyAmount);
-				item1 = highCurrencyItem; // Using the first slot
-			}
-		}
-
-		if (remainingPrice > 0) {
-			Currency baseCurrency = Currencies.getBase();
-			int maxStackSize = baseCurrency.getMaxStackSize();
-			if (remainingPrice > maxStackSize) {
-				// Cannot represent this price with the used currency items:
-				// TODO Move this warning into the loading phase.
-				int maxPrice = getMaximumSellingPrice();
-				Log.warning(this.getLogPrefix() + "Skipping offer with invalid price (" + price
-						+ "). Maximum price is " + maxPrice + ".");
-				return null;
-			}
-
-			UnmodifiableItemStack currencyItem = baseCurrency.getItemData().createUnmodifiableItemStack(remainingPrice);
-			if (item1 == null) {
-				item1 = currencyItem;
-			} else {
-				// The first item of the trading recipe is already used by the high currency item:
-				item2 = currencyItem;
-			}
-		}
-		assert item1 != null;
-		return new SKTradingRecipe(itemBeingSold, item1, item2, outOfStock);
-	}
-
 	@Override
 	public List<? extends TradingRecipe> getTradingRecipes(@Nullable Player player) {
-		// Empty if the container is not found:
 		List<? extends TradeOffer> offers = this.getOffers();
 		List<TradingRecipe> recipes = new ArrayList<>(offers.size());
 		offers.forEach(offer -> {
-			// Both the offer's and the trading recipe's items are immutable. So there is no need to
-			// copy the item.
-			UnmodifiableItemStack tradedItem = offer.getItem1();
-			Bukkit.broadcastMessage(offer.getStock() + "");
-			boolean outOfStock = true;
-			TradingRecipe recipe = this.createSellingRecipe(
-					tradedItem,
-					1,
-					outOfStock
-			);
-			if (recipe != null) {
-				recipes.add(recipe);
-			} // Else: Price is invalid (cannot be represented by currency items).
+			boolean outOfStock = offer.getStock() <= 0;
+			TradingRecipe recipe = SKTradeOffer.toTradingRecipe(offer, outOfStock);
+			recipes.add(recipe);
 		});
 		return Collections.unmodifiableList(recipes);
 	}
-
-//	@Override
-//	public List<? extends TradingRecipe> getTradingRecipes(@Nullable Player player) {
-//		Bukkit.broadcastMessage("SKRegularAdminShopkeeper.getTradingRecipes");
-//		// SKTradeOffer extends SKTradingRecipe and reports to not be out-of-stock. Both
-//		// SKTradeOffer and TradingRecipe are immutable. We can therefore reuse the offers as
-//		// trading recipes, and don't have to create new trading recipes for them.
-//		return offersView;
-//	}
 
 	// OFFERS
 
@@ -233,30 +148,46 @@ public class SKRegularAdminShopkeeper
 		});
 	}
 
+	public boolean updateOffer(TradeOffer offer) {
+		Validate.notNull(offer, "offer is null");
+		Validate.isTrue(offer instanceof SKTradeOffer, "offer is not of type SKTradeOffer");
+
+		int index = offers.indexOf(offer);
+		if (index == -1) {
+			return false;
+		}
+
+		this.markDirty();
+		return true;
+	}
+
+	public @Nullable TradeOffer getOffer(TradingRecipe tradingRecipe) {
+		for (TradeOffer offer : this.getOffers()) {
+			if (offer.areItemsEqual(tradingRecipe)) {
+				return offer;
+			}
+		}
+		return null;
+	}
+
 	private void loadOffers(ShopkeeperData shopkeeperData) throws InvalidDataException {
-		Bukkit.broadcastMessage("SKRegularAdminShopkeeper.loadOffers");
 		assert shopkeeperData != null;
 		this._setOffers(shopkeeperData.get(OFFERS));
 	}
 
 	private void saveOffers(ShopkeeperData shopkeeperData) {
-		Bukkit.broadcastMessage("SKRegularAdminShopkeeper.saveOffers");
-		this.getOffers().forEach(offer -> {
-			offer.setStock(10);
-		});
 		assert shopkeeperData != null;
 		shopkeeperData.set(OFFERS, this.getOffers());
 	}
 
+
 	@Override
 	public List<? extends TradeOffer> getOffers() {
-		Bukkit.broadcastMessage("SKRegularAdminShopkeeper.getOffers");
 		return offersView;
 	}
 
 	@Override
 	public void clearOffers() {
-		Bukkit.broadcastMessage("SKRegularAdminShopkeeper.clearOffers");
 		this._clearOffers();
 		this.markDirty();
 	}
@@ -267,7 +198,6 @@ public class SKRegularAdminShopkeeper
 
 	@Override
 	public void setOffers(List<? extends TradeOffer> offers) {
-		Bukkit.broadcastMessage("SKRegularAdminShopkeeper.setOffers");
 		Validate.notNull(offers, "offers is null");
 		Validate.noNullElements(offers, "offers contains null");
 		this._setOffers(offers);
@@ -282,7 +212,6 @@ public class SKRegularAdminShopkeeper
 
 	@Override
 	public void addOffer(TradeOffer offer) {
-		Bukkit.broadcastMessage("SKRegularAdminShopkeeper.addOffer");
 		Validate.notNull(offer, "offer is null");
 		this._addOffer(offer);
 		this.markDirty();
@@ -299,7 +228,6 @@ public class SKRegularAdminShopkeeper
 
 	@Override
 	public void addOffers(List<? extends TradeOffer> offers) {
-		Bukkit.broadcastMessage("SKRegularAdminShopkeeper.addOffers");
 		Validate.notNull(offers, "offers is null");
 		Validate.noNullElements(offers, "offers contains null");
 		this._addOffers(offers);

@@ -57,4 +57,6 @@ public interface RegularAdminShopkeeper extends AdminShopkeeper {
 	 *            the offers to add
 	 */
 	public void addOffers(List<? extends TradeOffer> offers);
+
+	public boolean updateOffer(TradeOffer offer);
 }

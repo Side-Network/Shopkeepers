@@ -168,7 +168,7 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 			DataContainer offerData = DataContainer.create();
 			// The items are assumed to be immutable.
 			offerData.set(RESULT_ITEM, value.getResultItem());
-			offerData.set(STOCK, value.getStock()); // Can be null
+			offerData.set(STOCK, value.getStock());
 			offerData.set(ITEM1, value.getItem1());
 			offerData.set(ITEM2, value.getItem2()); // Can be null
 			return offerData.serialize();
