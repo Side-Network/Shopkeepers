@@ -182,7 +182,7 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 				// copied.
 				UnmodifiableItemStack resultItem = offerData.get(RESULT_ITEM);
 				UnmodifiableItemStack item1 = offerData.get(ITEM1);
-				int stock = offerData.getInt("stock");
+				int stock = offerData.get(STOCK);
 				UnmodifiableItemStack item2 = offerData.get(ITEM2); // Can be null
 				return new SKTradeOffer(resultItem, item1, item2, stock);
 			} catch (MissingDataException e) {

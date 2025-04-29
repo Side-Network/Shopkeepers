@@ -111,6 +111,15 @@ public abstract class AbstractEditorHandler extends UIHandler {
 	// INVENTORY LAYOUT
 
 	protected int getInventorySize() {
+		// just for testing
+		//		int rows = 4 + this.getButtonRows();
+		//		if (rows == 5) { // admin gui have 5 rows, user editor have 6
+		//			rows += 1;
+		//		}
+		//
+		//		Bukkit.broadcastMessage(getUIType().getIdentifier());
+
+
 		return COLUMNS_PER_ROW * (4 + this.getButtonRows());
 	}
 

@@ -64,8 +64,7 @@ public class RegularAdminShopTradingHandler extends AdminShopTradingHandler {
         }
 
         offer.setStock(offer.getStock() - resultItem.getAmount());
-
-        Bukkit.broadcastMessage("Stock: " + offer.getStock());
+        shopkeeper.save();
 
         return true;
     }

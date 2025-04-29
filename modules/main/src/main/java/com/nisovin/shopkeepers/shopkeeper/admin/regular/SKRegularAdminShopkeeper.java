@@ -149,6 +149,7 @@ public class SKRegularAdminShopkeeper
 	}
 
 	public boolean updateOffer(TradeOffer offer) {
+
 		Validate.notNull(offer, "offer is null");
 		Validate.isTrue(offer instanceof SKTradeOffer, "offer is not of type SKTradeOffer");
 
