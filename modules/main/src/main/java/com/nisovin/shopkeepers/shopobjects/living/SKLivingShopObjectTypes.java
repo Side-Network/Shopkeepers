@@ -173,6 +173,9 @@ import com.nisovin.shopkeepers.util.java.Validate;
  * <li>BOGGED: okay, TODO toggle sheared state # 1.21
  * <li>BREEZE: okay
  * <li>CREAKING: okay # 1.21.4
+ * <li>HAPPY_GHAST: okay, babyable, body slot supports colored harness, TODO turns a bit slower than
+ * other mobs, baby variant does not turn towards player and when made adult again the adult also no
+ * longer turns toward the player until respawned # 1.21.6
  * </ul>
  **/
 public final class SKLivingShopObjectTypes implements LivingShopObjectTypes {

@@ -171,6 +171,8 @@ public class EquipmentUtils {
 		case "TRADER_LLAMA":
 		case "WOLF": // Body: Wolf armor MC 1.20.5
 			return EQUIPMENT_SLOTS_BODY;
+		case "HAPPY_GHAST": // Body: Colored harness MC 1.21.6
+			return EQUIPMENT_SLOTS_BODY;
 		default:
 			return Collections.emptyList();
 		}

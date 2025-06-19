@@ -3,6 +3,7 @@ package com.nisovin.shopkeepers.compat.v1_21_R5_paper;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ExplosionResult;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -34,10 +35,15 @@ import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantInventory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.Dynamic;
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.compat.CompatProvider;
 import com.nisovin.shopkeepers.shopobjects.living.LivingEntityAI;
+import com.nisovin.shopkeepers.util.annotations.ReadOnly;
 import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
+import com.nisovin.shopkeepers.util.data.container.DataContainer;
+import com.nisovin.shopkeepers.util.inventory.ItemStackComponentsData;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 import com.nisovin.shopkeepers.util.java.EnumUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
@@ -48,13 +54,20 @@ import io.papermc.paper.registry.RegistryKey;
 import net.minecraft.core.component.DataComponentExactPredicate;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.PatchedDataComponentMap;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.datafix.fixes.References;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.item.trading.MerchantOffers;
 
 public final class CompatProviderImpl implements CompatProvider {
+
+	private final TagParser<Tag> tagParser = Unsafe.castNonNull(TagParser.create(NbtOps.INSTANCE));
 
 	private final Field craftItemStackHandleField;
 	private final Method cowSetVariantMethod;
@@ -263,6 +276,81 @@ public final class CompatProviderImpl implements CompatProvider {
 		net.minecraft.world.item.ItemStack nmsItem = asNMSItemStack(itemStack);
 		Tag itemNBT = nmsItem.save(CraftRegistry.getMinecraftRegistry());
 		return itemNBT.toString();
+	}
+
+	// Note: Paper 1.21.5+ also already serializes ItemStacks in a similar format. However, for
+	// consistency and better compatibility across Paper and Spigot servers (e.g. loading item
+	// stacks saved on another server type), we use our own format on Paper servers as well.
+
+	@Override
+	public @Nullable ItemStackComponentsData getItemStackComponentsData(@ReadOnly ItemStack itemStack) {
+		Validate.notNull(itemStack, "itemStack is null!");
+		if (ItemUtils.isEmpty(itemStack)) {
+			return null;
+		}
+
+		var nmsItem = this.asNMSItemStack(itemStack);
+		var itemTag = (CompoundTag) nmsItem.save(CraftRegistry.getMinecraftRegistry());
+		var componentsTag = (CompoundTag) itemTag.get("components");
+		if (componentsTag == null) {
+			return null;
+		}
+
+		var componentsData = ItemStackComponentsData.ofNonNull(DataContainer.create());
+		componentsTag.forEach((componentKey, componentValue) -> {
+			assert componentKey != null;
+			// Serialized as SNBT:
+			componentsData.set(componentKey, componentValue.toString());
+		});
+		return componentsData;
+	}
+
+	@Override
+	public @Nullable ItemStack deserializeItemStack(
+			int dataVersion,
+			NamespacedKey id,
+			int count,
+			@Nullable ItemStackComponentsData componentsData
+	) {
+		Validate.notNull(id, "id is null!");
+		var itemTag = new CompoundTag();
+		itemTag.putString("id", id.toString());
+		itemTag.putInt("count", count);
+
+		var componentValues = componentsData != null ? componentsData.getValues() : null;
+		if (componentValues != null && !componentValues.isEmpty()) {
+			var componentsTag = new CompoundTag();
+			componentValues.forEach((componentKey, componentValue) -> {
+				assert componentKey != null;
+				assert componentValue != null;
+				var componentSnbt = componentValue.toString();
+
+				Tag componentTag;
+				try {
+					componentTag = Unsafe.assertNonNull(tagParser.parseFully(componentSnbt));
+				} catch (CommandSyntaxException e) {
+					throw new IllegalArgumentException(
+							"Error parsing item stack component: '" + componentSnbt + "'",
+							e
+					);
+				}
+				componentsTag.put(componentKey.toString(), componentTag);
+			});
+			itemTag.put("components", componentsTag);
+		}
+
+		var currentDataVersion = Bukkit.getUnsafe().getDataVersion();
+		var convertedItemTag = (CompoundTag) DataFixers.getDataFixer().update(
+				References.ITEM_STACK,
+				new Dynamic<>(Unsafe.castNonNull(NbtOps.INSTANCE), itemTag),
+				dataVersion,
+				currentDataVersion
+		).getValue();
+		var nmsItem = net.minecraft.world.item.ItemStack.parse(
+				CraftRegistry.getMinecraftRegistry(),
+				convertedItemTag
+		).orElseThrow();
+		return CraftItemStack.asCraftMirror(nmsItem);
 	}
 
 	// MC 1.21+ TODO Can be removed once we only support Bukkit 1.21+

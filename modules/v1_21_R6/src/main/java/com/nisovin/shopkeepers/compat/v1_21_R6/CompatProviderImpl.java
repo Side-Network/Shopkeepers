@@ -1,4 +1,4 @@
-package com.nisovin.shopkeepers.compat.v1_21_R5;
+package com.nisovin.shopkeepers.compat.v1_21_R6;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -7,16 +7,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.ExplosionResult;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
-import org.bukkit.craftbukkit.v1_21_R4.CraftRegistry;
-import org.bukkit.craftbukkit.v1_21_R4.entity.CraftAbstractVillager;
-import org.bukkit.craftbukkit.v1_21_R4.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_21_R4.entity.CraftLivingEntity;
-import org.bukkit.craftbukkit.v1_21_R4.entity.CraftMob;
-import org.bukkit.craftbukkit.v1_21_R4.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_21_R4.entity.CraftVillager;
-import org.bukkit.craftbukkit.v1_21_R4.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_21_R4.inventory.CraftMerchant;
-import org.bukkit.craftbukkit.v1_21_R4.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_21_R5.CraftRegistry;
+import org.bukkit.craftbukkit.v1_21_R5.entity.CraftAbstractVillager;
+import org.bukkit.craftbukkit.v1_21_R5.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_21_R5.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_21_R5.entity.CraftMob;
+import org.bukkit.craftbukkit.v1_21_R5.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_21_R5.entity.CraftVillager;
+import org.bukkit.craftbukkit.v1_21_R5.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_21_R5.inventory.CraftMerchant;
+import org.bukkit.craftbukkit.v1_21_R5.util.CraftMagicNumbers;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Cow;
@@ -83,7 +83,7 @@ public final class CompatProviderImpl implements CompatProvider {
 
 	@Override
 	public String getVersionId() {
-		return "1_21_R5";
+		return "1_21_R6";
 	}
 
 	public Class<?> getCraftMagicNumbersClass() {
@@ -271,9 +271,12 @@ public final class CompatProviderImpl implements CompatProvider {
 			return null;
 		}
 
-		net.minecraft.world.item.ItemStack nmsItem = asNMSItemStack(itemStack);
-		Tag itemNBT = nmsItem.save(CraftRegistry.getMinecraftRegistry());
-		return itemNBT.toString();
+		var nmsItem = this.asNMSItemStack(itemStack);
+		var itemTag = (CompoundTag) net.minecraft.world.item.ItemStack.CODEC.encodeStart(
+				CraftRegistry.getMinecraftRegistry().createSerializationContext(NbtOps.INSTANCE),
+				nmsItem
+		).getOrThrow();
+		return itemTag.toString();
 	}
 
 	@Override
@@ -284,7 +287,11 @@ public final class CompatProviderImpl implements CompatProvider {
 		}
 
 		var nmsItem = this.asNMSItemStack(itemStack);
-		var itemTag = (CompoundTag) nmsItem.save(CraftRegistry.getMinecraftRegistry());
+		var itemTag = (CompoundTag) net.minecraft.world.item.ItemStack.CODEC.encodeStart(
+				CraftRegistry.getMinecraftRegistry().createSerializationContext(NbtOps.INSTANCE),
+				nmsItem
+		).getOrThrow();
+
 		var componentsTag = (CompoundTag) itemTag.get("components");
 		if (componentsTag == null) {
 			return null;
@@ -340,10 +347,10 @@ public final class CompatProviderImpl implements CompatProvider {
 				dataVersion,
 				currentDataVersion
 		).getValue();
-		var nmsItem = net.minecraft.world.item.ItemStack.parse(
-				CraftRegistry.getMinecraftRegistry(),
+		var nmsItem = net.minecraft.world.item.ItemStack.CODEC.parse(
+				CraftRegistry.getMinecraftRegistry().createSerializationContext(NbtOps.INSTANCE),
 				convertedItemTag
-		).orElseThrow();
+		).getOrThrow();
 		return CraftItemStack.asCraftMirror(nmsItem);
 	}
 
