@@ -70,6 +70,9 @@ public class CompatVersion {
 
 	/**
 	 * Gets the server mappings version.
+	 * <p>
+	 * Note: On Paper, since 1.21.6, the server no longer supports the mappings version, so this
+	 * returns the Minecraft version instead.
 	 * 
 	 * @return the server mappings version
 	 */

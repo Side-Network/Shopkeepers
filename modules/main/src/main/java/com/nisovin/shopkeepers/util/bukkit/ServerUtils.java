@@ -23,22 +23,35 @@ public final class ServerUtils {
 		}
 		IS_PAPER = isPaper;
 
-		UnsafeValues unsafeValues = Bukkit.getUnsafe();
-		Method getMappingsVersionMethod;
-		try {
-			getMappingsVersionMethod = unsafeValues.getClass().getDeclaredMethod("getMappingsVersion");
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(
-					"Could not find method 'getMappingsVersion' in the UnsafeValues implementation!",
-					e
-			);
+		if (isPaper) {
+			// Since Paper 1.21.6, the server no longer supports the mappings version. We use the
+			// Minecraft version instead.
+			try {
+				var serverBuildInfoClass = Class.forName("io.papermc.paper.ServerBuildInfo");
+				var serverBuildInfo = serverBuildInfoClass.getMethod("buildInfo").invoke(null);
+				var serverVersion = serverBuildInfoClass.getMethod("minecraftVersionId").invoke(serverBuildInfo);
+				assert serverVersion != null;
+				MAPPINGS_VERSION = Unsafe.assertNonNull(serverVersion.toString());
+			} catch (Exception e) {
+				throw new RuntimeException("Could not retrieve the server's version!", e);
+			}
+		} else {
+			UnsafeValues unsafeValues = Bukkit.getUnsafe();
+			Method getMappingsVersionMethod;
+			try {
+				getMappingsVersionMethod = unsafeValues.getClass().getDeclaredMethod("getMappingsVersion");
+			} catch (NoSuchMethodException | SecurityException e) {
+				throw new RuntimeException(
+						"Could not find method 'getMappingsVersion' in the UnsafeValues implementation!",
+						e
+				);
+			}
+			try {
+				MAPPINGS_VERSION = Unsafe.cast(getMappingsVersionMethod.invoke(unsafeValues));
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				throw new RuntimeException("Could not retrieve the server's mappings version!", e);
+			}
 		}
-		try {
-			MAPPINGS_VERSION = Unsafe.cast(getMappingsVersionMethod.invoke(unsafeValues));
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new RuntimeException("Could not retrieve the server's mappings version!", e);
-		}
-
 	}
 
 	/**
@@ -50,6 +63,14 @@ public final class ServerUtils {
 		return IS_PAPER;
 	}
 
+	/**
+	 * Gets the server's mappings version.
+	 * <p>
+	 * On Paper, since 1.21.6, the server no longer supports the mappings version, so this returns
+	 * the Minecraft version instead.
+	 * 
+	 * @return the server's mappings version
+	 */
 	public static String getMappingsVersion() {
 		return MAPPINGS_VERSION;
 	}

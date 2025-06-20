@@ -41,8 +41,11 @@ public final class Compat {
 	// new minor Minecraft updates, whereas CraftBukkit may increment its 'Minecraft Version' less
 	// frequently. Also, our compat version may include additional tags, such as whether the module
 	// is paper-specific.
+	// Note: On Paper, since 1.21.6, the mappings version is no longer supported and we use the
+	// Minecraft version instead.
 	static {
 		// Registered in the order from latest to oldest.
+		register(new CompatVersion("1_21_R6_paper", "1.21.6", "1.21.6"));
 		register(new CompatVersion("1_21_R6", "1.21.6", "164f8e872cb3dff744982fca079642b2"));
 		register(new CompatVersion("1_21_R5_paper", "1.21.5", "7ecad754373a5fbc43d381d7450c53a5"));
 		register(new CompatVersion("1_21_R5", "1.21.5", "7ecad754373a5fbc43d381d7450c53a5"));
