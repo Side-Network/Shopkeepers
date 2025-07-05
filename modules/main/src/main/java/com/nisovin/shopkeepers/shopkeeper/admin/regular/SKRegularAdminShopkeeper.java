@@ -113,7 +113,13 @@ public class SKRegularAdminShopkeeper
 		List<? extends TradeOffer> offers = this.getOffers();
 		List<TradingRecipe> recipes = new ArrayList<>(offers.size());
 		offers.forEach(offer -> {
-			boolean outOfStock = offer.getStock() < offer.getResultItem().getAmount();
+			boolean outOfStock = false;
+			if (offer.getTempOutOfStock() == true) {
+				outOfStock = true;
+			} else {
+				outOfStock = offer.getStock() < offer.getResultItem().getAmount();
+			}
+
 			TradingRecipe recipe = SKTradeOffer.toTradingRecipe(offer, outOfStock);
 			recipes.add(recipe);
 		});

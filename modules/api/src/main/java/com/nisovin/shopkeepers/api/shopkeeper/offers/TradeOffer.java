@@ -134,4 +134,8 @@ public interface TradeOffer {
 	public int getStock();
 
 	public void setStock(int stock);
+
+	public boolean getTempOutOfStock();
+
+	public void setTempOutOfStock(boolean _tempOutOfStock);
 }

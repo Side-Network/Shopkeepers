@@ -53,7 +53,7 @@ public class ServerAssumptionsTest {
 	 * The tests are only run once, during the initial plugin startup. Any subsequent invocations
 	 * (e.g. during subsequent soft plugin reloads) return the result of the previous test
 	 * execution.
-	 * 
+	 *
 	 * @return <code>true</code> if the tests passed, <code>false</code> if one of the tests failed
 	 */
 	public static boolean run() {
@@ -95,7 +95,7 @@ public class ServerAssumptionsTest {
 
 		/**
 		 * Creates a new {@link ServerAssumptionFailedException}.
-		 * 
+		 *
 		 * @param message
 		 *            the exception message, not <code>null</code> or empty
 		 */
@@ -197,7 +197,7 @@ public class ServerAssumptionsTest {
 		itemMeta.setEnchantmentGlintOverride(true);
 		itemMeta.addEnchant(Enchantment.UNBREAKING, 1, true);
 		itemMeta.addEnchant(Enchantment.SHARPNESS, 2, true);
-		itemMeta.addAttributeModifier(Attribute.ATTACK_SPEED,
+		itemMeta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED,
 				new AttributeModifier(
 						new UUID(1L, 1L),
 						"attack speed bonus",
@@ -206,7 +206,7 @@ public class ServerAssumptionsTest {
 						EquipmentSlotGroup.HAND
 				)
 		);
-		itemMeta.addAttributeModifier(Attribute.ATTACK_SPEED,
+		itemMeta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED,
 				new AttributeModifier(
 						new UUID(2L, 2L),
 						"attack speed bonus 2",
@@ -215,7 +215,7 @@ public class ServerAssumptionsTest {
 						EquipmentSlotGroup.OFFHAND
 				)
 		);
-		itemMeta.addAttributeModifier(Attribute.MAX_HEALTH,
+		itemMeta.addAttributeModifier(Attribute.GENERIC_MAX_HEALTH,
 				new AttributeModifier(
 						new UUID(3L, 3L),
 						"max health bonus",
@@ -279,7 +279,7 @@ public class ServerAssumptionsTest {
 
 	/**
 	 * Runs all tests.
-	 * 
+	 *
 	 * @throws ServerAssumptionFailedException
 	 *             if one of the tests failed
 	 */
