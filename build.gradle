@@ -2,7 +2,7 @@ plugins {
 	id 'base' // Adds the clean task to the root project
 	id 'com.gradleup.shadow' version '8.3.0' apply false
 	id 'org.checkerframework' version '0.6.39' apply false
-	id 'io.papermc.paperweight.userdev' version '2.0.0-beta.16' apply false
+	id 'io.papermc.paperweight.userdev' version '2.0.0-beta.17' apply false
 	id 'org.ajoberstar.git-publish' version '5.1.1'
 	// Useful for build debugging:
 	// https://gitlab.com/barfuin/gradle-taskinfo
@@ -142,9 +142,6 @@ subprojects {
 
 		// Bukkit, Spigot-API
 		maven { url = 'https://hub.spigotmc.org/nexus/content/groups/public/' }
-
-		// nonpe snapshots
-		maven {url='https://raw.githubusercontent.com/vegardit/no-npe/mvn-snapshots-repo'}
 	}
 
 	// Shared plugin / task configurations:
@@ -160,6 +157,58 @@ subprojects {
 
 		java {
 			sourceCompatibility = JavaVersion.VERSION_21
+		}
+
+		// Null analysis with the Eclipse compiler:
+		// https://help.eclipse.org/latest/index.jsp?topic=/org.eclipse.jdt.doc.user/tasks/task-using_batch_compiler.htm
+		// Custom compilers with Gradle 8+: https://github.com/gradle/gradle/issues/23990
+		// See also https://github.com/TheMrMilchmann/gradle-ecj
+		task ecjAnalysis(type: JavaCompile) {
+			source = sourceSets.main.java
+			classpath = sourceSets.main.compileClasspath
+			destinationDirectory = file(sourceSets.main.java.destinationDirectory.asFile.get().absolutePath.replace("classes", "classes-ecj"))
+			//println(destinationDirectory.get())
+
+			// The Java version required to run ECJ:
+			def ECJ_REQUIRED_JAVA_VERSION = 11
+
+			// The Java version to request the toolchain for if the project's toolchain is not
+			// compatible with the ECJ requirements:
+			def ECJ_PREFERRED_JAVA_VERSION = 21
+
+			def defaultJavaCompiler = provider {
+				def javaCompiler = javaToolchains.compilerFor(java.toolchain).get()
+				if (javaCompiler.metadata.languageVersion.canCompileOrRun(ECJ_REQUIRED_JAVA_VERSION)) {
+					javaCompiler
+				} else {
+					javaToolchains.compilerFor {
+						languageVersion.set(JavaLanguageVersion.of(ECJ_PREFERRED_JAVA_VERSION))
+					}.get()
+				}
+			}
+
+			javaCompiler = defaultJavaCompiler
+
+			// ECJ does not support generating JNI headers. Make sure the property is not used.
+			options.headerOutputDirectory.set(provider { null })
+
+			options.fork = true
+			options.forkOptions.jvmArgs += [
+				'-classpath', project.configurations.ecj.asPath,
+				'org.eclipse.jdt.internal.compiler.batch.Main',
+				'-properties', '.settings/org.eclipse.jdt.core.prefs',
+				'-warn:-deprecation,unused',
+				'-info:-warningToken',
+				'-annotationpath', 'CLASSPATH'
+			]
+
+			doFirst {
+				//println(classpath.getAsPath())
+				def javacExecutable = javaCompiler.get().executablePath.asFile
+				def javaExecutableName = javacExecutable.name.replace("javac", "java")
+				def javaExecutablePath = javacExecutable.parentFile.toPath().resolve(javaExecutableName).toAbsolutePath()
+				options.forkOptions.executable = javaExecutablePath
+			}
 		}
 
 		// Configure all JavaCompile tasks (compileJava, compileTestJava, etc):
@@ -188,6 +237,9 @@ subprojects {
 		}
 
 		test {
+			// Run the ECJ analysis whenever we also run tests:
+//			dependsOn ecjAnalysis
+
 			systemProperty 'file.encoding', 'UTF-8'
 			workingDir project.file("${project.buildDir}/test-work/")
 			// Gradle complains when this folder does not yet exist.
@@ -339,7 +391,7 @@ gitPublish {
 // Prepare the local Maven repository via gitPublishReset, then publish artifacts into it, and then
 // commit and push the Maven repository to Github:
 gradle.afterProject { project ->
-	def repoStagingTask = project.tasks.findByName("publishAllPublicationsToStagingRepository")
+	def repoStagingTask = project.tasks.findByName("publishMavenJavaPublicationToStagingRepository")
 	if (repoStagingTask != null) {
 		println "Found repository staging task for project ${project.name}"
 		repoStagingTask.dependsOn(rootProject.tasks.gitPublishReset)
@@ -357,6 +409,7 @@ def taskListAliases = [
 	'cleanAssemble' : ['clean', 'assemble'],
 	'cleanBuild' : ['clean', 'build'],
 	'cleanInstall' : ['clean', 'build', 'publishToMavenLocal'],
+	'cleanStaging' : ['clean', 'build', 'publishToMavenLocal', 'publishAllPublicationsToStagingRepository'],
 	'cleanPublish' : ['clean', 'build', 'publishToMavenLocal', 'publishAllPublicationsToStagingRepository', 'gitPublishPush'],
 	'cleanInstallMinimal' : ['clean', ':shopkeepers-api:publishToMavenLocal']
 ]

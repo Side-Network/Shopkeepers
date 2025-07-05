@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.nisovin.shopkeepers.util.data.serialization.java.BooleanSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.NumberSerializers;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,6 +39,8 @@ import com.nisovin.shopkeepers.util.logging.Log;
 public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 
 	private int stock = 0;
+
+	private boolean tempOutOfStock = false;
 
 	/**
 	 * Creates a new {@link SKTradeOffer}.
@@ -85,10 +88,12 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 			UnmodifiableItemStack resultItem,
 			UnmodifiableItemStack item1,
 			@Nullable UnmodifiableItemStack item2,
-			int _stock
+			int _stock,
+			boolean _tempOutOfStock
 	) {
 		super(resultItem, item1, item2);
 		this.stock = _stock;
+		this.tempOutOfStock = _tempOutOfStock;
 	}
 
 	@Override
@@ -140,6 +145,9 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 		);
 	}
 
+	public static final Property<Boolean> TEMPDISABLED = new BasicProperty<Boolean>()
+			.dataKeyAccessor("tempOutOfStock", BooleanSerializers.STRICT)
+			.build();
 	public static final Property<Integer> STOCK = new BasicProperty<Integer>()
 			.dataKeyAccessor("stock", NumberSerializers.INTEGER)
 			.build();
@@ -170,6 +178,7 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 			offerData.set(RESULT_ITEM, value.getResultItem());
 			offerData.set(STOCK, value.getStock());
 			offerData.set(ITEM1, value.getItem1());
+			offerData.set(TEMPDISABLED, value.getTempOutOfStock());
 			offerData.set(ITEM2, value.getItem2()); // Can be null
 			return offerData.serialize();
 		}
@@ -183,8 +192,9 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 				UnmodifiableItemStack resultItem = offerData.get(RESULT_ITEM);
 				UnmodifiableItemStack item1 = offerData.get(ITEM1);
 				int stock = offerData.get(STOCK);
+				boolean tempOutOfStock = offerData.get(TEMPDISABLED);
 				UnmodifiableItemStack item2 = offerData.get(ITEM2); // Can be null
-				return new SKTradeOffer(resultItem, item1, item2, stock);
+				return new SKTradeOffer(resultItem, item1, item2, stock, tempOutOfStock);
 			} catch (MissingDataException e) {
 				throw new InvalidDataException(e.getMessage(), e);
 			}
@@ -439,5 +449,15 @@ public class SKTradeOffer extends SKTradingRecipe implements TradeOffer {
 	@Override
 	public void setStock(int _stock) {
 		stock = _stock;
+	}
+
+	@Override
+	public void setTempOutOfStock(boolean _tempOutOfStock) {
+		tempOutOfStock = _tempOutOfStock;
+	}
+
+	@Override
+	public boolean getTempOutOfStock() {
+		return tempOutOfStock;
 	}
 }

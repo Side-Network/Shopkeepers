@@ -1,9 +1,32 @@
 # Changelog
 Date format: (YYYY-MM-DD)  
 
-## v2.23.6 (TBA)
+## v2.23.7 (TBA)
 ### Supported MC versions: 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
 
+
+## v2.23.6 (2025-05-24)
+### Supported MC versions: 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
+
+* Data: Change the serialization of item stacks from Bukkit's built-in serialization to a custom serialization that saves item components as SNBT. Be sure to backup your current `save.yml` file before updating to this version!
+  * This has the following expected benefits:
+    * Better debugging of serialized item data: The data is serialized in a format that Minecraft users are familiar with and can find information about in the official Minecraft wiki.
+    * Better compatibility across Minecraft server versions: We pass the deserialized data through Minecraft's own data migration system, which should hopefully reduce the need for manual data migrations after server upgrades.
+    * Better compatibility across server variants: Spigot and Paper servers have diverged in how they serialize item stacks. Paper already saves item stacks in a format similar to the one used by the Shopkeepers plugin now. But by not relying on the specific server's built-in serialization, saved item data is expected to more easily be transferable across server variants.
+  * The shopkeeper storage version is bumped to `4` to automatically write all item data in the new format.
+  * The new serialization relies on server version specific code. A reflection-based implementation for Spigot mappings is provided for the "fallback mode" when running on a non-supported server version, but this is prone to break during server updates.
+  * Debug: For better error messages about which shopkeeper and trade is affected by a deserialization issue, we use our own deserialization approach instead of Bukkit's ConfigurationSerializable.
+  * Since all item data is migrated via Minecraft's data migration now, before the item stack is constructed, our previous item data migration logic can eventually be removed, together with the `item-migrations` debug option, once all servers are expected to have updated to the new serialization format.
+* Fix #959: The changes to the shopkeeper trade event in v2.19.0 introduced a bug that caused shift trading to continue trading even if the the active trade switches to a different result item. Additionally, we now also abort the trading if the cost items of the active trading recipe have changed, so that players don't accidentally continue trading the same result item but for different costs.
+* Localization: Use the default message when the specified language file is missing an entry.
+* Debug: Log the full exception stack trace when we fail to load the data of a shopkeeper.
+* Debug: The fallback mode can now be tested by adding a file with name `.force-fallback` to the plugin folder.
+* Internal: Various refactors related to UIs. Separate "UIHandlers" (now called "ViewProviders") from the actual view implementation. Each player-specific UI session is represented by a "View" instance now. This replaces the previous "UISession" and "EditorSession" objects.
+* Internal: Also add a dummy CompatVersion for the fallback provider.
+* Build: Exclude non-remapped server jar from NMS module dependencies. This avoids accidentally using the wrong (non-remapped) type.
+* Build: Resolve issue with the repository missing the external annotations artifact: Make the `publishMavenJavaPublicationToStagingRepository` task depend on `gitPublishReset`.
+* Build: Fix build by updating Gradle to 8.14 and Paper userdev to beta.17.
+* API: Revert nonpe version back to 1.3.5 for now until 1.3.6 has been released to Maven central. This resolves an issue with API clients being required to also add the nonpe snapshot repository to their projects.
 
 ## v2.23.5 (2025-04-23)
 ### Supported MC versions: 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
