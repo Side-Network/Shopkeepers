@@ -34,6 +34,7 @@ public class SalmonShop extends SKLivingShopObject<Salmon> {
 	// TODO Replace with the actual type once we only support MC 1.21.3+
 	public static final Property<String> VARIANT = new BasicProperty<String>()
 			.dataKeyAccessor("variant", StringSerializers.STRICT_NON_EMPTY)
+			.useDefaultIfMissing()
 			.defaultValue("MEDIUM")
 			.build();
 

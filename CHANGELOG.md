@@ -46,6 +46,7 @@ Date format: (YYYY-MM-DD)
   * Command: Remove command `convertItems` and related permissions `shopkeeper.convertitems.own` and `shopkeeper.convertitems.others`.
   * Debug: Remove debug option `item-conversions`.
   * Config: Remove settings `convert-player-items`, `convert-all-player-items` and `convert-player-items-exceptions`.
+* Data: Use default salmon variant if missing.
 
 **Message changes:**  
 * Removed `items-converted`.
