@@ -50,6 +50,8 @@ Date format: (YYYY-MM-DD)
   * Debug: Remove debug option `item-conversions`.
   * Config: Remove settings `convert-player-items`, `convert-all-player-items` and `convert-player-items-exceptions`.
 * Data: Use default salmon variant if missing.
+* Fix: Shopkeeper mobs no longer equip items from dispensers.
+  * These equipment items are not persisted and permanently lost once the shopkeeper is respawned. Instead, use the shopkeeper editor to add equipment to shopkeeper mobs.
 
 **Message changes:**  
 * Added `button-copper-golem-weather-state`.

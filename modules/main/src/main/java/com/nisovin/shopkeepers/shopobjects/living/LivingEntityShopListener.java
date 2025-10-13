@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseArmorEvent;
 import org.bukkit.event.block.EntityBlockFormEvent;
 import org.bukkit.event.entity.CreeperPowerEvent;
 import org.bukkit.event.entity.CreeperPowerEvent.PowerCause;
@@ -447,6 +448,14 @@ class LivingEntityShopListener implements Listener {
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	void onEntityPickupItemEvent(EntityPickupItemEvent event) {
 		if (shopkeeperRegistry.isShopkeeper(event.getEntity())) {
+			event.setCancelled(true);
+		}
+	}
+
+	// Prevent shopkeeper mobs from receiving items from dispensers.
+	@EventHandler()
+	void onBlockDispenseArmorEvent(BlockDispenseArmorEvent event) {
+		if (shopkeeperRegistry.isShopkeeper(event.getTargetEntity())) {
 			event.setCancelled(true);
 		}
 	}
