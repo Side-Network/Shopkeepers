@@ -208,7 +208,8 @@ public class Settings extends Config {
 					"BOGGED", // MC 1.21
 					"BREEZE", // MC 1.21
 					"CREAKING", // MC 1.21.4
-					"HAPPY_GHAST" // MC 1.21.6
+					"HAPPY_GHAST", // MC 1.21.6
+					"COPPER_GOLEM" // MC 1.21.9
 			), String::compareTo)
 	);
 

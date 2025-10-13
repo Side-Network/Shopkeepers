@@ -252,6 +252,10 @@ button-wolf-variant-lore:
 button-saddle: "&aToggle saddle"
 button-saddle-lore:
 - "Toggles the mob's saddle"
+button-copper-golem-weather-state: "&aChoose oxidation level"
+button-copper-golem-weather-state-lore:
+- "Changes the copper golem's"
+- "oxidation level"
 
 equipment-editor-title: "Equipment Editor"
 equipment-slot-lore:

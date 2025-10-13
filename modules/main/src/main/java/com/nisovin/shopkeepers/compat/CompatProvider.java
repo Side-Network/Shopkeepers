@@ -4,6 +4,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Golem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
@@ -189,5 +190,16 @@ public interface CompatProvider {
 	public default NamespacedKey cycleChickenVariant(NamespacedKey variant, boolean backwards) {
 		// Not supported by default.
 		return variant;
+	}
+
+	// MC 1.21.9+ TODO Can be removed once we only support Bukkit 1.21.9+
+
+	public default void setCopperGolemWeatherState(Golem golem, String weatherState) {
+		// Not supported by default.
+	}
+
+	// -2 to disable weathering state changes (waxed).
+	public default void setCopperGolemNextWeatheringTick(Golem golem, int tick) {
+		// Not supported by default.
 	}
 }

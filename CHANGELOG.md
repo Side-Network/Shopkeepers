@@ -7,6 +7,9 @@ Date format: (YYYY-MM-DD)
 * Update for Minecraft 1.21.10.
   * Note: 1.21.9 is not supported and has been superseded by 1.21.10.
   * Update the fallback compatibility module.
+  * Add copper golem to the by default enabled mob types.
+    * It supports the hand, offhand, head and saddle equipment slots.
+    * Its oxidation level is fixed and can be changed via the editor.
 * Config: Changes to the item data format inside the config.
   * The new format aligns more closely with how Minecraft represents item data and how we represent item data inside the save file.
   * We now use Minecraft's item type ids instead of Bukkit's material names.
@@ -49,6 +52,8 @@ Date format: (YYYY-MM-DD)
 * Data: Use default salmon variant if missing.
 
 **Message changes:**  
+* Added `button-copper-golem-weather-state`.
+* Added `button-copper-golem-weather-state-lore`.
 * Removed `items-converted`.
 * Removed `command-description-convert-items`.
 

@@ -20,8 +20,11 @@ import org.bukkit.craftbukkit.inventory.CraftMerchant;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Chicken;
+import org.bukkit.entity.CopperGolem;
+import org.bukkit.entity.CopperGolem.Oxidizing;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Golem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Pig;
@@ -53,6 +56,7 @@ import com.nisovin.shopkeepers.util.logging.Log;
 
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import io.papermc.paper.world.WeatheringCopperState;
 import net.minecraft.core.component.DataComponentExactPredicate;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.PatchedDataComponentMap;
@@ -506,5 +510,33 @@ public final class CompatProviderImpl implements CompatProvider {
 
 		Registry<Chicken.Variant> registryNonNull = Unsafe.castNonNull(registry);
 		return RegistryUtils.cycleKeyed(registryNonNull, variantValue, backwards).getKey();
+	}
+
+	// MC 1.21.9+ TODO Can be removed once we only support Bukkit 1.21.9+
+
+	public void setCopperGolemWeatherState(Golem golem, String weatherState) {
+		// Note: Different API than Spigot, but the same enum names.
+		WeatheringCopperState weatherStateValue = EnumUtils.valueOf(WeatheringCopperState.class, weatherState);
+		if (weatherStateValue == null) {
+			weatherStateValue = WeatheringCopperState.UNAFFECTED; // Default
+		}
+		((CopperGolem) golem).setWeatheringState(weatherStateValue);
+	}
+
+	public void setCopperGolemNextWeatheringTick(Golem golem, int tick) {
+		Oxidizing oxidizing;
+		switch (tick) {
+		case -2:
+			oxidizing = Oxidizing.waxed();
+			break;
+		case -1:
+			oxidizing = Oxidizing.unset();
+			break;
+		default:
+			oxidizing = Oxidizing.atTime(tick);
+			break;
+		}
+
+		((CopperGolem) golem).setOxidizing(oxidizing);
 	}
 }

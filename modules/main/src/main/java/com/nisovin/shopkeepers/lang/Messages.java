@@ -328,6 +328,11 @@ public class Messages extends Config {
 	public static List<String> buttonSaddleLore = c(Arrays.asList(
 			"Toggles the mob's saddle"
 	));
+	public static String buttonCopperGolemWeatherState = c("&aChoose oxidation level");
+	public static List<String> buttonCopperGolemWeatherStateLore = c(Arrays.asList(
+			"Changes the copper golem's",
+			"oxidation level"
+	));
 
 	public static String equipmentEditorTitle = c("Equipment Editor");
 	public static List<String> equipmentSlotLore = c(Arrays.asList(

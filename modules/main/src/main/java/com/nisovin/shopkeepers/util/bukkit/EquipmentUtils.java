@@ -50,6 +50,7 @@ public class EquipmentUtils {
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS;
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_HANDS_AND_ARMOR;
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_HANDS_AND_HEAD;
+	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_HANDS_HEAD_SADDLE;
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_MAINHAND_AND_HEAD;
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_HANDS;
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_MAINHAND;
@@ -81,6 +82,13 @@ public class EquipmentUtils {
 				EquipmentSlot.OFF_HAND,
 				EquipmentSlot.HEAD
 		));
+
+		EQUIPMENT_SLOTS_HANDS_HEAD_SADDLE = Collections.unmodifiableList(Unsafe.cast(Arrays.asList(
+				EquipmentSlot.HAND,
+				EquipmentSlot.OFF_HAND,
+				EquipmentSlot.HEAD,
+				saddleSlot
+		).stream().filter(x -> x != null).toList()));
 
 		EQUIPMENT_SLOTS_MAINHAND_AND_HEAD = Collections.unmodifiableList(Arrays.asList(
 				EquipmentSlot.HAND,
@@ -173,6 +181,11 @@ public class EquipmentUtils {
 			return EQUIPMENT_SLOTS_BODY;
 		case "HAPPY_GHAST": // Body: Colored harness MC 1.21.6
 			return EQUIPMENT_SLOTS_BODY;
+		case "COPPER_GOLEM": // MC 1.21.10
+			// Main and off hand: Overlaps, or only one is rendered.
+			// Head: Some items are rendered with a weird offset.
+			// Saddle: Only certain items are rendered.
+			return EQUIPMENT_SLOTS_HANDS_HEAD_SADDLE;
 		default:
 			return Collections.emptyList();
 		}

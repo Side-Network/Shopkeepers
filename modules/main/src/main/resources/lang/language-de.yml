@@ -259,6 +259,10 @@ button-saddle: "&aSattel umschalten"
 button-saddle-lore:
 - "Schaltet den Sattel"
 - "an oder aus"
+button-copper-golem-weather-state: "&aOxidationsgrad ändern"
+button-copper-golem-weather-state-lore:
+- "Ändert den Oxidationsgrad"
+- "des Kupfergolems"
 
 equipment-editor-title: "Ausrüstung Editor"
 equipment-slot-lore:

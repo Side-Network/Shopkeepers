@@ -31,6 +31,7 @@ import com.nisovin.shopkeepers.shopobjects.living.types.BabyableShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.CatShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.ChestedHorseShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.ChickenShop;
+import com.nisovin.shopkeepers.shopobjects.living.types.CopperGolemShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.CowShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.CreeperShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.EndermanShop;
@@ -176,6 +177,7 @@ import com.nisovin.shopkeepers.util.java.Validate;
  * <li>HAPPY_GHAST: okay, babyable, body slot supports colored harness, TODO turns a bit slower than
  * other mobs, baby variant does not turn towards player and when made adult again the adult also no
  * longer turns toward the player until respawned # 1.21.6
+ * <li>COPPER_GOLEM: okay, main and off hand equipment overlap, we disable oxidation # 1.21.9
  * </ul>
  **/
 public final class SKLivingShopObjectTypes implements LivingShopObjectTypes {
@@ -677,6 +679,24 @@ public final class SKLivingShopObjectTypes implements LivingShopObjectTypes {
 			break;
 		default:
 			break;
+		}
+
+		if (objectType == null) {
+			switch (entityType.name()) {
+			case "COPPER_GOLEM":
+				objectType = new SKLivingShopObjectType<>(
+						livingShops,
+						entityType,
+						identifier,
+						aliases,
+						permission,
+						CopperGolemShop.class,
+						CopperGolemShop::new
+				);
+				break;
+			default:
+				break;
+			}
 		}
 
 		if (objectType == null) {

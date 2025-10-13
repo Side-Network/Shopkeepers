@@ -20,8 +20,10 @@ import org.bukkit.craftbukkit.v1_21_R6.inventory.CraftMerchant;
 import org.bukkit.craftbukkit.v1_21_R6.util.CraftMagicNumbers;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Chicken;
+import org.bukkit.entity.CopperGolem;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Golem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Pig;
@@ -487,5 +489,19 @@ public final class CompatProviderImpl implements CompatProvider {
 
 		Registry<Chicken.Variant> registry = Unsafe.castNonNull(Registry.CHICKEN_VARIANT);
 		return RegistryUtils.cycleKeyed(registry, variantValue, backwards).getKeyOrThrow();
+	}
+
+	// MC 1.21.9+ TODO Can be removed once we only support Bukkit 1.21.9+
+
+	public void setCopperGolemWeatherState(Golem golem, String weatherState) {
+		CopperGolem.CopperWeatherState weatherStateValue = EnumUtils.valueOf(CopperGolem.CopperWeatherState.class, weatherState);
+		if (weatherStateValue == null) {
+			weatherStateValue = CopperGolem.CopperWeatherState.UNAFFECTED; // Default
+		}
+		((CopperGolem) golem).setWeatherState(weatherStateValue);
+	}
+
+	public void setCopperGolemNextWeatheringTick(Golem golem, int tick) {
+		((CopperGolem) golem).setNextWeatheringTick(tick);
 	}
 }
