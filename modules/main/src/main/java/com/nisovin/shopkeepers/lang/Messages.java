@@ -333,6 +333,21 @@ public class Messages extends Config {
 			"Changes the copper golem's",
 			"oxidation level"
 	));
+	public static String buttonArmorStandBasePlate = c("&aToggle base plate");
+	public static List<String> buttonArmorStandBasePlateLore = c(Arrays.asList(
+			"Toggles the base plate",
+			"of the armor stand"
+	));
+	public static String buttonArmorStandShowArms = c("&aToggle arms");
+	public static List<String> buttonArmorStandShowArmsLore = c(Arrays.asList(
+			"Toggles the arms",
+			"of the armor stand"
+	));
+	public static String buttonArmorStandSmall = c("&aToggle size");
+	public static List<String> buttonArmorStandSmallLore = c(Arrays.asList(
+			"Toggles the size",
+			"of the armor stand"
+	));
 
 	public static String equipmentEditorTitle = c("Equipment Editor");
 	public static List<String> equipmentSlotLore = c(Arrays.asList(

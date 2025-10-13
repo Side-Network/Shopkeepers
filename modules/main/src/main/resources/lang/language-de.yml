@@ -263,6 +263,18 @@ button-copper-golem-weather-state: "&aOxidationsgrad ändern"
 button-copper-golem-weather-state-lore:
 - "Ändert den Oxidationsgrad"
 - "des Kupfergolems"
+button-armor-stand-base-plate: "&aBodenplatte umschalten"
+button-armor-stand-base-plate-lore:
+- "Schaltet die Bodenplatte"
+- "an oder aus"
+button-armor-stand-show-arms: "&aArme umschalten"
+button-armor-stand-show-arms-lore:
+- "Schaltet die Arme"
+- "an oder aus"
+button-armor-stand-small: "&aGröße umschalten"
+button-armor-stand-small-lore:
+- "Ändert die Größe"
+- "des Rüstungsständers"
 
 equipment-editor-title: "Ausrüstung Editor"
 equipment-slot-lore:

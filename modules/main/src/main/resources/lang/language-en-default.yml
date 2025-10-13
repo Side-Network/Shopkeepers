@@ -256,6 +256,18 @@ button-copper-golem-weather-state: "&aChoose oxidation level"
 button-copper-golem-weather-state-lore:
 - "Changes the copper golem's"
 - "oxidation level"
+button-armor-stand-base-plate: "&aToggle base plate"
+button-armor-stand-base-plate-lore:
+- "Toggles the base plate"
+- "of the armor stand"
+button-armor-stand-show-arms: "&aToggle arms"
+button-armor-stand-show-arms-lore:
+- "Toggles the arms"
+- "of the armor stand"
+button-armor-stand-small: "&aToggle size"
+button-armor-stand-small-lore:
+- "Toggles the size"
+- "of the armor stand"
 
 equipment-editor-title: "Equipment Editor"
 equipment-slot-lore:

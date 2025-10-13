@@ -26,6 +26,7 @@ import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.shopobjects.living.LivingShopObjectTypes;
 import com.nisovin.shopkeepers.config.Settings.DerivedSettings;
 import com.nisovin.shopkeepers.shopobjects.living.types.AbstractHorseShop;
+import com.nisovin.shopkeepers.shopobjects.living.types.ArmorStandShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.AxolotlShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.BabyableShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.CatShop;
@@ -108,7 +109,8 @@ import com.nisovin.shopkeepers.util.java.Validate;
  * the pathfinder goals and applies a custom name if the entity doesn't have one already
  * <li>ENDERMITE: seems to work, however it shows strange movement
  * <li>GUARDIAN: does not work, error when trying to apply common AI goals
- * <li>ARMOR_STAND: cannot be clicked / accessed yet
+ * <li>ARMOR_STAND: okay, requires handling the PlaerInteractAtEvent for interactions TODO custom
+ * poses?
  * <li>SHULKER: okay, dynamically attaches to another adjacent block when the block it is attached
  * to is broken, or is not a full block face, or when a block in the opposite direction would block
  * it from opening, but this does not apply when the shulker is placed in a non-empty (i.e.
@@ -675,6 +677,17 @@ public final class SKLivingShopObjectTypes implements LivingShopObjectTypes {
 					permission,
 					StriderShop.class,
 					StriderShop::new
+			);
+			break;
+		case ARMOR_STAND:
+			objectType = new SKLivingShopObjectType<>(
+					livingShops,
+					entityType,
+					identifier,
+					aliases,
+					permission,
+					ArmorStandShop.class,
+					ArmorStandShop::new
 			);
 			break;
 		default:

@@ -10,6 +10,8 @@ Date format: (YYYY-MM-DD)
   * Add copper golem to the by default enabled mob types.
     * It supports the hand, offhand, head and saddle equipment slots.
     * Its oxidation level is fixed and can be changed via the editor.
+* Add armor stand to the by default enabled mob types.
+  * The editor supports toggling the base plate, arms, and size, as well as equipping items.
 * Config: Changes to the item data format inside the config.
   * The new format aligns more closely with how Minecraft represents item data and how we represent item data inside the save file.
   * We now use Minecraft's item type ids instead of Bukkit's material names.
@@ -56,6 +58,12 @@ Date format: (YYYY-MM-DD)
 **Message changes:**  
 * Added `button-copper-golem-weather-state`.
 * Added `button-copper-golem-weather-state-lore`.
+* Added `button-armor-stand-base-plate`.
+* Added `button-armor-stand-base-plate-lore`.
+* Added `button-armor-stand-show-arms`.
+* Added `button-armor-stand-show-arms-lore`.
+* Added `button-armor-stand-small`.
+* Added `button-armor-stand-small-lore`.
 * Removed `items-converted`.
 * Removed `command-description-convert-items`.
 

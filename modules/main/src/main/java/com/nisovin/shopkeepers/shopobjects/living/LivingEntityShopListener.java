@@ -1,6 +1,10 @@
 package com.nisovin.shopkeepers.shopobjects.living;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -42,6 +46,7 @@ import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent.BedEnterResult;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.projectiles.ProjectileSource;
@@ -62,8 +67,36 @@ import com.nisovin.shopkeepers.util.logging.Log;
 
 class LivingEntityShopListener implements Listener {
 
+	private class EntityInteraction {
+
+		private static final long TIMEOUT_NANOS = TimeUnit.MILLISECONDS.toNanos(250L);
+
+		private static final UUID UUID_NIL = new UUID(0L, 0L);
+
+		private long lastTimestamp = 0;
+		private UUID lastEntityId = UUID_NIL;
+
+		public EntityInteraction() {
+		}
+
+		// Returns true if the interaction matches the last recent entity interaction.
+		public boolean checkAndUpdate(UUID entityId) {
+			final long nowNanos = System.nanoTime();
+			if (entityId.equals(lastEntityId) && (nowNanos - lastTimestamp) < TIMEOUT_NANOS) {
+				return true;
+			}
+
+			lastTimestamp = nowNanos;
+			lastEntityId = entityId;
+			return false;
+		}
+	}
+
 	private final SKShopkeepersPlugin plugin;
 	private final SKShopkeeperRegistry shopkeeperRegistry;
+
+	// Key: Player id
+	private final Map<UUID, EntityInteraction> lastEntityInteractions = new HashMap<>();
 
 	LivingEntityShopListener(SKShopkeepersPlugin plugin) {
 		this.plugin = plugin;
@@ -183,17 +216,24 @@ class LivingEntityShopListener implements Listener {
 			player.updateInventory();
 		}
 
-		// The PlayerInteractAtEntityEvent gets sometimes called additionally to the
-		// PlayerInteractEntityEvent.
-		// We cancel the event but don't process it any further.
-		if (isInteractAtEvent) {
-			Log.debug("  Ignoring InteractAtEntity event");
-			return;
-		}
-
 		// Only trigger shopkeeper interaction for main-hand events:
 		if (event.getHand() != EquipmentSlot.HAND) {
 			Log.debug("  Ignoring off-hand interaction");
+			return;
+		}
+
+		// The PlayerInteractAtEntityEvent gets sometimes called additionally to the
+		// PlayerInteractEntityEvent. We only want to handle the interaction once.
+		// However, for certain entities, e.g. armor stands, we only receive the
+		// PlayerInteractAtEntityEvent, so we cannot simply ignore this event type.
+		// We remember the last entity interaction for each player and cancel but ignore the event
+		// if we already handled an interaction with the same entity recently.
+		var lastEntityInteraction = lastEntityInteractions.computeIfAbsent(
+				player.getUniqueId(),
+				playerId -> new EntityInteraction()
+		);
+		if (lastEntityInteraction.checkAndUpdate(clickedEntity.getUniqueId())) {
+			Log.debug("  Ignoring already handled entity interaction");
 			return;
 		}
 
@@ -213,6 +253,15 @@ class LivingEntityShopListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	void onEntityInteractAt(PlayerInteractAtEntityEvent event) {
 		this.onEntityInteract(event);
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	void onPlayerQuit(PlayerQuitEvent event) {
+		this.clearLastEntityInteraction(event.getPlayer());
+	}
+
+	private void clearLastEntityInteraction(Player player) {
+		lastEntityInteractions.remove(player.getUniqueId());
 	}
 
 	// TODO Many of those behaviors might no longer be active, once all entities use NoAI (once
