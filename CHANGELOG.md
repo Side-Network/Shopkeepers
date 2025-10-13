@@ -2,8 +2,11 @@
 Date format: (YYYY-MM-DD)  
 
 ## v2.24.0 (TBA)
-### Supported MC versions: 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
+### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
 
+* Update for Minecraft 1.21.10.
+  * Note: 1.21.9 is not supported and has been superseded by 1.21.10.
+  * Update the fallback compatibility module.
 * Config: Changes to the item data format inside the config.
   * The new format aligns more closely with how Minecraft represents item data and how we represent item data inside the save file.
   * We now use Minecraft's item type ids instead of Bukkit's material names.

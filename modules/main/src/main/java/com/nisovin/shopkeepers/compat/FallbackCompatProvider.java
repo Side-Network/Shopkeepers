@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.function.BiConsumer;
 
 import org.bukkit.Bukkit;
@@ -149,7 +150,6 @@ public final class FallbackCompatProvider implements CompatProvider {
 		var nmsDataFixerGetDataFixerMethod = nmsDataFixersClass.getDeclaredMethod("a");
 		nmsDataFixer = Unsafe.assertNonNull(nmsDataFixerGetDataFixerMethod.invoke(null));
 		var nmsDataFixerTypeReferenceClass = Class.forName("com.mojang.datafixers.DSL$TypeReference");
-		var nmsDataFixerTypeReferenceTypeNameMethod = nmsDataFixerTypeReferenceClass.getDeclaredMethod("typeName");
 		var nmsDataFixerClass = Class.forName("com.mojang.datafixers.DataFixer");
 		nmsDataFixerUpdateMethod = nmsDataFixerClass.getDeclaredMethod(
 				"update",
@@ -160,12 +160,12 @@ public final class FallbackCompatProvider implements CompatProvider {
 		);
 
 		// References
-		var nmsDataFixerReferencesClass = Class.forName("net.minecraft.util.datafix.fixes.DataConverterTypes");
 		// ITEM_STACK
-		nmsDataFixerTypeItemStack = Unsafe.assertNonNull(nmsDataFixerReferencesClass.getField("u").get(null));
-		if (!"item_stack".equals(nmsDataFixerTypeReferenceTypeNameMethod.invoke(nmsDataFixerTypeItemStack))) {
+		var nmsDataFixerTypeItemStackResult = findDataFixerConverterType("item_stack");
+		if (nmsDataFixerTypeItemStackResult == null) {
 			throw new IllegalStateException("Failed to retrieve the item stack datafixer type reference!");
 		}
+		nmsDataFixerTypeItemStack = nmsDataFixerTypeItemStackResult;
 
 		nmsDynamicConstructor = nmsDynamicClass.getConstructor(dynamicOpsClass, Object.class);
 		nmsDynamicGetValueMethod = nmsDynamicClass.getDeclaredMethod("getValue");
@@ -203,6 +203,30 @@ public final class FallbackCompatProvider implements CompatProvider {
 		} catch (NoSuchMethodException e) {
 			// Not found, e.g. pre 1.21.
 		}
+	}
+
+	private static @Nullable Object findDataFixerConverterType(String typeName) throws Exception {
+		var nmsDataFixerReferencesClass = Class.forName("net.minecraft.util.datafix.fixes.DataConverterTypes");
+		var nmsDataFixerTypeReferenceClass = Class.forName("com.mojang.datafixers.DSL$TypeReference");
+		var nmsDataFixerTypeReferenceTypeNameMethod = nmsDataFixerTypeReferenceClass.getDeclaredMethod("typeName");
+		for (Field field : nmsDataFixerReferencesClass.getDeclaredFields()) {
+			if (!Modifier.isStatic(field.getModifiers())) {
+				continue;
+			}
+
+			var value = field.get(null);
+			if (value == null) {
+				continue;
+			}
+
+			// Find by typeName:
+			var typeNameResult = nmsDataFixerTypeReferenceTypeNameMethod.invoke(value);
+			if (typeName.equals(typeNameResult)) {
+				return value;
+			}
+		}
+
+		return null;
 	}
 
 	@Override

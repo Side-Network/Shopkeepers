@@ -47,6 +47,9 @@ public final class Compat {
 	// Minecraft version instead.
 	static {
 		// Registered in the order from latest to oldest.
+		// 1.21.9: Not supported. Superseded by 1.21.10.
+		register(new CompatVersion("1_21_R8_paper", "1.21.10", "1.21.10"));
+		register(new CompatVersion("1_21_R8", "1.21.10", "614efe5192cd0510bc2ddc5feefa155d"));
 		// 1.21.8: Mappings version has not changed. We can reuse the 1.21.7 compat modules.
 		register(new CompatVersion("1_21_R7_paper", Arrays.asList(
 				new ServerVersion("1.21.7", "1.21.7"),
