@@ -268,6 +268,27 @@ button-armor-stand-small: "&aToggle size"
 button-armor-stand-small-lore:
 - "Toggles the size"
 - "of the armor stand"
+button-mannequin-main-hand: "&aToggle main hand"
+button-mannequin-main-hand-lore:
+- "Toggles the main hand"
+- "of the mannequin"
+button-mannequin-pose: "&aToggle pose"
+button-mannequin-pose-lore:
+- "Toggles the pose"
+- "of the mannequin"
+button-mannequin-profile: "&aChange skin"
+button-mannequin-profile-lore:
+- "Changes the skin"
+- "of the mannequin"
+
+mannequin-enter-profile: |-
+  &aPlease enter in chat the name or id of the player whose profile you want to apply to the mannequin.
+  &a  Enter a dash (-) to clear the current profile.
+  &a  Enter an exclamation mark (!) to keep the current profile.
+mannequin-enter-profile-canceled: "&7Canceled: The mannequin's profile was not changed."
+mannequin-profile-set: "&aThe mannequin's profile has been set to '&e{profileName}&a'!"
+mannequin-profile-cleared: "&aThe mannequin's profile has been cleared!"
+mannequin-profile-invalid: "&cFailed to fetch the profile for '&e{input}&c'!"
 
 equipment-editor-title: "Equipment Editor"
 equipment-slot-lore:

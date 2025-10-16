@@ -26,17 +26,21 @@ import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Golem;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Pose;
 import org.bukkit.entity.Salmon;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MainHand;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantInventory;
+import org.bukkit.profile.PlayerProfile;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -54,9 +58,11 @@ import com.nisovin.shopkeepers.util.java.EnumUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
 import com.nisovin.shopkeepers.util.logging.Log;
 
+import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.world.WeatheringCopperState;
+import net.kyori.adventure.text.Component;
 import net.minecraft.core.component.DataComponentExactPredicate;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.PatchedDataComponentMap;
@@ -538,5 +544,39 @@ public final class CompatProviderImpl implements CompatProvider {
 		}
 
 		((CopperGolem) golem).setOxidizing(oxidizing);
+	}
+
+	public void setMannequinHideDescription(LivingEntity mannequin, boolean hideDescription) {
+		if (hideDescription) {
+			((Mannequin) mannequin).setDescription(null);
+		} else {
+			((Mannequin) mannequin).setDescription(Mannequin.defaultDescription());
+		}
+	}
+
+	public void setMannequinDescription(LivingEntity mannequin, @Nullable String description) {
+		((Mannequin) mannequin).setDescription(description == null ? null : Component.text(description));
+	}
+
+	public void setMannequinMainHand(LivingEntity mannequin, MainHand mainHand) {
+		((Mannequin) mannequin).setMainHand(mainHand);
+	}
+
+	public void setMannequinPose(LivingEntity mannequin, Pose pose) {
+		((Mannequin) mannequin).setPose(pose);
+	}
+
+	public void setMannequinProfile(LivingEntity mannequin, @Nullable PlayerProfile profile) {
+		if (profile == null) {
+			// Empty profile:
+			var resolvableProfile = ResolvableProfile.resolvableProfile().build();
+			((Mannequin) mannequin).setProfile(resolvableProfile);
+			return;
+		}
+
+		var paperProfile = Bukkit.createProfileExact(profile.getUniqueId(), profile.getName());
+		paperProfile.setTextures(profile.getTextures());
+		var resolvableProfile = ResolvableProfile.resolvableProfile(paperProfile);
+		((Mannequin) mannequin).setProfile(resolvableProfile);
 	}
 }

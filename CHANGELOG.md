@@ -10,6 +10,14 @@ Date format: (YYYY-MM-DD)
   * Add copper golem to the by default enabled mob types.
     * It supports the hand, offhand, head and saddle equipment slots.
     * Its oxidation level is fixed and can be changed via the editor.
+  * Add mannequin to the by default enabled mob types.
+    * It does not rotate towards nearby players.
+    * Equipment is supported but only works with the latest Spigot versions (see SPIGOT-8087).
+    * The main hand and pose can be toggled via the editor. Note: Some of the poses have a very small hitbox.
+    * We hide the default "NPC" description from the nametag. There is no editor option to customize the description yet.
+    * The skin can be specified via the editor by entering the name or uuid of an existing player in chat.
+      * On Spigot, the profile lookup by name uses a blocking player id lookup as a workaround for some issue currently (see SPIGOT-8088).
+      * There are no editor options yet to customize the profile in other ways or hide individual skin layers.
 * Add armor stand to the by default enabled mob types.
   * The editor supports toggling the base plate, arms, and size, as well as equipping items.
 * Config: Changes to the item data format inside the config.
@@ -64,6 +72,17 @@ Date format: (YYYY-MM-DD)
 * Added `button-armor-stand-show-arms-lore`.
 * Added `button-armor-stand-small`.
 * Added `button-armor-stand-small-lore`.
+* Added `button-mannequin-main-hand`.
+* Added `button-mannequin-main-hand-lore`.
+* Added `button-mannequin-pose`.
+* Added `button-mannequin-pose-lore`.
+* Added `button-mannequin-profile`.
+* Added `button-mannequin-profile-lore`.
+* Added `mannequin-enter-profile`.
+* Added `mannequin-enter-profile-canceled`.
+* Added `mannequin-profile-set`.
+* Added `mannequin-profile-cleared`.
+* Added `mannequin-profile-invalid`.
 * Removed `items-converted`.
 * Removed `command-description-convert-items`.
 

@@ -43,6 +43,7 @@ import com.nisovin.shopkeepers.shopobjects.living.types.GoatShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.HorseShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.LlamaShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.MagmaCubeShop;
+import com.nisovin.shopkeepers.shopobjects.living.types.MannequinShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.MooshroomShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.PandaShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.ParrotShop;
@@ -179,7 +180,12 @@ import com.nisovin.shopkeepers.util.java.Validate;
  * <li>HAPPY_GHAST: okay, babyable, body slot supports colored harness, TODO turns a bit slower than
  * other mobs, baby variant does not turn towards player and when made adult again the adult also no
  * longer turns toward the player until respawned # 1.21.6
- * <li>COPPER_GOLEM: okay, main and off hand equipment overlap, we disable oxidation # 1.21.9
+ * <li>COPPER_GOLEM: okay, main and off hand equipment overlap, we disable oxidation, makes a sound
+ * when spawned # 1.21.9
+ * <li>MANNEQUIN: okay, does not rotate towards nearby players, always immovable (due to NoAI), we
+ * disable the "NPC" description, some poses have a very small hitbox TODO custom description?,
+ * option to hide individual skin layers? more profile customization options? (currently we only
+ * allow looking up a profile by player name) # 1.21.9
  * </ul>
  **/
 public final class SKLivingShopObjectTypes implements LivingShopObjectTypes {
@@ -705,6 +711,17 @@ public final class SKLivingShopObjectTypes implements LivingShopObjectTypes {
 						permission,
 						CopperGolemShop.class,
 						CopperGolemShop::new
+				);
+				break;
+			case "MANNEQUIN":
+				objectType = new SKLivingShopObjectType<>(
+						livingShops,
+						entityType,
+						identifier,
+						aliases,
+						permission,
+						MannequinShop.class,
+						MannequinShop::new
 				);
 				break;
 			default:

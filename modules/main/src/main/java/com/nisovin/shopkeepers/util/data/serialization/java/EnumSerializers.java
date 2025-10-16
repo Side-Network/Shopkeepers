@@ -20,7 +20,7 @@ public final class EnumSerializers {
 		protected final Class<@NonNull E> enumType;
 
 		/**
-		 * Creates a new {@link EnumSerializers}.
+		 * Creates a new {@link EnumSerializer}.
 		 * 
 		 * @param enumType
 		 *            the enum class, not <code>null</code>

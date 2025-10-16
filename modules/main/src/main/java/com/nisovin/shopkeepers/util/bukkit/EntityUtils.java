@@ -21,6 +21,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Pose;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Zombie;
 import org.bukkit.util.RayTraceResult;
@@ -112,6 +113,26 @@ public final class EntityUtils {
 			} else {
 				return false;
 			}
+		}
+	}
+
+	/**
+	 * Checks if the given {@link Pose} is a valid mannequin pose.
+	 * 
+	 * @param pose
+	 *            the pose
+	 * @return <code>true</code> if valid for mannequins
+	 */
+	public static boolean isValidMannequinPose(Pose pose) {
+		switch (pose) {
+		case STANDING:
+		case SNEAKING:
+		case SWIMMING:
+		case FALL_FLYING:
+		case SLEEPING:
+			return true;
+		default:
+			return false;
 		}
 	}
 

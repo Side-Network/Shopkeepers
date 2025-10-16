@@ -8,10 +8,13 @@ import org.bukkit.entity.Golem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Pose;
 import org.bukkit.entity.Salmon;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MainHand;
+import org.bukkit.profile.PlayerProfile;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
@@ -200,6 +203,26 @@ public interface CompatProvider {
 
 	// -2 to disable weathering state changes (waxed).
 	public default void setCopperGolemNextWeatheringTick(Golem golem, int tick) {
+		// Not supported by default.
+	}
+
+	public default void setMannequinHideDescription(LivingEntity mannequin, boolean hideDescription) {
+		// Not supported by default.
+	}
+
+	public default void setMannequinDescription(LivingEntity mannequin, @Nullable String description) {
+		// Not supported by default.
+	}
+
+	public default void setMannequinMainHand(LivingEntity mannequin, MainHand mainHand) {
+		// Not supported by default.
+	}
+
+	public default void setMannequinPose(LivingEntity mannequin, Pose pose) {
+		// Not supported by default.
+	}
+
+	public default void setMannequinProfile(LivingEntity mannequin, @Nullable PlayerProfile profile) {
 		// Not supported by default.
 	}
 }

@@ -143,6 +143,7 @@ public class EquipmentUtils {
 			return EQUIPMENT_SLOTS_BODY_AND_SADDLE;
 		case "PLAYER":
 		case "ARMOR_STAND":
+		case "MANNEQUIN":
 		case "ZOMBIE":
 		case "ZOMBIE_VILLAGER":
 		case "DROWNED":

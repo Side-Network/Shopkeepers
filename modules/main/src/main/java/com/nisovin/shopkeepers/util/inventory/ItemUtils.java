@@ -1,7 +1,10 @@
 package com.nisovin.shopkeepers.util.inventory;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Predicate;
 
 import org.bukkit.Bukkit;
@@ -12,6 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.checker.nullness.qual.PolyNull;
@@ -26,6 +30,7 @@ import com.nisovin.shopkeepers.util.java.CollectionUtils;
 import com.nisovin.shopkeepers.util.java.EnumUtils;
 import com.nisovin.shopkeepers.util.java.MathUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
+import com.nisovin.shopkeepers.util.logging.Log;
 
 /**
  * Utility functions related to materials and items.
@@ -745,6 +750,48 @@ public final class ItemUtils {
 		default:
 			return Material.WHITE_CARPET;
 		}
+	}
+
+	public static ItemStack createHead(UUID uuid, String name, String skinUrl) {
+		var itemStack = new ItemStack(Material.PLAYER_HEAD);
+
+		var profile = Bukkit.createPlayerProfile(uuid, name);
+		URL url;
+		try {
+			url = new URI(skinUrl).toURL();
+		} catch (Exception e) {
+			Log.debug("Invalid skin URL: " + skinUrl, e);
+			return itemStack;
+		}
+
+		profile.getTextures().setSkin(url);
+
+		var skullMeta = Unsafe.assertNonNull((SkullMeta) itemStack.getItemMeta());
+		try {
+			skullMeta.setOwnerProfile(profile);
+		} catch (Exception e) {
+			Log.debug("Failed to apply skull profile: " + skinUrl, e);
+			return itemStack;
+		}
+
+		itemStack.setItemMeta(skullMeta);
+		return itemStack;
+	}
+
+	public static final ItemStack getSkull_MHF_ArrowLeft() {
+		return createHead(
+				UUID.fromString("a68f0b64-8d14-4000-a95f4b9ba14f-8df9"),
+				"MHF_ArrowLeft",
+				"https://textures.minecraft.net/texture/f7aacad193e2226971ed95302dba433438be4644fbab5ebf818054061667fbe2"
+		);
+	}
+
+	public static final ItemStack getSkull_MHF_ArrowRight() {
+		return createHead(
+				UUID.fromString("50c8510b-5ea0-4d60-be9a7d542d6c-d156"),
+				"MHF_ArrowRight",
+				"https://textures.minecraft.net/texture/d34ef0638537222b20f480694dadc0f85fbe0759d581aa7fcdf2e43139377158"
+		);
 	}
 
 	public static boolean isDamageable(@ReadOnly @Nullable ItemStack itemStack) {

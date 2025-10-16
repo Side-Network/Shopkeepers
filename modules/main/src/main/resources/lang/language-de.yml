@@ -275,6 +275,27 @@ button-armor-stand-small: "&aGröße umschalten"
 button-armor-stand-small-lore:
 - "Ändert die Größe"
 - "des Rüstungsständers"
+button-mannequin-main-hand: "&aHaupthand umschalten"
+button-mannequin-main-hand-lore:
+- "Wechselt die Haupthand"
+- "der Spielerpuppe"
+button-mannequin-pose: "&aPose ändern"
+button-mannequin-pose-lore:
+- "Ändert die Pose"
+- "der Spielerpuppe"
+button-mannequin-profile: "&aSkin ändern"
+button-mannequin-profile-lore:
+- "Ändert die Skin-Textur"
+- "der Spielerpuppe"
+
+mannequin-enter-profile: |-
+  &aBitte gib im Chat den Namen oder die Id des Spielers ein, dessen Profil du auf die Spielerpuppe anwenden möchtest.
+  &a  Ein Minus (-) entfernt das aktuelle Profil.
+  &a  Ein Ausrufezeichen (!) behält das aktuelle Profil bei.
+mannequin-enter-profile-canceled: "&7Abgebrochen: Das Profil der Spielerpuppe wurde nicht geändert."
+mannequin-profile-set: "&aDas Profil der Spielerpuppe wurde zu '&e{profileName}&a geändert'!"
+mannequin-profile-cleared: "&aDas Profil der Spielerpuppe wurde entfernt!"
+mannequin-profile-invalid: "&cDas Profil für '&e{input}&c' konnte nicht abgerufen werden!"
 
 equipment-editor-title: "Ausrüstung Editor"
 equipment-slot-lore:

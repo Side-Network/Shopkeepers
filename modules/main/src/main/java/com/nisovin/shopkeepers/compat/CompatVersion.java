@@ -75,6 +75,15 @@ public class CompatVersion {
 	}
 
 	/**
+	 * Checks if {@link #getVariant()} equals the {@link #VARIANT_PAPER}.
+	 * 
+	 * @return <code>true</code> if this version is a Paper variant
+	 */
+	public boolean isPaper() {
+		return this.getVariant().equals(VARIANT_PAPER);
+	}
+
+	/**
 	 * Gets the supported server versions.
 	 * 
 	 * @return the supported server versions, not <code>null</code> or empty, sorted from oldest to

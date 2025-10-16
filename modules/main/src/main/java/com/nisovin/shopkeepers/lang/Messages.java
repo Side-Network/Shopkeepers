@@ -348,6 +348,31 @@ public class Messages extends Config {
 			"Toggles the size",
 			"of the armor stand"
 	));
+	public static String buttonMannequinMainHand = c("&aToggle main hand");
+	public static List<String> buttonMannequinMainHandLore = c(Arrays.asList(
+			"Toggles the main hand",
+			"of the mannequin"
+	));
+	public static String buttonMannequinPose = c("&aToggle pose");
+	public static List<String> buttonMannequinPoseLore = c(Arrays.asList(
+			"Toggles the pose",
+			"of the mannequin"
+	));
+	public static String buttonMannequinProfile = c("&aChange skin");
+	public static List<String> buttonMannequinProfileLore = c(Arrays.asList(
+			"Changes the skin",
+			"of the mannequin"
+	));
+
+	public static Text mannequinEnterProfile = Text.parse(
+			"&aPlease enter in chat the name or id of the player whose profile you want to apply to"
+					+ " the mannequin.\n"
+					+ "&a  Enter a dash (-) to clear the current profile.\n"
+					+ "&a  Enter an exclamation mark (!) to keep the current profile.");
+	public static Text mannequinEnterProfileCanceled = Text.parse("&7Canceled: The mannequin's profile was not changed.");
+	public static Text mannequinProfileSet = Text.parse("&aThe mannequin's profile has been set to '&e{profileName}&a'!");
+	public static Text mannequinProfileCleared = Text.parse("&aThe mannequin's profile has been cleared!");
+	public static Text mannequinProfileInvalid = Text.parse("&cFailed to fetch the profile for '&e{input}&c'!");
 
 	public static String equipmentEditorTitle = c("Equipment Editor");
 	public static List<String> equipmentSlotLore = c(Arrays.asList(
