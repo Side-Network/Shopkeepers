@@ -1,7 +1,7 @@
 # Changelog
 Date format: (YYYY-MM-DD)  
 
-## v2.24.0 (TBA)
+## v2.24.0 (2025-10-16)
 ### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
 
 * Update for Minecraft 1.21.10.
