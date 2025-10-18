@@ -1,5 +1,6 @@
 package com.nisovin.shopkeepers.tradelog.sqlite;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -17,6 +18,7 @@ import com.nisovin.shopkeepers.tradelog.base.AbstractFileTradeLogger;
 import com.nisovin.shopkeepers.tradelog.data.PlayerRecord;
 import com.nisovin.shopkeepers.tradelog.data.ShopRecord;
 import com.nisovin.shopkeepers.tradelog.data.TradeRecord;
+import com.nisovin.shopkeepers.util.java.FileUtils;
 import com.nisovin.shopkeepers.util.logging.Log;
 
 /**
@@ -66,16 +68,16 @@ public class SQLiteTradeLogger extends AbstractFileTradeLogger {
 	private final String connectionURL;
 
 	private volatile @Nullable String setupFailureReason = null;
+	private volatile boolean performSetupAgain = false;
 
 	public SQLiteTradeLogger(Plugin plugin) {
 		super(plugin, TradeLogStorageType.SQLITE);
 
 		this.connectionURL = "jdbc:sqlite:" + tradeLogsFolder.resolve(FILE_NAME);
-
-		this.createTable();
 	}
 
-	private Connection getConnection() throws SQLException {
+	private Connection getConnection() throws SQLException, IOException {
+		FileUtils.createDirectories(tradeLogsFolder);
 		return DriverManager.getConnection(connectionURL);
 	}
 
@@ -83,7 +85,12 @@ public class SQLiteTradeLogger extends AbstractFileTradeLogger {
 	protected void asyncSetup() {
 		super.asyncSetup();
 
-		this.createTable();
+		try (Connection connection = this.getConnection()) {
+			this.performSetup(connection);
+		} catch (Exception e) {
+			setupFailureReason = e.getMessage();
+			Log.severe(logPrefix + setupFailureReason, e);
+		}
 	}
 
 	@Override
@@ -94,13 +101,15 @@ public class SQLiteTradeLogger extends AbstractFileTradeLogger {
 		}
 	}
 
-	private void createTable() {
-		try (	Connection connection = getConnection();
-				Statement statement = connection.createStatement()) {
+	private void performSetup(Connection connection) throws Exception {
+		this.createTable(connection);
+	}
+
+	private void createTable(Connection connection) throws Exception {
+		try (Statement statement = connection.createStatement()) {
 			statement.execute(CREATE_TABLE);
-		} catch (SQLException e) {
-			setupFailureReason = "Could not create table '" + TABLE_NAME + "'.";
-			Log.severe(logPrefix + setupFailureReason, e);
+		} catch (Exception e) {
+			throw new Exception("Could not create table '" + TABLE_NAME + "'!", e);
 		}
 	}
 
@@ -110,24 +119,34 @@ public class SQLiteTradeLogger extends AbstractFileTradeLogger {
 		if (trade == null) return; // There are no unsaved trades
 
 		boolean done = false;
-		// TODO Keep the connection open? Cache the PreparedStatement?
-		try (	Connection connection = this.getConnection();
-				PreparedStatement insertStatement = connection.prepareStatement(INSERT_TRADE)) {
-			do {
-				this.insertTrade(insertStatement, trade);
+		// TODO Keep the connection open (at least until we observe an error)? Cache the
+		// PreparedStatement?
+		try (var connection = this.getConnection()) {
+			if (performSetupAgain) {
+				this.performSetup(connection);
+			}
 
-				// Trade successfully saved:
-				saveContext.onTradeSuccessfullySaved();
+			try (var insertStatement = connection.prepareStatement(INSERT_TRADE)) {
+				do {
+					this.insertTrade(insertStatement, trade);
 
-				// Get the next trade to insert:
-				trade = saveContext.getNextUnsavedTrade();
-				if (trade == null) break; // There are no more trades to save
-			} while (true);
+					// Trade successfully saved:
+					saveContext.onTradeSuccessfullySaved();
 
-			// We are about to close the connection:
-			done = true;
-		} catch (SQLException e) {
+					// Get the next trade to insert:
+					trade = saveContext.getNextUnsavedTrade();
+					if (trade == null) break; // There are no more trades to save
+				} while (true);
+
+				// We are about to close the connection:
+				done = true;
+			}
+		} catch (Exception e) {
 			if (!done) {
+				// If the saving failed, we re-attempt the database setup during the subsequent
+				// re-try to handle cases in which the database file might have been dynamically
+				// deleted.
+				performSetupAgain = true;
 				throw e;
 			} else {
 				// Since all inserts completed successfully, we assume that the trades have been

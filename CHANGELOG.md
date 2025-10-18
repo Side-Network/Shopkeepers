@@ -4,6 +4,8 @@ Date format: (YYYY-MM-DD)
 ## v2.24.1 (TBA)
 ### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
 
+* Fix: Automatically create missing parent directories for the SQLite trade log.
+* Fix: Repeat the setup of the SQLite trade log database if an error occurred during a previous save attempt.
 
 ## v2.24.0 (2025-10-16)
 ### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
