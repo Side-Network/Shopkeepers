@@ -85,7 +85,10 @@ public final class ItemUtils {
 	}
 
 	public static boolean isChest(@Nullable Material material) {
-		return material == Material.CHEST || material == Material.TRAPPED_CHEST;
+		if (material == null) return false;
+
+		// Chest, trapped chest, copper chests:
+		return material.data == org.bukkit.block.data.type.Chest.class;
 	}
 
 	public static boolean isShulkerBox(@Nullable Material material) {
