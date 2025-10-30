@@ -394,6 +394,9 @@ public abstract class Config {
 		for (String extraMessage : e.getExtraMessages()) {
 			Log.warning(this.getLogPrefix() + extraMessage);
 		}
+		// Note: Since the debug flag is itself loaded from the config, this might only have an
+		// effect here during subsequent config reloads.
+		Log.debug(this.getLogPrefix() + "Error details: ", e);
 	}
 
 	protected String msgValueLoadException(String configKey, ValueLoadException e) {
@@ -435,6 +438,7 @@ public abstract class Config {
 			return (T) valueType.load(defaults, configKey);
 		} catch (ValueLoadException e) {
 			Log.warning(this.msgDefaultValueLoadException(configKey, e));
+			Log.debug(this.getLogPrefix() + "Error details: ", e);
 			return null;
 		}
 	}

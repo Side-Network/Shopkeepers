@@ -7,6 +7,7 @@ Date format: (YYYY-MM-DD)
 * Fix: Consider copper chests valid shop containers.
 * Fix: Automatically create missing parent directories for the SQLite trade log.
 * Fix: Repeat the setup of the SQLite trade log database if an error occurred during a previous save attempt.
+* Debug: In debug mode, log the exception details when the loading of some config setting fails. Note that since the debug flag is itself loaded from the config, this might only have an effect during subsequent config reloads.
 
 ## v2.24.0 (2025-10-16)
 ### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
