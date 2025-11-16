@@ -69,8 +69,8 @@ class CommandTransfer extends Command {
 		String newOwnerName = context.getOrNull(ARGUMENT_NEW_OWNER_NAME); // Can be null
 		assert newOwnerUUID != null ^ newOwnerName != null;
 
-		// TODO Move this logic into the argument itself, but avoid looking up the offline player
-		// more than once per command invocation.
+		// TODO Move this logic into the argument itself, but avoid looking up the offline player by
+		// name more than once per command invocation.
 		User newOwner;
 		if (newOwnerUUID != null) {
 			newOwner = UserArgumentUtils.findUser(newOwnerUUID);

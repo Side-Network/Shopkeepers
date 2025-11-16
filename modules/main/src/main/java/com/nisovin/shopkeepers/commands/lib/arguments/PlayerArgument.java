@@ -18,14 +18,14 @@ import com.nisovin.shopkeepers.commands.lib.context.CommandContextView;
 import com.nisovin.shopkeepers.util.java.Validate;
 
 /**
- * Accepts a player specified by either name (might not have to be exact, depending on the used
- * matching function) or UUID.
+ * Accepts a player specified by either UUID or name (might not have to be exact, depending on the
+ * used matching function).
  */
 public class PlayerArgument extends CommandArgument<Player> {
 
 	protected final ArgumentFilter<? super Player> filter; // Not null
-	private final PlayerByNameArgument playerNameArgument;
 	private final PlayerByUUIDArgument playerUUIDArgument;
+	private final PlayerByNameArgument playerNameArgument;
 	private final TypedFirstOfArgument<Player> firstOfArgument;
 
 	public PlayerArgument(String name) {
@@ -50,6 +50,26 @@ public class PlayerArgument extends CommandArgument<Player> {
 		super(name);
 		Validate.notNull(filter, "filter is null");
 		this.filter = filter;
+		this.playerUUIDArgument = new PlayerByUUIDArgument(
+				name + ":uuid",
+				filter,
+				minimumUUIDCompletionInput
+		) {
+			@Override
+			protected Iterable<? extends UUID> getCompletionSuggestions(
+					CommandInput input,
+					CommandContextView context,
+					int minimumCompletionInput,
+					String idPrefix
+			) {
+				return Unsafe.initialized(PlayerArgument.this).getUUIDCompletionSuggestions(
+						input,
+						context,
+						minimumCompletionInput,
+						idPrefix
+				);
+			}
+		};
 		this.playerNameArgument = new PlayerByNameArgument(
 				name + ":name",
 				filter,
@@ -79,29 +99,9 @@ public class PlayerArgument extends CommandArgument<Player> {
 				);
 			}
 		};
-		this.playerUUIDArgument = new PlayerByUUIDArgument(
-				name + ":uuid",
-				filter,
-				minimumUUIDCompletionInput
-		) {
-			@Override
-			protected Iterable<? extends UUID> getCompletionSuggestions(
-					CommandInput input,
-					CommandContextView context,
-					int minimumCompletionInput,
-					String idPrefix
-			) {
-				return Unsafe.initialized(PlayerArgument.this).getUUIDCompletionSuggestions(
-						input,
-						context,
-						minimumCompletionInput,
-						idPrefix
-				);
-			}
-		};
 		this.firstOfArgument = new TypedFirstOfArgument<>(
 				name + ":firstOf",
-				Arrays.asList(playerNameArgument, playerUUIDArgument),
+				Arrays.asList(playerUUIDArgument, playerNameArgument),
 				false,
 				false
 		);
