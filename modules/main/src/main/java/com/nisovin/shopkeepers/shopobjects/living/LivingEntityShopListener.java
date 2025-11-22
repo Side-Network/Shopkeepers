@@ -30,6 +30,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.event.entity.EntityMountEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
@@ -307,6 +308,20 @@ class LivingEntityShopListener implements Listener {
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	void onEntityEnterVehicle(VehicleEnterEvent event) {
 		Entity entity = event.getEntered();
+		if (shopkeeperRegistry.isShopkeeper(entity)) {
+			event.setCancelled(true);
+		}
+	}
+
+	// Note: This might not really be needed currently. We handle this anyway to account for
+	// unexpected or future cases in which mobs might try to mount other non-vehicle entities.
+	// Note: Baby zombies mounting nearby chickens during spawning is not preventable by this event
+	// (mounting happens during entity setup, before the shopkeeper mob has been spawned and is
+	// registered as a shopkeeper object). We handle this case separately by disabling the spawn
+	// data randomization during spawning.
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	void onEntityMount(EntityMountEvent event) {
+		Entity entity = event.getEntity();
 		if (shopkeeperRegistry.isShopkeeper(entity)) {
 			event.setCancelled(true);
 		}

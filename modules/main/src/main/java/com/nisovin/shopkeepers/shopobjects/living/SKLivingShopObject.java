@@ -344,7 +344,10 @@ public class SKLivingShopObject<E extends LivingEntity>
 		Class<? extends Entity> entityClass = Unsafe.assertNonNull(entityType.getEntityClass());
 		// Note: We expect this type of entity to be spawnable, and not result in an
 		// IllegalArgumentException.
-		this.entity = (E) world.spawn(spawnLocation, entityClass, entity -> {
+		// We disable the spawn data randomization here (prevents for example baby zombies from
+		// spawning or mounting nearby chicken):
+		// TODO With this, some of the setup below might no longer be needed.
+		this.entity = (E) world.spawn(spawnLocation, entityClass, false, entity -> {
 			assert entity != null;
 			// Note: This callback is run after the entity has been prepared (this includes the
 			// creation of random equipment and the random spawning of passengers) and right before

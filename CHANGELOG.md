@@ -7,6 +7,8 @@ Date format: (YYYY-MM-DD)
 * Fix: Consider copper chests valid shop containers.
 * Fix: Automatically create missing parent directories for the SQLite trade log.
 * Fix: Repeat the setup of the SQLite trade log database if an error occurred during a previous save attempt.
+* Fix: Baby zombies would occasionally spawn or mount nearby chickens. Disable spawn data randomization.
+  * We also cancel any entity mounting events for shopkeeper mobs now, in case there are ever any cases in the future in which mobs might try to mount other mobs, outside of spawning.
 * Debug: In debug mode, log the exception details when the loading of some config setting fails. Note that since the debug flag is itself loaded from the config, this might only have an effect during subsequent config reloads.
 
 ## v2.24.0 (2025-10-16)
