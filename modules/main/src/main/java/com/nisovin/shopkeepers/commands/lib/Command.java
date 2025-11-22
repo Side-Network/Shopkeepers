@@ -969,7 +969,7 @@ public abstract class Command {
 			);
 		} catch (FallbackArgumentException e) {
 			// Fallback is not allowed to throw another fallback exception here.
-			Validate.State.error("Argument '" + fallbackArgument.getName()
+			throw Validate.State.error("Argument '" + fallbackArgument.getName()
 					+ "' threw another FallbackArgumentException while parsing fallback: " + e);
 		} catch (ArgumentParseException e) { // Fallback failed
 			argsReader.setState(argsReaderState); // Restore previous args reader state

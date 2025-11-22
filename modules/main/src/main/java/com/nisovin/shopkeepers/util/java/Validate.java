@@ -220,23 +220,13 @@ public final class Validate {
 
 	public static final class State {
 
-		public static void error(String errorMessage) {
-			throw illegalStateException(errorMessage);
-		}
-
-		public static void error(Supplier<String> errorMessageSupplier) {
-			throw illegalStateException(errorMessageSupplier);
-		}
-
-		private static IllegalStateException illegalStateException(String errorMessage) {
+		public static IllegalStateException error(String errorMessage) {
 			return new IllegalStateException(errorMessage);
 		}
 
 		// Note: Throws a NPE if the supplier is null, similar to how Logger throws a NPE.
-		private static IllegalStateException illegalStateException(
-				Supplier<String> errorMessageSupplier
-		) {
-			return new IllegalStateException(errorMessageSupplier.get());
+		public static IllegalStateException error(Supplier<String> errorMessageSupplier) {
+			throw new IllegalStateException(errorMessageSupplier.get());
 		}
 
 		@EnsuresNonNull("#1")
@@ -250,7 +240,7 @@ public final class Validate {
 				String errorMessage
 		) {
 			if (object == null) {
-				throw illegalStateException(errorMessage);
+				throw error(errorMessage);
 			}
 			return Unsafe.initialized(object);
 		}
@@ -261,7 +251,7 @@ public final class Validate {
 				Supplier<String> errorMessageSupplier
 		) {
 			if (object == null) {
-				throw illegalStateException(errorMessageSupplier);
+				throw error(errorMessageSupplier);
 			}
 			return Unsafe.initialized(object);
 		}
@@ -274,7 +264,7 @@ public final class Validate {
 		@EnsuresNonNull("#1")
 		public static String notEmpty(@Nullable String string, String errorMessage) {
 			if (string == null || string.isEmpty()) {
-				throw illegalStateException(errorMessage);
+				throw error(errorMessage);
 			}
 			return string;
 		}
@@ -285,7 +275,7 @@ public final class Validate {
 				Supplier<String> errorMessageSupplier
 		) {
 			if (string == null || string.isEmpty()) {
-				throw illegalStateException(errorMessageSupplier);
+				throw error(errorMessageSupplier);
 			}
 			return string;
 		}
@@ -296,14 +286,14 @@ public final class Validate {
 
 		public static boolean isTrue(boolean expression, String errorMessage) {
 			if (!expression) {
-				error(errorMessage);
+				throw error(errorMessage);
 			}
 			return expression;
 		}
 
 		public static boolean isTrue(boolean expression, Supplier<String> errorMessageSupplier) {
 			if (!expression) {
-				error(errorMessageSupplier);
+				throw error(errorMessageSupplier);
 			}
 			return expression;
 		}
@@ -314,7 +304,7 @@ public final class Validate {
 
 		public static <@Nullable T> T isTrue(T value, Predicate<T> predicate, String errorMessage) {
 			if (!predicate.test(value)) {
-				error(errorMessage);
+				throw error(errorMessage);
 			}
 			return value;
 		}
@@ -325,7 +315,7 @@ public final class Validate {
 				Supplier<String> errorMessageSupplier
 		) {
 			if (!predicate.test(value)) {
-				error(errorMessageSupplier);
+				throw error(errorMessageSupplier);
 			}
 			return value;
 		}
@@ -336,14 +326,14 @@ public final class Validate {
 
 		public static double isFinite(double value, String errorMessage) {
 			if (!Double.isFinite(value)) {
-				error(errorMessage);
+				throw error(errorMessage);
 			}
 			return value;
 		}
 
 		public static double isFinite(double value, Supplier<String> errorMessageSupplier) {
 			if (!Double.isFinite(value)) {
-				error(errorMessageSupplier);
+				throw error(errorMessageSupplier);
 			}
 			return value;
 		}
@@ -354,14 +344,14 @@ public final class Validate {
 
 		public static double notNaN(double value, String errorMessage) {
 			if (Double.isNaN(value)) {
-				error(errorMessage);
+				throw error(errorMessage);
 			}
 			return value;
 		}
 
 		public static double notNaN(double value, Supplier<String> errorMessageSupplier) {
 			if (Double.isNaN(value)) {
-				error(errorMessageSupplier);
+				throw error(errorMessageSupplier);
 			}
 			return value;
 		}
@@ -372,14 +362,14 @@ public final class Validate {
 
 		public static float isFinite(float value, String errorMessage) {
 			if (!Float.isFinite(value)) {
-				error(errorMessage);
+				throw error(errorMessage);
 			}
 			return value;
 		}
 
 		public static float isFinite(float value, Supplier<String> errorMessageSupplier) {
 			if (!Float.isFinite(value)) {
-				error(errorMessageSupplier);
+				throw error(errorMessageSupplier);
 			}
 			return value;
 		}
@@ -390,14 +380,14 @@ public final class Validate {
 
 		public static float notNaN(float value, String errorMessage) {
 			if (Float.isNaN(value)) {
-				error(errorMessage);
+				throw error(errorMessage);
 			}
 			return value;
 		}
 
 		public static float notNaN(float value, Supplier<String> errorMessageSupplier) {
 			if (Float.isNaN(value)) {
-				error(errorMessageSupplier);
+				throw error(errorMessageSupplier);
 			}
 			return value;
 		}

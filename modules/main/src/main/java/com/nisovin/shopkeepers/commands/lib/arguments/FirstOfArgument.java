@@ -159,7 +159,7 @@ public class FirstOfArgument
 					// Assert: fallbacks is modifiable.
 					fallbacks.add(e);
 				} else {
-					Validate.State.error("Argument '" + e.getArgument().getName()
+					throw Validate.State.error("Argument '" + e.getArgument().getName()
 							+ "' threw another FallbackArgumentException while parsing fallback: "
 							+ e);
 				}

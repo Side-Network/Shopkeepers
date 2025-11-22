@@ -136,7 +136,7 @@ public abstract class SingletonTask {
 		Validate.State.isTrue(Bukkit.isPrimaryThread(),
 				"This operation has to be called from the main thread!");
 		if (this.isWithinSyncExecution()) {
-			Validate.State.error(
+			throw Validate.State.error(
 					"This operation is not allowed to be called from within the task's execution!"
 			);
 		}
