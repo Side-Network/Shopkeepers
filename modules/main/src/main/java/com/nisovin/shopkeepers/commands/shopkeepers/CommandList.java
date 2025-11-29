@@ -25,7 +25,6 @@ import com.nisovin.shopkeepers.commands.lib.arguments.PlayerByNameArgument;
 import com.nisovin.shopkeepers.commands.lib.arguments.PlayerUUIDArgument;
 import com.nisovin.shopkeepers.commands.lib.arguments.PositiveIntegerArgument;
 import com.nisovin.shopkeepers.commands.lib.arguments.SenderPlayerNameFallback;
-import com.nisovin.shopkeepers.commands.lib.arguments.TransformedArgument;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContextView;
 import com.nisovin.shopkeepers.commands.lib.util.PlayerArgumentUtils;
 import com.nisovin.shopkeepers.commands.util.ShopkeeperArgumentUtils;
@@ -68,10 +67,8 @@ class CommandList extends Command {
 						// page argument a chance to parse the input first)
 						// TODO Add alias 'own'?
 						new SenderPlayerNameFallback(new AnyStringFallback(
-								new TransformedArgument<>(
-										new PlayerByNameArgument(ARGUMENT_PLAYER_NAME),
-										(player) -> Unsafe.assertNonNull(player.getName())
-								)
+								new PlayerByNameArgument(ARGUMENT_PLAYER_NAME)
+										.transformed(player -> player.getName())
 						))
 				), false) // Don't join formats
 		), true, true)); // Join and reverse formats
