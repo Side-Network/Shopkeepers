@@ -92,7 +92,7 @@ public final class ShopkeeperTeleporter {
 		if (sender != null) {
 			TextUtils.sendMessage(sender, Messages.teleportSuccess,
 					"player", TextUtils.getPlayerText(player),
-					"shop", shopkeeper.getDisplayName()
+					"shop", TextUtils.getShopText(shopkeeper)
 			);
 		}
 		return true;

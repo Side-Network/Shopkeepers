@@ -15,6 +15,7 @@ Date format: (YYYY-MM-DD)
   * Config: Item metadata (e.g. item display names) can only be retrieved when the trade was logged while using `log-item-metadata: true`.
   * Debug: If we fail to load the stored item metadata (can for example be the case when there have been backwards incompatible changes across server updates), we log the error in debug mode but otherwise silently ignore it and display the item without the metadata in the history.
   * In the command output, players have their uuid as hover text and shops have their shopkeeper uuid as hover text.
+* Command: The `/shopkeeper teleport` command shows the shopkeeper uuid as hover text in the success message now.
 * Fix: Consider copper chests valid shop containers.
 * Fix: Automatically create missing parent directories for the SQLite trade log.
 * Fix: Repeat the setup of the SQLite trade log database if an error occurred during a previous save attempt.
