@@ -14,6 +14,7 @@ Date format: (YYYY-MM-DD)
   * Config: This command is currently only supported when using `trade-log-storage: 'SQLITE'`.
   * Config: Item metadata (e.g. item display names) can only be retrieved when the trade was logged while using `log-item-metadata: true`.
   * Debug: If we fail to load the stored item metadata (can for example be the case when there have been backwards incompatible changes across server updates), we log the error in debug mode but otherwise silently ignore it and display the item without the metadata in the history.
+  * Trade log: Depending on the trade log merging configuration and the hard-coded IO buffering delay, it can take a few seconds for trades to show up in the trading history. In order for trades to show up in the trading history more quickly, the IO buffering delay (the delay before logs are persisted to the database) is reduced from 30 seconds to 10 seconds. With this change and the default trade log merging configuration, it now takes 10-25 seconds for trades to show up in the trading history, versus the 30-45 seconds from before.
   * In the command output, players have their uuid as hover text and shops have their shopkeeper uuid as hover text.
 * Command: The `/shopkeeper teleport` command shows the shopkeeper uuid as hover text in the success message now.
 * Fix: Consider copper chests valid shop containers.

@@ -39,7 +39,14 @@ import com.nisovin.shopkeepers.util.logging.Log;
  */
 public abstract class AbstractSingleWriterTradeLogger implements TradeLogger {
 
-	private static final int DELAYED_SAVE_TICKS = 600; // 30 seconds
+	// Note: We use a relatively short buffering delay here:
+	// - According to the configuration, consecutive equal trades are already merged over a duration
+	// of 5-15 seconds by default. The buffering here primarily affects different trades and trades
+	// of different players.
+	// - The IO overhead of saving operations is relatively low.
+	// - Other components may depend on the persisted trade history (e.g. external tools and our own
+	// history feature). Keeping the delay small improves the user experience of those tools.
+	private static final int DELAYED_SAVE_TICKS = 200; // 10 seconds
 
 	private static final int SAVE_MAX_ATTEMPTS = 20;
 	private static final long SAVE_RETRY_DELAY_MILLIS = 25L;
