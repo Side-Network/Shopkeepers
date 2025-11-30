@@ -15,6 +15,21 @@ import com.nisovin.shopkeepers.util.yaml.YamlUtils;
  */
 public class TradeLogUtils {
 
+	// On Paper 1.21.5+, ItemStacks are serialized in a different format:
+	private static @Nullable Boolean USES_NEW_PAPER_FORMAT = null;
+
+	private static boolean usesNewPaperFormat() {
+		if (USES_NEW_PAPER_FORMAT == null) {
+			// Probe the item serialization output:
+			var itemStack = new ItemStack(Material.STONE, 1);
+			var serialized = itemStack.serialize();
+			USES_NEW_PAPER_FORMAT = serialized.containsKey("id");
+		}
+		assert USES_NEW_PAPER_FORMAT != null;
+
+		return USES_NEW_PAPER_FORMAT.booleanValue();
+	}
+
 	// Note: We log the item metadata in Yaml format, since this is what Bukkit natively supports
 	// for serializing and deserializing ItemStacks. This ensures that we are able to load the data
 	// again and recreate the original ItemStack if we wish to.
@@ -60,12 +75,16 @@ public class TradeLogUtils {
 		}
 
 		Map<String, Object> itemData = Unsafe.castNonNull(YamlUtils.fromYaml(metadata));
-		itemData.put("type", itemType.name());
-		itemData.put("amount", amount);
-		// Account for Paper 1.21.5+:
-		// Assumption: Any additional fields are silently ignored during deserialization.
-		itemData.put("id", itemType.getKey().toString());
-		itemData.put("count", amount);
+		// Paper 1.21.5+ uses uses a different serialization format:
+		// Note: We cannot simply add both sets of fields, because Paper throws an error when
+		// encountering unexpected fields during deserialization.
+		if (usesNewPaperFormat()) {
+			itemData.put("id", itemType.getKey().toString());
+			itemData.put("count", amount);
+		} else {
+			itemData.put("type", itemType.name());
+			itemData.put("amount", amount);
+		}
 
 		return ItemStack.deserialize(itemData);
 	}
