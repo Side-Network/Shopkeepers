@@ -2,6 +2,11 @@ package com.nisovin.shopkeepers.tradelog;
 
 import java.util.Map;
 
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import com.nisovin.shopkeepers.util.yaml.YamlUtils;
 
@@ -41,6 +46,28 @@ public class TradeLogUtils {
 		// In order to ensure single-line CSV records, we format the Yaml compactly:
 		String yaml = YamlUtils.toCompactYaml(itemData);
 		return yaml;
+	}
+
+	public static ItemStack loadItemStack(
+			Material itemType,
+			int amount,
+			@Nullable String metadata
+	) {
+		var itemStack = new ItemStack(itemType, amount);
+
+		if (metadata == null || metadata.isEmpty()) {
+			return itemStack;
+		}
+
+		Map<String, Object> itemData = Unsafe.castNonNull(YamlUtils.fromYaml(metadata));
+		itemData.put("type", itemType.name());
+		itemData.put("amount", amount);
+		// Account for Paper 1.21.5+:
+		// Assumption: Any additional fields are silently ignored during deserialization.
+		itemData.put("id", itemType.getKey().toString());
+		itemData.put("count", amount);
+
+		return ItemStack.deserialize(itemData);
 	}
 
 	private TradeLogUtils() {

@@ -820,6 +820,25 @@ public class Messages extends Config {
 	public static Text snapshotRestoreFailed = Text.parse("&cFailed to restore snapshot: &e({id}) &2{name} &8(&7{timestamp}&8)");
 	public static Text snapshotRestored = Text.parse("&aSnapshot restored: &e({id}) &2{name} &8(&7{timestamp}&8)");
 
+	public static Text historyHeader = Text.parse("&9Trades of {players}&9 with {shops}&9: &e{tradesCount} &e(Page {page} of {maxPage})");
+	public static Text historyHeaderAllPlayers = Text.parse("&eall players");
+	public static Text historyHeaderSpecificPlayer = Text.parse("&e{player}");
+	public static Text historyHeaderAllShops = Text.parse("&eall shops");
+	public static Text historyHeaderAdminShops = Text.parse("all &eadmin shops");
+	public static Text historyHeaderPlayerShops = Text.parse("all &eplayer shops");
+	public static Text historyHeaderAllOwnedShops = Text.parse("shops owned by &e{owner}");
+	public static Text historyHeaderSpecificShop = Text.parse("shop &e\"{shop}\"");
+	public static Text historyHeaderSpecificOwnedShop = Text.parse("shop &e\"{shop}\"&9 owned by &e{owner}");
+
+	public static Text historyDisabled = Text.parse("&7The trading history is disabled.");
+	public static Text historyNoTradesFound = Text.parse("&7No trades found.");
+
+	public static Text historyEntryOneItem = Text.parse("  &f{index}) &e{player}&7 [&6{item1Amount}x &a{item1}&7] \u279e [&6{resultItemAmount}x &a{resultItem}&7] {shop}{trade_count} &7(&f{timeAgo} ago&7)");
+	public static Text historyEntryTwoItems = Text.parse("  &f{index}) &e{player}&7 [&6{item1Amount}x &a{item1}&7] [&6{item2Amount}x &a{item2}&7] \u279e [&6{resultItemAmount}x &a{resultItem}&7] {shop}{trade_count} &7(&f{timeAgo} ago&7)");
+	public static Text historyEntryPlayerShop = Text.parse("&e{owner}");
+	public static Text historyEntryAdminShop = Text.parse("&eAdmin Shop");
+	public static Text historyEntryTradeCount = Text.parse("&7 (&6{count}x&7)");
+
 	public static Text noPermission = Text.parse("&cYou don't have the permission to do that.");
 
 	public static Text commandUnknown = Text.parse("&cUnknown command '&e{command}&c'!");
@@ -859,6 +878,7 @@ public class Messages extends Config {
 	public static Text commandDescriptionDebug = Text.parse("Toggles debug mode on and off.");
 	public static Text commandDescriptionNotify = Text.parse("Turns trade notifications for you on or off.");
 	public static Text commandDescriptionList = Text.parse("Lists all shops of a specific player, or all admin shops.");
+	public static Text commandDescriptionHistory = Text.parse("Shows the trading history.");
 	public static Text commandDescriptionRemove = Text.parse("Removes a specific shop.");
 	public static Text commandDescriptionRemoveAll = Text.parse("Removes all shops of a specific player, all players, or all admin shops.");
 	public static Text commandDescriptionGive = Text.parse("Gives shop creation item(s) to the specified player.");

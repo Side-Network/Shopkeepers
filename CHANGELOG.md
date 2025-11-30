@@ -4,6 +4,17 @@ Date format: (YYYY-MM-DD)
 ## v2.24.1 (TBA)
 ### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
 
+* Command: Add command `/shopkeeper history [player|'all'|'self'] [shop=...|owner=...|'own'|'player'|'admin'|'all'] [page]`.
+  * Permission: `shopkeeper.history.own` (default: `true`): Allows viewing the own trading history.
+  * Permission: `shopkeeper.history.admin` (default: `op`): Allows viewing the trading history of others and admin shops.
+  * Example: `/shopkeeper blablubbabc shop=Test` shows the trading history of player "blablubbabc" with the shopkeeper named "Test" (assuming there is only a single shopkeeper with this name). You can also target a specific shopkeeper via their id, unique id, or by looking at them in-game.
+  * The player and owner argument also support the look-up of offline players, taking into account the currently existing shop owners, and existing online mode players. However, the plugin does not check the trading history to find offline players by name.
+  * Only the currently existing shopkeepers can be specified by name or id. To look up the trading history of a no longer existing shop, use their unique id.
+  * If the owner of a shop has changed, a player without the `shopkeeper.history.admin` permission can only view the trading history of the shopkeeper from when they still owned the shop.
+  * Config: This command is currently only supported when using `trade-log-storage: 'SQLITE'`.
+  * Config: Item metadata (e.g. item display names) can only be retrieved when the trade was logged while using `log-item-metadata: true`.
+  * Debug: If we fail to load the stored item metadata (can for example be the case when there have been backwards incompatible changes across server updates), we log the error in debug mode but otherwise silently ignore it and display the item without the metadata in the history.
+  * In the command output, players have their uuid as hover text and shops have their shopkeeper uuid as hover text.
 * Fix: Consider copper chests valid shop containers.
 * Fix: Automatically create missing parent directories for the SQLite trade log.
 * Fix: Repeat the setup of the SQLite trade log database if an error occurred during a previous save attempt.
@@ -12,6 +23,25 @@ Date format: (YYYY-MM-DD)
 * Command: Abort early as soon as the first command argument rejects a parsed argument value. This results in more relevant error messages for the user in cases in which pending fallbacks might succeed but result in a less ideal argument binding or subsequent command failure.
 * Command: NamedArgument no longer supports nested fallbacks. Instead, if the named argument prefix is successfully parsed but the inner argument ends up failing to parse, we use an ArgumentRejectedException now to immediately abort the command argument parsing without evaluating earlier command argument fallbacks that might end up parsing the input and resulting in a less relevant binding or parsing error.
 * Debug: In debug mode, log the exception details when the loading of some config setting fails. Note that since the debug flag is itself loaded from the config, this might only have an effect during subsequent config reloads.
+
+**Message changes:**  
+* Added `history-header`.
+* Added `history-header-all-players`.
+* Added `history-header-specific-player`.
+* Added `history-header-all-shops`.
+* Added `history-header-admin-shops`.
+* Added `history-header-player-shops`.
+* Added `history-header-all-owned-shops`.
+* Added `history-header-specific-shop`.
+* Added `history-header-specific-owned-shop`.
+* Added `history-disabled`.
+* Added `history-no-trades-found`.
+* Added `history-entry-one-item`.
+* Added `history-entry-two-items`.
+* Added `history-entry-player-shop`.
+* Added `history-entry-admin-shop`.
+* Added `history-entry-trade-count`.
+* Added `command-description-history`.
 
 ## v2.24.0 (2025-10-16)
 ### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6

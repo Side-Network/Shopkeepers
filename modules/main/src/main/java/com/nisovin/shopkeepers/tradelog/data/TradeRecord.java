@@ -81,7 +81,7 @@ public class TradeRecord {
 	private final @Nullable UnmodifiableItemStack item2; // Can be null
 	private final int tradeCount; // > 0
 
-	private TradeRecord(
+	public TradeRecord(
 			Instant timestamp,
 			PlayerRecord player,
 			ShopRecord shop,

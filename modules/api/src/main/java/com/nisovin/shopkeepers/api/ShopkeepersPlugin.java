@@ -79,6 +79,15 @@ public interface ShopkeepersPlugin extends Plugin {
 	public static final String LIST_ADMIN_PERMISSION = "shopkeeper.list.admin";
 
 	/**
+	 * The <code>shopkeeper.history.own</code> permission.
+	 */
+	public static final String HISTORY_OWN_PERMISSION = "shopkeeper.history.own";
+	/**
+	 * The <code>shopkeeper.history.admin</code> permission.
+	 */
+	public static final String HISTORY_ADMIN_PERMISSION = "shopkeeper.history.admin";
+
+	/**
 	 * The <code>shopkeeper.remove.own</code> permission.
 	 */
 	public static final String REMOVE_OWN_PERMISSION = "shopkeeper.remove.own";

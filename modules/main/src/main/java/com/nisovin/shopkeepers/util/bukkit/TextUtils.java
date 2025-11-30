@@ -21,6 +21,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
+import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.api.user.User;
 import com.nisovin.shopkeepers.api.util.ChunkCoords;
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
@@ -28,6 +29,7 @@ import com.nisovin.shopkeepers.spigot.text.SpigotText;
 import com.nisovin.shopkeepers.text.HoverEventText;
 import com.nisovin.shopkeepers.text.Text;
 import com.nisovin.shopkeepers.text.TextBuilder;
+import com.nisovin.shopkeepers.tradelog.data.PlayerRecord;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 import com.nisovin.shopkeepers.util.java.StringUtils;
@@ -428,9 +430,22 @@ public final class TextUtils {
 		return getPlayerText(player.getName(), player.getUniqueId());
 	}
 
+	public static Text getPlayerText(PlayerRecord playerRecord) {
+		Validate.notNull(playerRecord, "playerRecord is null");
+		return getPlayerText(playerRecord.getName(), playerRecord.getUniqueId());
+	}
+
 	public static Text getPlayerText(User user) {
 		Validate.notNull(user, "user is null");
 		return getPlayerText(user.getName(), user.getUniqueId());
+	}
+
+	public static Text getPlayerText(@Nullable User user, String fallback) {
+		if (user != null) {
+			return getPlayerText(user);
+		} else {
+			return getPlayerText(fallback, null);
+		}
 	}
 
 	public static Text getPlayerText(@Nullable String playerName, @Nullable UUID playerUUID) {
@@ -451,6 +466,23 @@ public final class TextUtils {
 		} else {
 			return Text.of(UNKNOWN_PLAYER);
 		}
+	}
+
+	public static Text getShopText(Shopkeeper shopkeeper) {
+		return getShopText(Text.of(shopkeeper.getDisplayName()), shopkeeper.getUniqueId());
+	}
+
+	public static Text getShopText(Text displayName, UUID uniqueId) {
+		var uniqueIdString = uniqueId.toString();
+		return Text.hoverEvent(Text.of(uniqueIdString))
+				.childInsertion(uniqueIdString)
+				// Placeholder instead of child text: The given displayName Text is of unknown
+				// origin. Adding it has child here assigns its parent which may cause issues down
+				// the line (e.g. if the same Text instance is later reused). We either need to copy
+				// it, or supply it as a placeholder argument.
+				.childPlaceholder("displayName")
+				.buildRoot()
+				.setPlaceholderArguments("displayName", displayName);
 	}
 
 	public static Text getItemText(@Nullable UnmodifiableItemStack itemStack) {

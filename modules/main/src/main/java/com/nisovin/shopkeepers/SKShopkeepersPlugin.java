@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
@@ -24,9 +25,9 @@ import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
 import com.nisovin.shopkeepers.api.shopkeeper.ShopType;
 import com.nisovin.shopkeepers.commands.Commands;
 import com.nisovin.shopkeepers.compat.Compat;
-import com.nisovin.shopkeepers.compat.MC_1_21_9;
 import com.nisovin.shopkeepers.compat.MC_1_21_3;
 import com.nisovin.shopkeepers.compat.MC_1_21_4;
+import com.nisovin.shopkeepers.compat.MC_1_21_9;
 import com.nisovin.shopkeepers.compat.ServerAssumptionsTest;
 import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.config.lib.ConfigLoadException;
@@ -60,6 +61,7 @@ import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
 import com.nisovin.shopkeepers.spigot.SpigotFeatures;
 import com.nisovin.shopkeepers.storage.SKShopkeeperStorage;
 import com.nisovin.shopkeepers.tradelog.TradeLoggers;
+import com.nisovin.shopkeepers.tradelog.history.TradingHistoryProvider;
 import com.nisovin.shopkeepers.tradenotifications.TradeNotifications;
 import com.nisovin.shopkeepers.trading.commandtrading.CommandTrading;
 import com.nisovin.shopkeepers.ui.SKDefaultUITypes;
@@ -97,6 +99,13 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 		return Validate.State.notNull(plugin, "Plugin is not enabled!");
 	}
 
+	// Utilities:
+	private final Executor syncExecutor = SchedulerUtils.createSyncExecutor(Unsafe.initialized(this));
+	private final Executor asyncExecutor = SchedulerUtils.createAsyncExecutor(Unsafe.initialized(this));
+
+	private final ForcingCreatureSpawner forcingCreatureSpawner = new ForcingCreatureSpawner(Unsafe.initialized(this));
+	private final ForcingEntityTeleporter forcingEntityTeleporter = new ForcingEntityTeleporter(Unsafe.initialized(this));
+
 	private final ApiInternals apiInternals = new SKApiInternals();
 
 	// Shop types and shop object types registry:
@@ -118,8 +127,6 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 			Unsafe.initialized(this)
 	);
 
-	private final ForcingCreatureSpawner forcingCreatureSpawner = new ForcingCreatureSpawner(Unsafe.initialized(this));
-	private final ForcingEntityTeleporter forcingEntityTeleporter = new ForcingEntityTeleporter(Unsafe.initialized(this));
 	private final Commands commands = new Commands(Unsafe.initialized(this));
 	private final ChatInput chatInput = new ChatInput(Unsafe.initialized(this));
 	private final InteractionInput interactionInput = new InteractionInput(Unsafe.initialized(this));
@@ -570,6 +577,14 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 
 	// UTILITIES
 
+	public Executor getSyncExecutor() {
+		return syncExecutor;
+	}
+
+	public Executor getAsyncExecutor() {
+		return asyncExecutor;
+	}
+
 	public ForcingCreatureSpawner getForcingCreatureSpawner() {
 		return forcingCreatureSpawner;
 	}
@@ -753,5 +768,11 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 
 	public TradeNotifications getTradeNotifications() {
 		return tradeNotifications;
+	}
+
+	// TRADING HISTORY
+
+	public @Nullable TradingHistoryProvider getTradingHistoryProvider() {
+		return tradeLoggers.getTradingHistoryProvider();
 	}
 }

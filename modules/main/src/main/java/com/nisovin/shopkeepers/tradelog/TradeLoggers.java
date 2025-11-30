@@ -8,14 +8,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.nisovin.shopkeepers.SKShopkeepersPlugin;
 import com.nisovin.shopkeepers.api.events.ShopkeeperTradeCompletedEvent;
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.tradelog.csv.CsvTradeLogger;
 import com.nisovin.shopkeepers.tradelog.data.TradeRecord;
+import com.nisovin.shopkeepers.tradelog.history.TradingHistoryProvider;
 import com.nisovin.shopkeepers.tradelog.sqlite.SQLiteTradeLogger;
 import com.nisovin.shopkeepers.util.java.Validate;
 import com.nisovin.shopkeepers.util.trading.MergedTrades;
@@ -24,7 +25,7 @@ import com.nisovin.shopkeepers.util.trading.TradeMerger.MergeMode;
 
 public class TradeLoggers implements Listener {
 
-	private final Plugin plugin;
+	private final SKShopkeepersPlugin plugin;
 	private final List<TradeLogger> loggers = new ArrayList<>();
 	// In order to represent the logged trades more compactly, we merge equivalent trades that are
 	// triggered in quick succession over a certain period of time. The maximum merge duration is
@@ -37,7 +38,7 @@ public class TradeLoggers implements Listener {
 	private @Nullable TradeMerger tradeMerger;
 	private boolean enabled = false;
 
-	public TradeLoggers(Plugin plugin) {
+	public TradeLoggers(SKShopkeepersPlugin plugin) {
 		Validate.notNull(plugin, "plugin is null");
 		this.plugin = plugin;
 	}
@@ -86,6 +87,23 @@ public class TradeLoggers implements Listener {
 		// Wait for any pending writes to complete:
 		loggers.forEach(TradeLogger::flush);
 		loggers.clear();
+	}
+
+	/**
+	 * Gets the currently active {@link TradingHistoryProvider}.
+	 * <p>
+	 * There can only be one active {@link TradingHistoryProvider}: This returns the first active
+	 * {@link TradeLogger} that implements {@link TradingHistoryProvider}.
+	 * 
+	 * @return the active {@link TradingHistoryProvider}, or <code>null</code> if there is none
+	 */
+	public @Nullable TradingHistoryProvider getTradingHistoryProvider() {
+		for (var logger : loggers) {
+			if (logger instanceof TradingHistoryProvider tradingHistoryProvider) {
+				return tradingHistoryProvider;
+			}
+		}
+		return null;
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
