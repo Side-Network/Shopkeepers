@@ -130,7 +130,11 @@ public final class ItemData {
 				} else {
 					var dataContainer = DataContainer.of(data);
 					if (dataContainer != null) {
-						// The data container is assumed to be modifiable here.
+						// Ensure that the data container is mutable:
+						// For example, the output of serialize(ItemData) is immutable, which can be
+						// encountered when the default value for a missing ItemData setting is
+						// inserted into the config.
+						dataContainer = DataContainer.ofNonNull(dataContainer.getValuesCopy());
 						dataContainer.set(ItemStackSerializers.DATA_VERSION.getName(), dataVersion);
 						dataItem = ItemStackSerializers.UNMODIFIABLE.deserialize(dataContainer);
 					} else {
