@@ -113,6 +113,26 @@ public class CompatVersion {
 		return supportedServerVersions.getFirst().getMappingsVersion();
 	}
 
+	/**
+	 * Gets the {@link ServerVersion#getMinecraftVersion()} of the last
+	 * {@link #getSupportedServerVersions() supported server version}.
+	 * 
+	 * @return the Minecraft version of the last supported server version
+	 */
+	public String getLastMinecraftVersion() {
+		return supportedServerVersions.getLast().getMinecraftVersion();
+	}
+
+	/**
+	 * Gets the {@link ServerVersion#getMappingsVersion()} of the last
+	 * {@link #getSupportedServerVersions() supported server version}.
+	 * 
+	 * @return the mappings version of the last supported server version
+	 */
+	public String getLastMappingsVersion() {
+		return supportedServerVersions.getLast().getMappingsVersion();
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

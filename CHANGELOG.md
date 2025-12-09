@@ -26,6 +26,7 @@ Date format: (YYYY-MM-DD)
 * Command: Abort early as soon as the first command argument rejects a parsed argument value. This results in more relevant error messages for the user in cases in which pending fallbacks might succeed but result in a less ideal argument binding or subsequent command failure.
 * Command: NamedArgument no longer supports nested fallbacks. Instead, if the named argument prefix is successfully parsed but the inner argument ends up failing to parse, we use an ArgumentRejectedException now to immediately abort the command argument parsing without evaluating earlier command argument fallbacks that might end up parsing the input and resulting in a less relevant binding or parsing error.
 * Debug: In debug mode, log the exception details when the loading of some config setting fails. Note that since the debug flag is itself loaded from the config, this might only have an effect during subsequent config reloads.
+* Build: Fix clean build: Spigot 1.21.7 was replaced by 1.21.8 and can no longer be built. However, the server should be identical to 1.21.7, so we can just reference 1.21.8 instead.
 
 **Message changes:**  
 * Added `history-header`.
