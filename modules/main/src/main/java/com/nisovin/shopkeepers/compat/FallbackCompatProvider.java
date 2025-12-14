@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.function.BiConsumer;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -16,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.view.builder.InventoryViewBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
@@ -302,6 +302,15 @@ public final class FallbackCompatProvider implements CompatProvider {
 	}
 
 	@Override
+	public void setInventoryViewTitle(InventoryViewBuilder<?> builder, String title) {
+		// Only works on Spigot:
+		try {
+			builder.title(title);
+		} catch (NoSuchMethodError e) {
+		}
+	}
+
+	@Override
 	public void updateTrades(Player player) {
 		// Not supported.
 	}
@@ -433,7 +442,7 @@ public final class FallbackCompatProvider implements CompatProvider {
 				nmsCompoundTagPutMethod.invoke(itemTag, "components", componentsTag);
 			}
 
-			var currentDataVersion = Bukkit.getUnsafe().getDataVersion();
+			var currentDataVersion = ServerUtils.getDataVersion();
 			var convertedItemTagDynamic = nmsDataFixerUpdateMethod.invoke(
 					nmsDataFixer,
 					nmsDataFixerTypeItemStack,

@@ -1,6 +1,5 @@
 package com.nisovin.shopkeepers.util.data.serialization.bukkit;
 
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -9,6 +8,8 @@ import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.util.bukkit.DataUtils;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
+import com.nisovin.shopkeepers.util.bukkit.ServerUtils;
 import com.nisovin.shopkeepers.util.data.container.DataContainer;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
 import com.nisovin.shopkeepers.util.data.property.Property;
@@ -31,7 +32,7 @@ public final class ItemStackSerializers {
 			// If no data version is specified, we assume the current data version (i.e. no data
 			// migrations are applied).
 			.useDefaultIfMissing()
-			.defaultValue(Bukkit.getUnsafe().getDataVersion())
+			.defaultValue(ServerUtils.getDataVersion())
 			.build();
 	public static final Property<NamespacedKey> ID = new BasicProperty<NamespacedKey>()
 			.dataKeyAccessor("id", NamespacedKeySerializers.DEFAULT)
@@ -124,9 +125,9 @@ public final class ItemStackSerializers {
 			// is saved to the same Yaml document multiple times in different contexts.
 
 			var dataContainer = DataContainer.create();
-			dataContainer.set(DATA_VERSION, Bukkit.getUnsafe().getDataVersion());
+			dataContainer.set(DATA_VERSION, ServerUtils.getDataVersion());
 			// getKey instead of getKeyOrThrow: Compatible with both Spigot and Paper.
-			dataContainer.set(ID, value.getType().getKey());
+			dataContainer.set(ID, RegistryUtils.getKeyOrThrow(value.getType()));
 			dataContainer.set(COUNT, value.getAmount());
 			// TODO: Saving the itemstack to get its data can result in an error if Minecraft finds
 			// the item data to be invalid. Example: Entity data component with missing "id".

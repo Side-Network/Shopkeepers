@@ -8,6 +8,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.yaml.YamlUtils;
 
 /**
@@ -79,7 +80,7 @@ public class TradeLogUtils {
 		// Note: We cannot simply add both sets of fields, because Paper throws an error when
 		// encountering unexpected fields during deserialization.
 		if (usesNewPaperFormat()) {
-			itemData.put("id", itemType.getKey().toString());
+			itemData.put("id", RegistryUtils.getKeyOrThrow(itemType).toString());
 			itemData.put("count", amount);
 		} else {
 			itemData.put("type", itemType.name());

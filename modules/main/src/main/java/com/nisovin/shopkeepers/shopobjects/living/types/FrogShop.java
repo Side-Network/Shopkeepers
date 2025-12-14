@@ -1,6 +1,7 @@
 package com.nisovin.shopkeepers.shopobjects.living.types;
 
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Registry;
@@ -97,23 +98,16 @@ public class FrogShop extends BabyableShop<Frog> {
 		entity.setVariant(this.getVariant());
 	}
 
+	private static final Map<Frog.Variant, DyeColor> VARIANT_EDITOR_ITEM_COLORS = Map.ofEntries(
+			Map.entry(Frog.Variant.TEMPERATE, DyeColor.ORANGE),
+			Map.entry(Frog.Variant.WARM, DyeColor.LIGHT_GRAY),
+			Map.entry(Frog.Variant.COLD, DyeColor.GREEN)
+	);
+
 	private ItemStack getVariantEditorItem() {
-		ItemStack iconItem;
-		switch (this.getVariant()) {
-		case TEMPERATE:
-			iconItem = new ItemStack(ItemUtils.getWoolType(DyeColor.ORANGE));
-			break;
-		case WARM:
-			iconItem = new ItemStack(ItemUtils.getWoolType(DyeColor.LIGHT_GRAY));
-			break;
-		case COLD:
-			iconItem = new ItemStack(ItemUtils.getWoolType(DyeColor.GREEN));
-			break;
-		default:
-			// Unknown:
-			iconItem = new ItemStack(ItemUtils.getWoolType(DyeColor.PURPLE));
-			break;
-		}
+		var frogVariant = this.getVariant();
+		var dyeColor = VARIANT_EDITOR_ITEM_COLORS.getOrDefault(frogVariant, DyeColor.PURPLE);
+		ItemStack iconItem = new ItemStack(ItemUtils.getWoolType(dyeColor));
 		ItemUtils.setDisplayNameAndLore(iconItem,
 				Messages.buttonFrogVariant,
 				Messages.buttonFrogVariantLore

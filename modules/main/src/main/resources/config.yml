@@ -137,7 +137,7 @@ disable-inventory-verification: false
 shop-creation-item:
   id: 'minecraft:villager_spawn_egg'
   components:
-    minecraft:custom_name: '''{"color":"green","italic":false,"text":"Shopkeeper"}'''
+    minecraft:custom_name: '{color:"green",italic:0b,text:"Shopkeeper"}'
 
 # Whether to add a custom NBT tag to newly created shop creation items, e.g.
 # when created via the '/shopkeeper give' command.

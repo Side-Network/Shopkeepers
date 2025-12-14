@@ -1,8 +1,8 @@
 package com.nisovin.shopkeepers.util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -27,8 +27,6 @@ import org.bukkit.inventory.meta.components.FoodComponent;
 import org.bukkit.inventory.meta.components.ToolComponent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
@@ -53,12 +51,12 @@ public class TestItemStacks {
 				createItemStackDisplayName(),
 				createItemStackComplete(),
 				// TODO Broken in MC 1.20.5+, until late MC 1.21. See SPIGOT-7857
-				//createItemStackBlockData(),
+				// createItemStackBlockData(),
 				createItemStackUncommonMeta(),
 				createItemStackWritableBook(),
 				createItemStackWrittenBook(),
 				// TODO Broken in MC 1.20.5+, until late MC 1.21. See SPIGOT-7857
-				//createItemStackTileEntityDisplayName(),
+				// createItemStackTileEntityDisplayName(),
 				createItemStackBasicTileEntity()
 		);
 	}
@@ -103,8 +101,14 @@ public class TestItemStacks {
 		itemMeta.setMaxStackSize(65);
 		itemMeta.setRarity(ItemRarity.EPIC);
 		itemMeta.setHideTooltip(true);
-		itemMeta.setCustomModelData(1);
-		itemMeta.setFireResistant(true); // TODO Replaced with damage resistance in MC 1.21.2/3
+
+		var customModelData = itemMeta.getCustomModelDataComponent();
+		var customModelDataFloats = new ArrayList<Float>();
+		customModelDataFloats.add(1.0f);
+		customModelData.setFloats(Unsafe.castNonNull(customModelDataFloats));
+		itemMeta.setCustomModelDataComponent(customModelData);
+
+		//itemMeta.setFireResistant(true); // TODO Replaced with damage resistance in MC 1.21.2/3
 		itemMeta.setUnbreakable(true);
 		((Damageable) itemMeta).setDamage(2);
 		((Damageable) itemMeta).setMaxDamage(10);
@@ -119,28 +123,25 @@ public class TestItemStacks {
 		itemMeta.setEnchantmentGlintOverride(true);
 		itemMeta.addEnchant(Enchantment.UNBREAKING, 1, true);
 		itemMeta.addEnchant(Enchantment.SHARPNESS, 2, true);
-		itemMeta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED,
+		itemMeta.addAttributeModifier(Attribute.ATTACK_SPEED,
 				new AttributeModifier(
-						new UUID(1L, 1L),
-						"attack speed bonus",
+						NamespacedKeyUtils.create("some_plugin", "attack-speed-bonus"),
 						2,
 						Operation.ADD_NUMBER,
 						EquipmentSlotGroup.HAND
 				)
 		);
-		itemMeta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED,
+		itemMeta.addAttributeModifier(Attribute.ATTACK_SPEED,
 				new AttributeModifier(
-						new UUID(2L, 2L),
-						"attack speed bonus 2",
+						NamespacedKeyUtils.create("some_plugin", "attack-speed-bonus-2"),
 						0.5,
 						Operation.MULTIPLY_SCALAR_1,
 						EquipmentSlotGroup.OFFHAND
 				)
 		);
-		itemMeta.addAttributeModifier(Attribute.GENERIC_MAX_HEALTH,
+		itemMeta.addAttributeModifier(Attribute.MAX_HEALTH,
 				new AttributeModifier(
-						new UUID(3L, 3L),
-						"max health bonus",
+						NamespacedKeyUtils.create("some_plugin", "max-health-bonus"),
 						2,
 						Operation.ADD_NUMBER,
 						EquipmentSlotGroup.HAND
@@ -152,9 +153,9 @@ public class TestItemStacks {
 		food.setNutrition(2);
 		food.setSaturation(2.5f);
 		food.setCanAlwaysEat(true);
-		food.setEatSeconds(5.5f); // TODO Removed in MC 1.21.2/3
 		// TODO Removed in MC 1.21.2/3
-		food.addEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5, 1), 0.5f);
+		// food.setEatSeconds(5.5f);
+		// food.addEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5, 1), 0.5f);
 		itemMeta.setFood(food);
 		// TODO MC 1.21.2/3:
 		// - EquippableComponent

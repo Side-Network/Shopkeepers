@@ -14,6 +14,7 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MainHand;
+import org.bukkit.inventory.view.builder.InventoryViewBuilder;
 import org.bukkit.profile.PlayerProfile;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -118,6 +119,11 @@ public interface CompatProvider {
 			@ReadOnly @Nullable ItemStack provided,
 			@ReadOnly @Nullable ItemStack required
 	);
+
+	public default void setInventoryViewTitle(InventoryViewBuilder<?> builder, String title) {
+		// Note: Different API on Paper (Component).
+		builder.title(title);
+	}
 
 	// Note: It is not safe to reduce the number of trading recipes! Reducing the size below the
 	// selected index can crash the client. It's left to the caller to ensure that the number of

@@ -23,6 +23,7 @@ import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.util.annotations.ReadWrite;
 import com.nisovin.shopkeepers.util.bukkit.MinecraftEnumUtils;
 import com.nisovin.shopkeepers.util.bukkit.NamespacedKeyUtils;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.java.CollectionUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
 
@@ -212,7 +213,7 @@ public final class PotionUtils {
 	}
 
 	public static @Nullable PotionType getLongPotionType(PotionType potionType) {
-		var key = potionType.getKey();
+		var key = RegistryUtils.getKeyOrThrow(potionType);
 		if (key.getKey().startsWith("long_")) return potionType;
 		if (!potionType.isExtendable()) return null;
 
@@ -220,7 +221,7 @@ public final class PotionUtils {
 	}
 
 	public static @Nullable PotionType getStrongPotionType(PotionType potionType) {
-		var key = potionType.getKey();
+		var key = RegistryUtils.getKeyOrThrow(potionType);
 		if (key.getKey().startsWith("strong_")) return potionType;
 		if (!potionType.isUpgradeable()) return null;
 

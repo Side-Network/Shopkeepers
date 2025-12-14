@@ -40,6 +40,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantInventory;
+import org.bukkit.inventory.view.builder.InventoryViewBuilder;
 import org.bukkit.profile.PlayerProfile;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -63,6 +64,7 @@ import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.world.WeatheringCopperState;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.core.component.DataComponentExactPredicate;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.PatchedDataComponentMap;
@@ -233,6 +235,12 @@ public final class CompatProviderImpl implements CompatProvider {
 		);
 		// Compare the components according to Minecraft's matching rules (imprecise):
 		return DataComponentExactPredicate.allOf(requiredComponents).test(nmsProvided);
+	}
+
+	@Override
+	public void setInventoryViewTitle(InventoryViewBuilder<?> builder, String title) {
+		var titleComponent = LegacyComponentSerializer.legacySection().deserialize(title);
+		builder.title(titleComponent);
 	}
 
 	@Override

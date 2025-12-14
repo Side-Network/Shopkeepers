@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.TradeSelectEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MenuType;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.MerchantRecipe;
@@ -94,7 +95,7 @@ public class TradingView extends View {
 		var player = this.getPlayer();
 
 		// Set up merchant:
-		Merchant merchant = this.setupMerchant(title, recipes);
+		Merchant merchant = this.setupMerchant(recipes);
 
 		// Increment 'talked-to-villager' statistic when opening trading menu:
 		if (Settings.incrementVillagerStatistics) {
@@ -102,11 +103,15 @@ public class TradingView extends View {
 		}
 
 		// Open merchant:
-		return player.openMerchant(merchant, true);
+		var menuBuilder = MenuType.MERCHANT.builder();
+		Compat.getProvider().setInventoryViewTitle(menuBuilder, title);
+		var inventoryView = menuBuilder.merchant(merchant).build(player);
+		player.openInventory(inventoryView);
+		return inventoryView;
 	}
 
-	protected Merchant setupMerchant(String title, List<? extends TradingRecipe> recipes) {
-		Merchant merchant = Bukkit.createMerchant(title);
+	protected Merchant setupMerchant(List<? extends TradingRecipe> recipes) {
+		Merchant merchant = Bukkit.createMerchant();
 		this.setupMerchantRecipes(merchant, recipes);
 		return merchant;
 	}

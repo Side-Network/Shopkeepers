@@ -7,7 +7,7 @@ website: '${dboUrl}'
 softdepend: [Multiverse-Core, My Worlds, Transporter, Towny, WorldGuard, Citizens, Vault, Gringotts, ChestShop]
 
 main: com.nisovin.shopkeepers.SKShopkeepersPlugin
-api-version: '1.20.6'
+api-version: '1.21.5'
 
 commands:
     shopkeeper:

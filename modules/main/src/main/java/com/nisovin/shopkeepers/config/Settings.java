@@ -45,6 +45,7 @@ import com.nisovin.shopkeepers.shopobjects.living.types.SlimeShop;
 import com.nisovin.shopkeepers.tradelog.TradeLogStorageType;
 import com.nisovin.shopkeepers.util.bukkit.ConfigUtils;
 import com.nisovin.shopkeepers.util.bukkit.EntityUtils;
+import com.nisovin.shopkeepers.util.bukkit.ServerUtils;
 import com.nisovin.shopkeepers.util.bukkit.SoundEffect;
 import com.nisovin.shopkeepers.util.inventory.ItemData;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
@@ -976,7 +977,7 @@ public class Settings extends Config {
 
 	// Returns true if the data version has changed.
 	private boolean updateDataVersion() {
-		var currentDataVersion = Bukkit.getUnsafe().getDataVersion();
+		var currentDataVersion = ServerUtils.getDataVersion();
 		if (dataVersion == currentDataVersion) {
 			return false;
 		}

@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R4.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_21_R4.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.junit.Test;
@@ -21,8 +21,8 @@ import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 import com.nisovin.shopkeepers.util.java.MutableLong;
 import com.nisovin.shopkeepers.util.java.TimeUtils;
 
+import net.minecraft.core.component.DataComponentExactPredicate;
 import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.DataComponentPredicate;
 import net.minecraft.core.component.PatchedDataComponentMap;
 
 public class PerformanceTests extends AbstractBukkitTest {
@@ -172,7 +172,7 @@ public class PerformanceTests extends AbstractBukkitTest {
 		CraftItemStack craftItemStack = CraftItemStack.asCraftCopy(itemStack);
 		var componentsPatch = CraftItemStack.asNMSCopy(itemStack).getComponentsPatch();
 		var componentsPatchCopy = CraftItemStack.asNMSCopy(itemStack).getComponentsPatch();
-		var componentPredicate = DataComponentPredicate.allOf(PatchedDataComponentMap.fromPatch(
+		var componentPredicate = DataComponentExactPredicate.allOf(PatchedDataComponentMap.fromPatch(
 				DataComponentMap.EMPTY,
 				CraftItemStack.asNMSCopy(itemStack).getComponentsPatch()
 		));
@@ -256,7 +256,7 @@ public class PerformanceTests extends AbstractBukkitTest {
 				warmupCount,
 				testCount,
 				() -> {
-					DataComponentPredicate.allOf(PatchedDataComponentMap.fromPatch(
+					DataComponentExactPredicate.allOf(PatchedDataComponentMap.fromPatch(
 							DataComponentMap.EMPTY,
 							CraftItemStack.asNMSCopy(itemStack).getComponentsPatch()
 					)).test(CraftItemStack.asNMSCopy(itemStack));
@@ -269,7 +269,7 @@ public class PerformanceTests extends AbstractBukkitTest {
 				warmupCount,
 				testCount,
 				() -> {
-					DataComponentPredicate.allOf(PatchedDataComponentMap.fromPatch(
+					DataComponentExactPredicate.allOf(PatchedDataComponentMap.fromPatch(
 							DataComponentMap.EMPTY,
 							CraftItemStack.asNMSCopy(craftItemStack).getComponentsPatch()
 					)).test(CraftItemStack.asNMSCopy(craftItemStack));

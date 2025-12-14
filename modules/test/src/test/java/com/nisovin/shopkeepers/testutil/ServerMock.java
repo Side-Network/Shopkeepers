@@ -1,6 +1,7 @@
 package com.nisovin.shopkeepers.testutil;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -9,27 +10,29 @@ import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.Registry;
 import org.bukkit.Server;
-import org.bukkit.craftbukkit.v1_20_R4.CraftRegistry;
-import org.bukkit.craftbukkit.v1_20_R4.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_20_R4.inventory.CraftItemFactory;
-import org.bukkit.craftbukkit.v1_20_R4.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.v1_20_R4.util.Versioning;
+import org.bukkit.craftbukkit.v1_21_R4.CraftRegistry;
+import org.bukkit.craftbukkit.v1_21_R4.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_21_R4.inventory.CraftItemFactory;
+import org.bukkit.craftbukkit.v1_21_R4.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_21_R4.util.Versioning;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.util.java.Validate;
 
 import net.minecraft.SharedConstants;
+import net.minecraft.core.HolderLookup.RegistryLookup;
 import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.core.Registry.PendingTags;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryDataLoader;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.server.RegistryLayer;
-import net.minecraft.server.WorldLoader;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.packs.repository.ServerPacksSource;
 import net.minecraft.server.packs.resources.MultiPackResourceManager;
+import net.minecraft.tags.TagLoader;
 
 /**
  * Mocks the Server (at least the functions required for our tests).
@@ -53,12 +56,22 @@ class ServerMock extends ProxyHandler<Server> {
 				packRepository.getAvailablePacks().stream().map(Pack::open).toList()
 		);
 		LayeredRegistryAccess<RegistryLayer> layers = Unsafe.castNonNull(RegistryLayer.createRegistryAccess());
-		layers = Unsafe.castNonNull(WorldLoader.loadAndReplaceLayer(
+		List<PendingTags<?>> tags = Unsafe.castNonNull(TagLoader.loadTagsForExistingRegistries(
 				resourceManager,
-				Unsafe.cast(layers),
-				RegistryLayer.WORLDGEN,
-				RegistryDataLoader.WORLDGEN_REGISTRIES
+				layers.getLayer(RegistryLayer.STATIC)
 		));
+		RegistryAccess.Frozen worldgenAccess = layers.getAccessForLoading(RegistryLayer.WORLDGEN);
+		List<RegistryLookup<?>> lookups = Unsafe.castNonNull(
+				TagLoader.buildUpdatedLookups(worldgenAccess, Unsafe.castNonNull(tags))
+		);
+		RegistryAccess.Frozen loadedWorldgen = RegistryDataLoader.load(
+				resourceManager,
+				Unsafe.castNonNull(lookups),
+				RegistryDataLoader.WORLDGEN_REGISTRIES
+		);
+		layers = Unsafe.castNonNull(
+				layers.replaceFrom(RegistryLayer.WORLDGEN, loadedWorldgen)
+		);
 		REGISTRY_CUSTOM = Unsafe.castNonNull(layers.compositeAccess().freeze());
 
 		// Set up the server mock as Bukkit API provider:

@@ -1,9 +1,13 @@
 # Changelog
 Date format: (YYYY-MM-DD)  
 
-## v2.24.1 (TBA)
-### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
+## v2.25.0 (TBA)
+### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
 
+* Drop support for Minecraft versions below 1.21.5. This has the following benefits:
+  * Modernize the plugin by building against a more modern Bukkit version.
+  * Reduce the plugin size by bundling fewer compatibility modules.
+  * Simplify updating the plugin for new Paper versions: For versions before 1.21.5, the Spigot and Paper versions shared the same compatibility code, which required building all Paper modules against the Spigot mappings. But since Paper usually releases their Spigot mapping support after some delay, updating the plugin to support the latest Minecraft version on Paper was also delayed.
 * Command: Add command `/shopkeeper history [player|'all'|'self'] [shop=...|owner=...|'own'|'player'|'admin'|'all'] [page]`.
   * Permission: `shopkeeper.history.own` (default: `true`): Allows viewing the own trading history.
   * Permission: `shopkeeper.history.admin` (default: `op`): Allows viewing the trading history of others and admin shops.

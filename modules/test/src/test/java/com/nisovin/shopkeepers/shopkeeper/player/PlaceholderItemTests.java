@@ -12,6 +12,7 @@ import org.junit.Test;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.testutil.AbstractBukkitTest;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.inventory.EnchantmentUtils;
 import com.nisovin.shopkeepers.util.inventory.PotionUtils;
 
@@ -144,7 +145,7 @@ public class PlaceholderItemTests extends AbstractBukkitTest {
 			// Note: Long and strong potions are their own potion types. Their keys start with
 			// either "long" or "strong".
 			testParsing(
-					placeholderItem(potionType.getKey().getKey() + " potion"),
+					placeholderItem(RegistryUtils.getKeyOrThrow(potionType).getKey() + " potion"),
 					potion(potionType)
 			);
 		}

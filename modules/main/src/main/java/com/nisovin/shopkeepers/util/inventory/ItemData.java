@@ -13,6 +13,7 @@ import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
 import com.nisovin.shopkeepers.util.bukkit.ConfigUtils;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.data.container.DataContainer;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
 import com.nisovin.shopkeepers.util.data.property.Property;
@@ -95,7 +96,7 @@ public final class ItemData {
 			Validate.notNull(value, "value is null");
 
 			// getKey instead of getKeyOrThrow: Compatible with both Spigot and Paper.
-			var itemTypeKey = value.getType().getKey();
+			var itemTypeKey = RegistryUtils.getKeyOrThrow(value.getType());
 
 			var componentsData = ItemStackComponentsData.of(ItemUtils.asItemStack(value.dataItem));
 			if (componentsData == null) {

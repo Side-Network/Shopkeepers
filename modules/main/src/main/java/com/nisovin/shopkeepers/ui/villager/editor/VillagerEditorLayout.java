@@ -3,8 +3,6 @@ package com.nisovin.shopkeepers.ui.villager.editor;
 import java.util.List;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Registry;
@@ -25,6 +23,7 @@ import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.config.Settings.DerivedSettings;
 import com.nisovin.shopkeepers.lang.Messages;
+import com.nisovin.shopkeepers.shopobjects.living.types.villager.VillagerEditorItems;
 import com.nisovin.shopkeepers.ui.confirmations.ConfirmationUI;
 import com.nisovin.shopkeepers.ui.confirmations.ConfirmationUIState;
 import com.nisovin.shopkeepers.ui.editor.ActionButton;
@@ -319,57 +318,7 @@ public final class VillagerEditorLayout extends EditorLayout {
 
 			@Override
 			public @Nullable ItemStack getIcon(EditorView editorView) {
-				ItemStack iconItem;
-				switch (profession) {
-				case ARMORER:
-					iconItem = new ItemStack(Material.BLAST_FURNACE);
-					break;
-				case BUTCHER:
-					iconItem = new ItemStack(Material.SMOKER);
-					break;
-				case CARTOGRAPHER:
-					iconItem = new ItemStack(Material.CARTOGRAPHY_TABLE);
-					break;
-				case CLERIC:
-					iconItem = new ItemStack(Material.BREWING_STAND);
-					break;
-				case FARMER:
-					iconItem = new ItemStack(Material.WHEAT); // Instead of COMPOSTER
-					break;
-				case FISHERMAN:
-					iconItem = new ItemStack(Material.FISHING_ROD); // Instead of BARREL
-					break;
-				case FLETCHER:
-					iconItem = new ItemStack(Material.FLETCHING_TABLE);
-					break;
-				case LEATHERWORKER:
-					iconItem = new ItemStack(Material.LEATHER); // Instead of CAULDRON
-					break;
-				case LIBRARIAN:
-					iconItem = new ItemStack(Material.LECTERN);
-					break;
-				case MASON:
-					iconItem = new ItemStack(Material.STONECUTTER);
-					break;
-				case SHEPHERD:
-					iconItem = new ItemStack(Material.LOOM);
-					break;
-				case TOOLSMITH:
-					iconItem = new ItemStack(Material.SMITHING_TABLE);
-					break;
-				case WEAPONSMITH:
-					iconItem = new ItemStack(Material.GRINDSTONE);
-					break;
-				case NITWIT:
-					iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
-					ItemUtils.setLeatherColor(iconItem, Color.GREEN);
-					break;
-				case NONE:
-				default:
-					iconItem = new ItemStack(Material.BARRIER);
-					break;
-				}
-				assert iconItem != null;
+				var iconItem = VillagerEditorItems.getProfessionEditorItem(profession);
 				ItemUtils.setDisplayNameAndLore(iconItem,
 						Messages.buttonVillagerProfession,
 						Messages.buttonVillagerProfessionLore
@@ -414,31 +363,7 @@ public final class VillagerEditorLayout extends EditorLayout {
 
 			@Override
 			public @Nullable ItemStack getIcon(EditorView editorView) {
-				ItemStack iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
-				switch (villagerType) {
-				default:
-				case PLAINS:
-					// Default brown color:
-					break;
-				case DESERT:
-					ItemUtils.setLeatherColor(iconItem, Color.ORANGE);
-					break;
-				case JUNGLE:
-					ItemUtils.setLeatherColor(iconItem, Color.YELLOW.mixColors(Color.ORANGE));
-					break;
-				case SAVANNA:
-					ItemUtils.setLeatherColor(iconItem, Color.RED);
-					break;
-				case SNOW:
-					ItemUtils.setLeatherColor(iconItem, DyeColor.CYAN.getColor());
-					break;
-				case SWAMP:
-					ItemUtils.setLeatherColor(iconItem, DyeColor.PURPLE.getColor());
-					break;
-				case TAIGA:
-					ItemUtils.setLeatherColor(iconItem, Color.WHITE.mixDyes(DyeColor.BROWN));
-					break;
-				}
+				var iconItem = VillagerEditorItems.getVillagerTypeEditorItem(villagerType);
 				ItemUtils.setDisplayNameAndLore(iconItem,
 						Messages.buttonVillagerVariant,
 						Messages.buttonVillagerVariantLore

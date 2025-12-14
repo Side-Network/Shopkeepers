@@ -1,7 +1,7 @@
 package com.nisovin.shopkeepers.compat;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
@@ -181,8 +181,14 @@ public class ServerAssumptionsTest {
 		itemMeta.setMaxStackSize(65);
 		itemMeta.setRarity(ItemRarity.EPIC);
 		itemMeta.setHideTooltip(true);
-		itemMeta.setCustomModelData(1);
-		//itemMeta.setFireResistant(true); // TODO Replaced with damage resistance in MC 1.21.2/3
+
+		var customModelData = itemMeta.getCustomModelDataComponent();
+		var customModelDataFloats = new ArrayList<Float>();
+		customModelDataFloats.add(1.0f);
+		customModelData.setFloats(Unsafe.castNonNull(customModelDataFloats));
+		itemMeta.setCustomModelDataComponent(customModelData);
+
+		// itemMeta.setFireResistant(true); // TODO Replaced with damage resistance in MC 1.21.2/3
 		itemMeta.setUnbreakable(true);
 		((Damageable) itemMeta).setDamage(2);
 		((Damageable) itemMeta).setMaxDamage(10);
@@ -197,28 +203,25 @@ public class ServerAssumptionsTest {
 		itemMeta.setEnchantmentGlintOverride(true);
 		itemMeta.addEnchant(Enchantment.UNBREAKING, 1, true);
 		itemMeta.addEnchant(Enchantment.SHARPNESS, 2, true);
-		itemMeta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED,
+		itemMeta.addAttributeModifier(Attribute.ATTACK_SPEED,
 				new AttributeModifier(
-						new UUID(1L, 1L),
-						"attack speed bonus",
+						NamespacedKeyUtils.create("some_plugin", "attack-speed-bonus"),
 						2,
 						Operation.ADD_NUMBER,
 						EquipmentSlotGroup.HAND
 				)
 		);
-		itemMeta.addAttributeModifier(Attribute.GENERIC_ATTACK_SPEED,
+		itemMeta.addAttributeModifier(Attribute.ATTACK_SPEED,
 				new AttributeModifier(
-						new UUID(2L, 2L),
-						"attack speed bonus 2",
+						NamespacedKeyUtils.create("some_plugin", "attack-speed-bonus-2"),
 						0.5,
 						Operation.MULTIPLY_SCALAR_1,
 						EquipmentSlotGroup.OFFHAND
 				)
 		);
-		itemMeta.addAttributeModifier(Attribute.GENERIC_MAX_HEALTH,
+		itemMeta.addAttributeModifier(Attribute.MAX_HEALTH,
 				new AttributeModifier(
-						new UUID(3L, 3L),
-						"max health bonus",
+						NamespacedKeyUtils.create("some_plugin", "max-health-bonus"),
 						2,
 						Operation.ADD_NUMBER,
 						EquipmentSlotGroup.HAND
@@ -230,6 +233,7 @@ public class ServerAssumptionsTest {
 		food.setNutrition(2);
 		food.setSaturation(2.5f);
 		food.setCanAlwaysEat(true);
+		// TODO Removed in MC 1.21.2/3
 		// food.setEatSeconds(5.5f);
 		// food.addEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5, 1), 0.5f);
 		itemMeta.setFood(food);

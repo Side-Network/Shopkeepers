@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -67,7 +68,7 @@ public final class EnchantmentUtils {
 		}
 
 		// Lookup by key:
-		return Enchantment.getByKey(namespacedKey);
+		return Registry.ENCHANTMENT.get(namespacedKey);
 	}
 
 	/**

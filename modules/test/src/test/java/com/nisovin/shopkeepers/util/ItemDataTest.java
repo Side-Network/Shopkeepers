@@ -106,7 +106,7 @@ public class ItemDataTest extends AbstractItemStackSerializationTest<@Nullable S
 				"item:" + yamlNewline()
 						+ "  id: minecraft:diamond_sword" + yamlNewline()
 						+ "  components:" + yamlNewline()
-						+ "    minecraft:custom_name: '''{\"color\":\"red\",\"text\":\"Custom Name\"}'''" + yamlNewline()
+						+ "    minecraft:custom_name: '{color:\"red\",text:\"Custom Name\"}'" + yamlNewline()
 		);
 	}
 
@@ -120,23 +120,23 @@ public class ItemDataTest extends AbstractItemStackSerializationTest<@Nullable S
 				"item:" + yamlNewline()
 						+ "  id: minecraft:diamond_sword" + yamlNewline()
 						+ "  components:" + yamlNewline()
-						+ "    minecraft:custom_model_data: '1'" + yamlNewline()
-						+ "    minecraft:lore: '[''{\"color\":\"green\",\"text\":\"lore1\"}'',''\"lore2\"'']'" + yamlNewline()
+						+ "    minecraft:custom_model_data: '{floats:[1.0f]}'" + yamlNewline()
+						+ "    minecraft:lore: '[{color:\"green\",text:\"lore1\"},\"lore2\"]'" + yamlNewline()
 						+ "    minecraft:max_stack_size: '65'" + yamlNewline()
-						+ "    minecraft:attribute_modifiers: '{modifiers:[{amount:2.0d,name:\"attack speed bonus\",operation:\"add_value\",slot:\"hand\",type:\"minecraft:generic.attack_speed\",uuid:[I;0,1,0,1]},{amount:0.5d,name:\"attack" + yamlNewline()
-						+ "      speed bonus 2\",operation:\"add_multiplied_total\",slot:\"offhand\",type:\"minecraft:generic.attack_speed\",uuid:[I;0,2,0,2]},{amount:2.0d,name:\"max" + yamlNewline()
-						+ "      health bonus\",operation:\"add_value\",slot:\"hand\",type:\"minecraft:generic.max_health\",uuid:[I;0,3,0,3]}]}'" + yamlNewline()
-						+ "    minecraft:enchantments: '{levels:{\"minecraft:sharpness\":2,\"minecraft:unbreaking\":1},show_in_tooltip:0b}'" + yamlNewline()
+						+ "    minecraft:attribute_modifiers: '["
+						+ "{amount:2.0d,id:\"some_plugin:attack-speed-bonus\",operation:\"add_value\",slot:\"hand\",type:\"minecraft:attack_speed\"},"
+						+ "{amount:0.5d,id:\"some_plugin:attack-speed-bonus-2\",operation:\"add_multiplied_total\",slot:\"offhand\",type:\"minecraft:attack_speed\"},"
+						+ "{amount:2.0d,id:\"some_plugin:max-health-bonus\",operation:\"add_value\",slot:\"hand\",type:\"minecraft:max_health\"}]'" + yamlNewline()
+						+ "    minecraft:enchantments: '{\"minecraft:sharpness\":2,\"minecraft:unbreaking\":1}'" + yamlNewline()
 						+ "    minecraft:tool: '{damage_per_block:2,default_mining_speed:1.5f,rules:[{blocks:\"minecraft:stone\",correct_for_drops:1b,speed:0.5f}]}'" + yamlNewline()
 						+ "    minecraft:damage: '2'" + yamlNewline()
+						+ "    minecraft:tooltip_display: '{hidden_components:[\"minecraft:enchantments\"],hide_tooltip:1b}'" + yamlNewline()
 						+ "    minecraft:enchantment_glint_override: 1b" + yamlNewline()
 						+ "    minecraft:repair_cost: '3'" + yamlNewline()
-						+ "    minecraft:hide_tooltip: '{}'" + yamlNewline()
-						+ "    minecraft:fire_resistant: '{}'" + yamlNewline()
-						+ "    minecraft:item_name: '''{\"color\":\"red\",\"text\":\"Custom item name\"}'''" + yamlNewline()
-						+ "    minecraft:food: '{can_always_eat:1b,eat_seconds:5.5f,effects:[{effect:{ambient:1b,amplifier:1b,duration:5,id:\"minecraft:blindness\",show_icon:1b},probability:0.5f}],nutrition:2,saturation:2.5f}'" + yamlNewline()
+						+ "    minecraft:item_name: '{color:\"red\",text:\"Custom item name\"}'" + yamlNewline()
+						+ "    minecraft:food: '{can_always_eat:1b,nutrition:2,saturation:2.5f}'" + yamlNewline()
 						+ "    minecraft:unbreakable: '{}'" + yamlNewline()
-						+ "    minecraft:custom_name: '''{\"color\":\"red\",\"text\":\"Custom Name\"}'''" + yamlNewline()
+						+ "    minecraft:custom_name: '{color:\"red\",text:\"Custom Name\"}'" + yamlNewline()
 						+ "    minecraft:rarity: '\"epic\"'" + yamlNewline()
 						+ "    minecraft:custom_data: '{PublicBukkitValues:{\"some_plugin:some-key\":\"some value\",\"some_plugin:some-other-key\":{\"inner_plugin:inner-key\":0.3f}}}'" + yamlNewline()
 						+ "    minecraft:max_damage: '10'" + yamlNewline()
@@ -165,7 +165,7 @@ public class ItemDataTest extends AbstractItemStackSerializationTest<@Nullable S
 		this.testYamlSerialization(itemStack, "item:" + yamlNewline()
 				+ "  id: minecraft:leather_chestplate" + yamlNewline()
 				+ "  components:" + yamlNewline()
-				+ "    minecraft:dyed_color: '{rgb:255}'" + yamlNewline());
+				+ "    minecraft:dyed_color: '255'" + yamlNewline());
 	}
 
 	// Basic TileEntity
@@ -186,7 +186,7 @@ public class ItemDataTest extends AbstractItemStackSerializationTest<@Nullable S
 				"item:" + yamlNewline()
 						+ "  id: minecraft:chest" + yamlNewline()
 						+ "  components:" + yamlNewline()
-						+ "    minecraft:custom_name: '''{\"color\":\"red\",\"text\":\"Custom Name\"}'''" + yamlNewline()
+						+ "    minecraft:custom_name: '{color:\"red\",text:\"Custom Name\"}'" + yamlNewline()
 		);
 	}
 

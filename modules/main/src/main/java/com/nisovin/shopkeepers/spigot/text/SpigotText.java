@@ -22,6 +22,7 @@ import com.nisovin.shopkeepers.text.PlaceholderText;
 import com.nisovin.shopkeepers.text.PlainText;
 import com.nisovin.shopkeepers.text.Text;
 import com.nisovin.shopkeepers.text.TranslatableText;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.bukkit.TextUtils;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 import com.nisovin.shopkeepers.util.java.StringUtils;
@@ -308,7 +309,7 @@ public final class SpigotText {
 					// not supported currently.
 					var action = net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_ITEM;
 					var content = new net.md_5.bungee.api.chat.hover.content.Item(
-							item.getType().getKey().toString(),
+							RegistryUtils.getKeyOrThrow(item.getType()).toString(),
 							item.getAmount(),
 							null
 					);

@@ -95,6 +95,15 @@ public final class ServerUtils {
 		return pkg.getName();
 	}
 
+	/**
+	 * Gets the server's current data version.
+	 * 
+	 * @return the server's data version
+	 */
+	public static int getDataVersion() {
+		return Bukkit.getUnsafe().getDataVersion();
+	}
+
 	private ServerUtils() {
 	}
 }

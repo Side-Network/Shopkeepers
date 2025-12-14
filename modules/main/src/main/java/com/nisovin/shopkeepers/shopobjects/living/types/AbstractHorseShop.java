@@ -104,6 +104,8 @@ public class AbstractHorseShop<E extends AbstractHorse> extends BabyableShop<E> 
 		AbstractHorse entity = this.getEntity();
 		if (entity == null) return; // Not spawned
 
+		// TODO Deprecation of setSaddle in MC 1.21.5 might be a mistake, since there are entities
+		// other than horse that also return AbstractHorseInventory and do support saddle.
 		entity.getInventory().setSaddle(this.hasSaddle() ? new ItemStack(Material.SADDLE) : null);
 	}
 

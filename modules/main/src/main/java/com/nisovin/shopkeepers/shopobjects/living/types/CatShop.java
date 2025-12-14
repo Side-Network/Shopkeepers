@@ -1,6 +1,7 @@
 package com.nisovin.shopkeepers.shopobjects.living.types;
 
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
@@ -114,47 +115,25 @@ public class CatShop extends SittableShop<Cat> {
 		entity.setCatType(this.getCatType());
 	}
 
+	private static final Map<Cat.Type, Color> CAT_TYPE_EDITOR_ITEM_COLORS = Map.ofEntries(
+			Map.entry(Cat.Type.TABBY, Color.BLACK.mixColors(Color.ORANGE)),
+			Map.entry(Cat.Type.ALL_BLACK, Color.BLACK),
+			Map.entry(Cat.Type.BLACK, Color.BLACK.mixDyes(DyeColor.GRAY)),
+			Map.entry(Cat.Type.BRITISH_SHORTHAIR, Color.SILVER),
+			Map.entry(Cat.Type.CALICO, Color.ORANGE.mixDyes(DyeColor.BROWN)),
+			Map.entry(Cat.Type.JELLIE, Color.GRAY),
+			Map.entry(Cat.Type.PERSIAN, Color.WHITE.mixDyes(DyeColor.ORANGE)),
+			Map.entry(Cat.Type.RAGDOLL, Color.WHITE.mixDyes(DyeColor.BROWN)),
+			Map.entry(Cat.Type.RED, Color.ORANGE),
+			Map.entry(Cat.Type.SIAMESE, Color.GRAY.mixDyes(DyeColor.BROWN)),
+			Map.entry(Cat.Type.WHITE, Color.WHITE)
+	);
+
 	private ItemStack getCatTypeEditorItem() {
+		var catType = this.getCatType();
 		ItemStack iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
-		switch (this.getCatType()) {
-		case TABBY:
-			ItemUtils.setLeatherColor(iconItem, Color.BLACK.mixColors(Color.ORANGE));
-			break;
-		case ALL_BLACK:
-			ItemUtils.setLeatherColor(iconItem, Color.BLACK);
-			break;
-		case BLACK:
-			ItemUtils.setLeatherColor(iconItem, Color.BLACK.mixDyes(DyeColor.GRAY));
-			break;
-		case BRITISH_SHORTHAIR:
-			ItemUtils.setLeatherColor(iconItem, Color.SILVER);
-			break;
-		case CALICO:
-			ItemUtils.setLeatherColor(iconItem, Color.ORANGE.mixDyes(DyeColor.BROWN));
-			break;
-		case JELLIE:
-			ItemUtils.setLeatherColor(iconItem, Color.GRAY);
-			break;
-		case PERSIAN:
-			ItemUtils.setLeatherColor(iconItem, Color.WHITE.mixDyes(DyeColor.ORANGE));
-			break;
-		case RAGDOLL:
-			ItemUtils.setLeatherColor(iconItem, Color.WHITE.mixDyes(DyeColor.BROWN));
-			break;
-		case RED:
-			ItemUtils.setLeatherColor(iconItem, Color.ORANGE);
-			break;
-		case SIAMESE:
-			ItemUtils.setLeatherColor(iconItem, Color.GRAY.mixDyes(DyeColor.BROWN));
-			break;
-		case WHITE:
-			ItemUtils.setLeatherColor(iconItem, Color.WHITE);
-			break;
-		default:
-			// Unknown type:
-			ItemUtils.setLeatherColor(iconItem, Color.PURPLE);
-			break;
-		}
+		var color = CAT_TYPE_EDITOR_ITEM_COLORS.getOrDefault(catType, Color.PURPLE);
+		ItemUtils.setLeatherColor(iconItem, color);
 		ItemUtils.setDisplayNameAndLore(iconItem,
 				Messages.buttonCatVariant,
 				Messages.buttonCatVariantLore

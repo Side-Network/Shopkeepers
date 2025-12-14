@@ -1657,6 +1657,8 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 	 * 
 	 * @param sender
 	 *            the {@link CommandSender}, not <code>null</code>
+	 * @param uiType
+	 *            the {@link UIType}, not <code>null</code>
 	 * @param silent
 	 *            <code>true</code> to omit any feedback that might otherwise be sent to the sender
 	 * @return <code>true</code> if the sender can access the UI this shopkeeper

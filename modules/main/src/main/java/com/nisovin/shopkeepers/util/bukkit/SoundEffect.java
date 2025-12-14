@@ -92,7 +92,8 @@ public final class SoundEffect {
 			Float volume = value.getVolume();
 
 			// Sound and sound name are both serialized as String:
-			String serializedSound = (sound != null) ? sound.getKey().toString() : soundName;
+			String serializedSound = (sound != null) ? RegistryUtils.getKeyOrThrow(sound).toString()
+					: soundName;
 
 			// Use a compact representation if only the sound / sound name is specified:
 			if (category == null && pitch == null && volume == null) {
