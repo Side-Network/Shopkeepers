@@ -5,6 +5,7 @@ import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -104,9 +105,10 @@ public class AbstractHorseShop<E extends AbstractHorse> extends BabyableShop<E> 
 		AbstractHorse entity = this.getEntity();
 		if (entity == null) return; // Not spawned
 
-		// TODO Deprecation of setSaddle in MC 1.21.5 might be a mistake, since there are entities
-		// other than horse that also return AbstractHorseInventory and do support saddle.
-		entity.getInventory().setSaddle(this.hasSaddle() ? new ItemStack(Material.SADDLE) : null);
+		var saddleItem = this.hasSaddle() ? new ItemStack(Material.SADDLE) : null;
+		var equipment = entity.getEquipment();
+		assert equipment != null;
+		equipment.setItem(EquipmentSlot.SADDLE, saddleItem);
 	}
 
 	private ItemStack getSaddleEditorItem() {

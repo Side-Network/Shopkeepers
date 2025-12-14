@@ -363,6 +363,16 @@ public class Messages extends Config {
 			"Changes the skin",
 			"of the mannequin"
 	));
+	public static String buttonNautilusArmor = c("&aChoose armor");
+	public static List<String> buttonNautilusArmorLore = c(Arrays.asList(
+			"Changes the armor",
+			"of the nautilus"
+	));
+	public static String buttonZombieNautilusVariant = c("&aChoose variant");
+	public static List<String> buttonZombieNautilusVariantLore = c(Arrays.asList(
+			"Changes the look of",
+			"the zombie nautilus."
+	));
 
 	public static Text mannequinEnterProfile = Text.parse(
 			"&aPlease enter in chat the name or id of the player whose profile you want to apply to"

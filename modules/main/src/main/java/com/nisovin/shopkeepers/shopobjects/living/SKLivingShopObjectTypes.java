@@ -45,6 +45,7 @@ import com.nisovin.shopkeepers.shopobjects.living.types.LlamaShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.MagmaCubeShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.MannequinShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.MooshroomShop;
+import com.nisovin.shopkeepers.shopobjects.living.types.NautilusShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.PandaShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.ParrotShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.PigShop;
@@ -60,6 +61,7 @@ import com.nisovin.shopkeepers.shopobjects.living.types.TropicalFishShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.VillagerShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.WanderingTraderShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.WolfShop;
+import com.nisovin.shopkeepers.shopobjects.living.types.ZombieNautilusShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.ZombieShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.ZombieVillagerShop;
 import com.nisovin.shopkeepers.util.bukkit.PermissionUtils;
@@ -186,6 +188,10 @@ import com.nisovin.shopkeepers.util.java.Validate;
  * disable the "NPC" description, some poses have a very small hitbox TODO custom description?,
  * option to hide individual skin layers? more profile customization options? (currently we only
  * allow looking up a profile by player name) # 1.21.9
+ * <li>CAMEL_HUSK: okay, similar to camel # 1.21.11
+ * <li>NAUTILUS: okay, saddle, armor
+ * <li>PARCHED: okay, similar to other skeletons
+ * <li>ZOMBIE_NAUTILUS: okay, variants, saddle, armor, does not support baby variant
  * </ul>
  **/
 public final class SKLivingShopObjectTypes implements LivingShopObjectTypes {
@@ -722,6 +728,28 @@ public final class SKLivingShopObjectTypes implements LivingShopObjectTypes {
 						permission,
 						MannequinShop.class,
 						MannequinShop::new
+				);
+				break;
+			case "NAUTILUS":
+				objectType = new SKLivingShopObjectType<>(
+						livingShops,
+						entityType,
+						identifier,
+						aliases,
+						permission,
+						NautilusShop.class,
+						NautilusShop::new
+				);
+				break;
+			case "ZOMBIE_NAUTILUS":
+				objectType = new SKLivingShopObjectType<>(
+						livingShops,
+						entityType,
+						identifier,
+						aliases,
+						permission,
+						ZombieNautilusShop.class,
+						ZombieNautilusShop::new
 				);
 				break;
 			default:

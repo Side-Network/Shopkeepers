@@ -64,5 +64,6 @@ buildSpigotIfMissing 1.21.6 remapped
 # Note: 1.21.7 was replaced by 1.21.8 and can no longer be built. But the server is identical to 1.21.8.
 buildSpigotIfMissing 1.21.8 remapped
 buildSpigotIfMissing 1.21.10 remapped
+buildSpigotIfMissing 1.21.11 remapped
 
 popd

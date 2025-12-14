@@ -287,6 +287,14 @@ button-mannequin-profile: "&aSkin ändern"
 button-mannequin-profile-lore:
 - "Ändert die Skin-Textur"
 - "der Spielerpuppe"
+button-nautilus-armor: "&aRüstung ändern"
+button-nautilus-armor-lore:
+- "Ändert die Rüstung"
+- "des Nautilus"
+button-zombie-nautilus-variant: "&aVariante ändern"
+button-zombie-nautilus-variant-lore:
+- "Ändert das Aussehen"
+- "des Zombie-Nautilus"
 
 mannequin-enter-profile: |-
   &aBitte gib im Chat den Namen oder die Id des Spielers ein, dessen Profil du auf die Spielerpuppe anwenden möchtest.

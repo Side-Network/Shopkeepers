@@ -899,21 +899,24 @@ public class SKLivingShopObject<E extends LivingEntity>
 			return EquipmentUtils.EQUIPMENT_SLOTS;
 		}
 
-		switch (this.getEntityType()) {
-		case PIG: // Dedicated button for saddle
-		case STRIDER: // Dedicated button for saddle
-		case LLAMA: // Dedicated button for carpet (armor slot)
-		case TRADER_LLAMA: // Dedicated button for carpet (armor slot)
-		case HORSE: // Dedicated button for horse armor (armor slot) and saddle
-		case MULE: // Dedicated button for saddle
-		case DONKEY: // Dedicated button for saddle
-		case CAMEL: // Dedicated button for saddle
-		case ZOMBIE_HORSE: // Dedicated button for saddle
-		case SKELETON_HORSE: // Dedicated button for saddle
+		switch (this.getEntityType().name()) {
+		case "PIG": // Dedicated button for saddle
+		case "STRIDER": // Dedicated button for saddle
+		case "NAUTILUS": // Dedicated buttons for saddle and armor
+		case "ZOMBIE_NAUTILUS": // Dedicated buttons for saddle and armor
+		case "LLAMA": // Dedicated button for carpet (armor slot)
+		case "TRADER_LLAMA": // Dedicated button for carpet (armor slot)
+		case "HORSE": // Dedicated button for horse armor (armor slot) and saddle
+		case "MULE": // Dedicated button for saddle
+		case "DONKEY": // Dedicated button for saddle
+		case "CAMEL": // Dedicated button for saddle
+		case "CAMEL_HUSK": // Dedicated button for saddle
+		case "ZOMBIE_HORSE": // Dedicated button for saddle
+		case "SKELETON_HORSE": // Dedicated button for saddle
 			return Collections.emptyList();
-		case VINDICATOR: // The main hand item is only visible during a chase.
+		case "VINDICATOR": // The main hand item is only visible during a chase.
 			return EquipmentUtils.EQUIPMENT_SLOTS_HEAD;
-		case ENDERMAN: // Item in hand is mapped to the carried block
+		case "ENDERMAN": // Item in hand is mapped to the carried block
 			return EquipmentUtils.EQUIPMENT_SLOTS_MAINHAND;
 		default:
 			return EquipmentUtils.getSupportedEquipmentSlots(this.getEntityType());

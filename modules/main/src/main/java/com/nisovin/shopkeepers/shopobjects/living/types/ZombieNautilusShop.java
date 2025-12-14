@@ -2,26 +2,25 @@ package com.nisovin.shopkeepers.shopobjects.living.types;
 
 import java.util.List;
 
-import org.bukkit.Color;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.block.banner.Pattern;
-import org.bukkit.block.banner.PatternType;
-import org.bukkit.entity.Horse;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Tameable;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BannerMeta;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
 import com.nisovin.shopkeepers.api.shopobjects.living.LivingShopEquipment;
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
-import com.nisovin.shopkeepers.compat.MC_1_21_11;
+import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
 import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
+import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObject;
 import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
 import com.nisovin.shopkeepers.ui.editor.Button;
 import com.nisovin.shopkeepers.ui.editor.EditorView;
@@ -31,64 +30,47 @@ import com.nisovin.shopkeepers.util.data.property.BasicProperty;
 import com.nisovin.shopkeepers.util.data.property.Property;
 import com.nisovin.shopkeepers.util.data.property.value.PropertyValue;
 import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
+import com.nisovin.shopkeepers.util.data.serialization.bukkit.NamespacedKeySerializers;
+import com.nisovin.shopkeepers.util.data.serialization.java.BooleanSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.EnumSerializers;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
+import com.nisovin.shopkeepers.util.inventory.NautilusArmor;
 import com.nisovin.shopkeepers.util.java.EnumUtils;
 
-public class HorseShop extends AbstractHorseShop<Horse> {
+// Note: Does not support the baby variant even though it implements the Ageable interface.
+//TODO Use the ZombieNautilius type once we support 1.21.11+
+public class ZombieNautilusShop extends SKLivingShopObject<Tameable> {
 
-	public enum HorseArmor {
-
-		LEATHER(Material.LEATHER_HORSE_ARMOR),
-		IRON(Material.IRON_HORSE_ARMOR),
-		GOLD(Material.GOLDEN_HORSE_ARMOR),
-		DIAMOND(Material.DIAMOND_HORSE_ARMOR),
-		NETHERITE(MC_1_21_11.NETHERITE_HORSE_ARMOR);
-
-		private final @Nullable Material material;
-
-		private HorseArmor(@Nullable Material material) {
-			this.material = material;
-		}
-
-		public @Nullable Material getMaterial() {
-			return material;
-		}
-
-		public boolean isEnabled() {
-			return material != null;
-		}
-	}
-
-	public static final Property<Horse.Color> COLOR = new BasicProperty<Horse.Color>()
-			.dataKeyAccessor("color", EnumSerializers.lenient(Horse.Color.class))
-			.defaultValue(Horse.Color.BROWN)
+	public static final Property<Boolean> SADDLE = new BasicProperty<Boolean>()
+			.dataKeyAccessor("saddle", BooleanSerializers.LENIENT)
+			.defaultValue(false)
 			.build();
 
-	public static final Property<Horse.Style> STYLE = new BasicProperty<Horse.Style>()
-			.dataKeyAccessor("style", EnumSerializers.lenient(Horse.Style.class))
-			.defaultValue(Horse.Style.NONE)
+	// TODO Replace with the actual type once we only support MC 1.21.11+
+	public static final Property<NamespacedKey> VARIANT = new BasicProperty<NamespacedKey>()
+			.dataKeyAccessor("variant", NamespacedKeySerializers.DEFAULT)
+			.defaultValue(NamespacedKey.minecraft("temperate"))
 			.build();
 
-	public static final Property<@Nullable HorseArmor> ARMOR = new BasicProperty<@Nullable HorseArmor>()
-			.dataKeyAccessor("armor", EnumSerializers.lenient(HorseArmor.class))
+	public static final Property<@Nullable NautilusArmor> ARMOR = new BasicProperty<@Nullable NautilusArmor>()
+			.dataKeyAccessor("armor", EnumSerializers.lenient(NautilusArmor.class))
 			.nullable() // Null indicates 'no armor'
 			.defaultValue(null)
 			.build();
 
-	private final PropertyValue<Horse.Color> colorProperty = new PropertyValue<>(COLOR)
-			.onValueChanged(Unsafe.initialized(this)::applyColor)
+	private final PropertyValue<Boolean> saddleProperty = new PropertyValue<>(SADDLE)
+			.onValueChanged(Unsafe.initialized(this)::applySaddle)
 			.build(properties);
-	private final PropertyValue<Horse.Style> styleProperty = new PropertyValue<>(STYLE)
-			.onValueChanged(Unsafe.initialized(this)::applyStyle)
+	private final PropertyValue<NamespacedKey> variantProperty = new PropertyValue<>(VARIANT)
+			.onValueChanged(Unsafe.initialized(this)::applyVariant)
 			.build(properties);
-	private final PropertyValue<@Nullable HorseArmor> armorProperty = new PropertyValue<>(ARMOR)
+	private final PropertyValue<@Nullable NautilusArmor> armorProperty = new PropertyValue<>(ARMOR)
 			.onValueChanged(Unsafe.initialized(this)::applyArmor)
 			.build(properties);
 
-	public HorseShop(
+	public ZombieNautilusShop(
 			LivingShops livingShops,
-			SKLivingShopObjectType<HorseShop> livingObjectType,
+			SKLivingShopObjectType<ZombieNautilusShop> livingObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
@@ -98,32 +80,32 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 	@Override
 	public void load(ShopObjectData shopObjectData) throws InvalidDataException {
 		super.load(shopObjectData);
-		colorProperty.load(shopObjectData);
-		styleProperty.load(shopObjectData);
+		saddleProperty.load(shopObjectData);
+		variantProperty.load(shopObjectData);
 		armorProperty.load(shopObjectData);
 	}
 
 	@Override
 	public void save(ShopObjectData shopObjectData, boolean saveAll) {
 		super.save(shopObjectData, saveAll);
-		colorProperty.save(shopObjectData);
-		styleProperty.save(shopObjectData);
+		saddleProperty.save(shopObjectData);
+		variantProperty.save(shopObjectData);
 		armorProperty.save(shopObjectData);
 	}
 
 	@Override
 	protected void onSpawn() {
 		super.onSpawn();
-		this.applyColor();
-		this.applyStyle();
+		this.applySaddle();
+		this.applyVariant();
 		this.applyArmor();
 	}
 
 	@Override
 	public List<Button> createEditorButtons() {
 		List<Button> editorButtons = super.createEditorButtons();
-		editorButtons.add(this.getColorEditorButton());
-		editorButtons.add(this.getStyleEditorButton());
+		editorButtons.add(this.getSaddleEditorButton());
+		editorButtons.add(this.getVariantEditorButton());
 		editorButtons.add(this.getArmorEditorButton());
 		return editorButtons;
 	}
@@ -138,122 +120,102 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 		this.applyArmor();
 	}
 
-	// COLOR
+	// SADDLE
 
-	public Horse.Color getColor() {
-		return colorProperty.getValue();
+	public boolean hasSaddle() {
+		return saddleProperty.getValue();
 	}
 
-	public void setColor(Horse.Color color) {
-		colorProperty.setValue(color);
+	public void setSaddle(boolean saddle) {
+		saddleProperty.setValue(saddle);
 	}
 
-	public void cycleColor(boolean backwards) {
-		this.setColor(EnumUtils.cycleEnumConstant(Horse.Color.class, this.getColor(), backwards));
+	public void cycleSaddle() {
+		this.setSaddle(!this.hasSaddle());
 	}
 
-	private void applyColor() {
-		Horse entity = this.getEntity();
+	private void applySaddle() {
+		Tameable entity = this.getEntity();
 		if (entity == null) return; // Not spawned
 
-		entity.setColor(this.getColor());
+		var saddleItem = this.hasSaddle() ? new ItemStack(Material.SADDLE) : null;
+		var equipment = entity.getEquipment();
+		assert equipment != null;
+		equipment.setItem(EquipmentSlot.SADDLE, saddleItem);
 	}
 
-	private ItemStack getColorEditorItem() {
-		ItemStack iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
-		switch (this.getColor()) {
-		case BLACK:
-			ItemUtils.setLeatherColor(iconItem, Color.fromRGB(31, 31, 31));
-			break;
-		case BROWN:
-			ItemUtils.setLeatherColor(iconItem, Color.fromRGB(54, 25, 8));
-			break;
-		case CHESTNUT:
-			ItemUtils.setLeatherColor(iconItem, Color.fromRGB(110, 59, 38));
-			break;
-		case CREAMY:
-			ItemUtils.setLeatherColor(iconItem, Color.fromRGB(98, 65, 28));
-			break;
-		case DARK_BROWN:
-			ItemUtils.setLeatherColor(iconItem, Color.fromRGB(39, 21, 13));
-			break;
-		case GRAY:
-			ItemUtils.setLeatherColor(iconItem, Color.SILVER);
-			break;
-		case WHITE:
-		default:
-			ItemUtils.setLeatherColor(iconItem, Color.WHITE);
-			break;
-		}
-		ItemUtils.setDisplayNameAndLore(iconItem,
-				Messages.buttonHorseColor,
-				Messages.buttonHorseColorLore
+	private ItemStack getSaddleEditorItem() {
+		ItemStack iconItem = new ItemStack(Material.SADDLE);
+		ItemUtils.setDisplayNameAndLore(
+				iconItem,
+				Messages.buttonSaddle,
+				Messages.buttonSaddleLore
 		);
 		return iconItem;
 	}
 
-	private Button getColorEditorButton() {
+	private Button getSaddleEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
 			public @Nullable ItemStack getIcon(EditorView editorView) {
-				return getColorEditorItem();
+				return getSaddleEditorItem();
 			}
 
 			@Override
 			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
-				boolean backwards = clickEvent.isRightClick();
-				cycleColor(backwards);
+				cycleSaddle();
 				return true;
 			}
 		};
 	}
 
-	// STYLE
+	// VARIANT
 
-	public Horse.Style getStyle() {
-		return styleProperty.getValue();
+	public NamespacedKey getVariant() {
+		return variantProperty.getValue();
 	}
 
-	public void setStyle(Horse.Style style) {
-		styleProperty.setValue(style);
+	public void setVariant(NamespacedKey variant) {
+		variantProperty.setValue(variant);
 	}
 
-	public void cycleStyle(boolean backwards) {
-		this.setStyle(EnumUtils.cycleEnumConstant(Horse.Style.class, this.getStyle(), backwards));
+	public void cycleVariant(boolean backwards) {
+		this.setVariant(Compat.getProvider().cycleZombieNautilusVariant(this.getVariant(), backwards));
 	}
 
-	private void applyStyle() {
-		Horse entity = this.getEntity();
+	private void applyVariant() {
+		LivingEntity entity = this.getEntity();
 		if (entity == null) return; // Not spawned
 
-		entity.setStyle(this.getStyle());
+		Compat.getProvider().setZombieNautilusVariant(entity, this.getVariant());
 	}
 
-	private ItemStack getStyleEditorItem() {
-		ItemStack iconItem = new ItemStack(Material.WHITE_BANNER);
-		BannerMeta itemMeta = Unsafe.castNonNull(iconItem.getItemMeta());
-		itemMeta.addPattern(new Pattern(DyeColor.BROWN, PatternType.CURLY_BORDER));
-		itemMeta.addPattern(new Pattern(DyeColor.BROWN, PatternType.TRIANGLES_BOTTOM));
-		itemMeta.addPattern(new Pattern(DyeColor.BROWN, PatternType.TRIANGLES_TOP));
-		iconItem.setItemMeta(itemMeta);
-		ItemUtils.setDisplayNameAndLore(iconItem,
-				Messages.buttonHorseStyle,
-				Messages.buttonHorseStyleLore
+	private static final NamespacedKey VARIANT_WARM = NamespacedKey.minecraft("warm");
+
+	private ItemStack getVariantEditorItem() {
+		var variant = this.getVariant();
+		var itemType = variant.equals(VARIANT_WARM) ? Material.BRAIN_CORAL
+				: Material.DEAD_BRAIN_CORAL;
+		ItemStack iconItem = new ItemStack(itemType);
+		ItemUtils.setDisplayNameAndLore(
+				iconItem,
+				Messages.buttonZombieNautilusVariant,
+				Messages.buttonZombieNautilusVariantLore
 		);
 		return iconItem;
 	}
 
-	private Button getStyleEditorButton() {
+	private Button getVariantEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
 			public @Nullable ItemStack getIcon(EditorView editorView) {
-				return getStyleEditorItem();
+				return getVariantEditorItem();
 			}
 
 			@Override
 			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				boolean backwards = clickEvent.isRightClick();
-				cycleStyle(backwards);
+				cycleVariant(backwards);
 				return true;
 			}
 		};
@@ -261,18 +223,18 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 
 	// ARMOR
 
-	public @Nullable HorseArmor getArmor() {
+	public @Nullable NautilusArmor getArmor() {
 		return armorProperty.getValue();
 	}
 
-	public void setArmor(@Nullable HorseArmor armor) {
+	public void setArmor(@Nullable NautilusArmor armor) {
 		armorProperty.setValue(armor);
 	}
 
 	public void cycleArmor(boolean backwards) {
 		this.setArmor(
 				EnumUtils.cycleEnumConstantNullable(
-						HorseArmor.class,
+						NautilusArmor.class,
 						this.getArmor(),
 						backwards,
 						horseArmor -> horseArmor == null || horseArmor.isEnabled()
@@ -281,7 +243,7 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 	}
 
 	private void applyArmor() {
-		Horse entity = this.getEntity();
+		LivingEntity entity = this.getEntity();
 		if (entity == null) return; // Not spawned
 
 		// The armor uses the body equipment slot. If a non-empty equipment item is set, e.g. via
@@ -294,20 +256,22 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 			}
 		}
 
-		HorseArmor armor = this.getArmor();
+		NautilusArmor armor = this.getArmor();
 		var armorItem = (armor == null || !armor.isEnabled()) ? null
 				: new ItemStack(Unsafe.assertNonNull(armor.getMaterial()));
-		entity.getInventory().setArmor(armorItem);
+		var equipment = entity.getEquipment();
+		assert equipment != null;
+		equipment.setItem(EquipmentSlot.BODY, armorItem);
 	}
 
 	private ItemStack getArmorEditorItem() {
-		HorseArmor armor = this.getArmor();
+		NautilusArmor armor = this.getArmor();
 		var iconType = armor == null || !armor.isEnabled() ? Material.BARRIER
 				: Unsafe.assertNonNull(armor.getMaterial());
 		ItemStack iconItem = new ItemStack(iconType);
 		ItemUtils.setDisplayNameAndLore(iconItem,
-				Messages.buttonHorseArmor,
-				Messages.buttonHorseArmorLore
+				Messages.buttonNautilusArmor,
+				Messages.buttonNautilusArmorLore
 		);
 		return iconItem;
 	}

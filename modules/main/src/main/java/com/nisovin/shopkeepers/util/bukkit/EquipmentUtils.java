@@ -135,11 +135,14 @@ public class EquipmentUtils {
 		case "MULE":
 		case "DONKEY":
 		case "CAMEL":
+		case "CAMEL_HUSK":
 			// MC 1.21.5: Saddle is now an equipment slot.
 			return EQUIPMENT_SLOTS_SADDLE;
 		// MC 1.21.5: Saddle is now an equipment slot.
-		// Body: Horse armor (EquipmentSlot added in Bukkit 1.20.5)
+		// Body: Horse armor, Nautilus armor (EquipmentSlot added in Bukkit 1.20.5)
 		case "HORSE":
+		case "NAUTILUS":
+		case "ZOMBIE_NAUTILUS":
 			return EQUIPMENT_SLOTS_BODY_AND_SADDLE;
 		case "PLAYER":
 		case "ARMOR_STAND":
@@ -152,6 +155,7 @@ public class EquipmentUtils {
 		case "SKELETON":
 		case "WITHER_SKELETON":
 		case "STRAY":
+		case "PARCHED":
 		case "BOGGED":
 		case "PIGLIN":
 		case "PIGLIN_BRUTE":
@@ -207,20 +211,23 @@ public class EquipmentUtils {
 	 * @return <code>true</code> if the entity type supports a saddle
 	 */
 	public static boolean supportsSaddle(EntityType entityType) {
-		switch (entityType) {
-		case PIG:
-		case STRIDER:
+		switch (entityType.name()) {
+		case "PIG":
+		case "STRIDER":
+		case "NAUTILUS":
+		case "ZOMBIE_NAUTILUS":
 			// AbstractHorse:
-		case HORSE:
-		case SKELETON_HORSE:
-		case ZOMBIE_HORSE:
-		case MULE:
-		case DONKEY:
-		case CAMEL:
+		case "HORSE":
+		case "SKELETON_HORSE":
+		case "ZOMBIE_HORSE":
+		case "MULE":
+		case "DONKEY":
+		case "CAMEL":
+		case "CAMEL_HUSK":
 			return true;
 		// Llama extends AbstractHorse, but the saddle is not displayed:
-		case LLAMA:
-		case TRADER_LLAMA:
+		case "LLAMA":
+		case "TRADER_LLAMA":
 		default:
 			return false;
 		}

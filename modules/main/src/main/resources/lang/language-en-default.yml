@@ -280,6 +280,14 @@ button-mannequin-profile: "&aChange skin"
 button-mannequin-profile-lore:
 - "Changes the skin"
 - "of the mannequin"
+button-nautilus-armor: "&aChoose armor"
+button-nautilus-armor-lore:
+- "Changes the armor"
+- "of the nautilus"
+button-zombie-nautilus-variant: "&aChoose variant"
+button-zombie-nautilus-variant-lore:
+- "Changes the look of"
+- "the zombie nautilus."
 
 mannequin-enter-profile: |-
   &aPlease enter in chat the name or id of the player whose profile you want to apply to the mannequin.

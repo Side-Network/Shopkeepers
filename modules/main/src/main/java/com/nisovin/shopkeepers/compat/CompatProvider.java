@@ -231,4 +231,15 @@ public interface CompatProvider {
 	public default void setMannequinProfile(LivingEntity mannequin, @Nullable PlayerProfile profile) {
 		// Not supported by default.
 	}
+
+	// MC 1.21.11+ TODO Can maybe be removed once we only support Bukkit 1.21.11+
+
+	public default void setZombieNautilusVariant(LivingEntity zombieNautilus, NamespacedKey variant) {
+		// Not supported by default.
+	}
+
+	public default NamespacedKey cycleZombieNautilusVariant(NamespacedKey variant, boolean backwards) {
+		// Not supported by default.
+		return variant;
+	}
 }

@@ -2,8 +2,15 @@
 Date format: (YYYY-MM-DD)  
 
 ## v2.25.0 (TBA)
-### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
+### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
 
+* Update for Minecraft 1.21.11.
+  * Add support for new mob types:
+    * Camel husk: Similar editor options as camel.
+    * Nautilus: Supports baby variant, saddle and armor.
+    * Zombie nautilus: Supports saddle, coral variant and armor.
+    * Parched: Similar editor options as other skeleton types.
+  * Horse shopkeepers: Add support for netherite horse armor.
 * Drop support for Minecraft versions below 1.21.5. This has the following benefits:
   * Modernize the plugin by building against a more modern Bukkit version.
   * Reduce the plugin size by bundling fewer compatibility modules.
@@ -35,6 +42,10 @@ Date format: (YYYY-MM-DD)
 * Build: Use Mojang mappings for the Paper modules: Earlier supported after Minecraft updates and avoids redundant remapping at runtime.
 
 **Message changes:**  
+* Added `button-nautilus-armor`.
+* Added `button-nautilus-armor-lore`.
+* Added `button-zombie-nautilus-variant`.
+* Added `button-zombie-nautilus-variant-lore`.
 * Added `history-header`.
 * Added `history-header-all-players`.
 * Added `history-header-specific-player`.

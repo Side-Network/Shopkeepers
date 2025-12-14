@@ -231,6 +231,7 @@ enabled-living-shops:
 - BOGGED
 - BREEZE
 - CAMEL
+- CAMEL_HUSK
 - CAT
 - CAVE_SPIDER
 - CHICKEN
@@ -261,8 +262,10 @@ enabled-living-shops:
 - MANNEQUIN
 - MOOSHROOM
 - MULE
+- NAUTILUS
 - OCELOT
 - PANDA
+- PARCHED
 - PARROT
 - PHANTOM
 - PIG
@@ -300,6 +303,7 @@ enabled-living-shops:
 - ZOGLIN
 - ZOMBIE
 - ZOMBIE_HORSE
+- ZOMBIE_NAUTILUS
 - ZOMBIE_VILLAGER
 - ZOMBIFIED_PIGLIN
 

@@ -12,7 +12,9 @@ def nmsModules = [
 	':shopkeepers-v1_21_R7',
 	':shopkeepers-v1_21_R7_paper',
 	':shopkeepers-v1_21_R8',
-	':shopkeepers-v1_21_R8_paper'
+	':shopkeepers-v1_21_R8_paper',
+	':shopkeepers-v1_21_R9',
+	':shopkeepers-v1_21_R9_paper'
 ]
 
 configurations {

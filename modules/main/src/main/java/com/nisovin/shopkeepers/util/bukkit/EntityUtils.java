@@ -73,6 +73,8 @@ public final class EntityUtils {
 	 */
 	public static boolean burnsInSunlight(EntityType entityType) {
 		// Husks (a zombie sub-type) is not affected by sunburn.
+		// Note: Camel husk is also not affected by sunburn, but it does not derive from Zombie, so
+		// no special case is needed for it here.
 		if (entityType == EntityType.HUSK) return false;
 		if (entityType == EntityType.PHANTOM) return true;
 
@@ -99,6 +101,8 @@ public final class EntityUtils {
 	 */
 	public static boolean isRemovedOnPeacefulDifficulty(EntityType entityType) {
 		assert entityType != null;
+		// Note: Some mobs, like camel husk and zombie nautilus (not sub-types of Monster) do not
+		// spawn naturally in peaceful mode, but do not despawn automatically either.
 		switch (entityType) {
 		case EntityType.PIGLIN:
 			return false;

@@ -182,6 +182,14 @@ public class TestItemStacks {
 				PersistentDataType.TAG_CONTAINER,
 				customContainer
 		);
+		// TODO MC 1.21.11:
+		// - damage type / damage type key
+		// - Use effects
+		// - Swing animation
+		// - Attack range
+		// - Piercing weapon
+		// - Kinetic weapon
+		// - Minimum attack charge
 		itemStack.setItemMeta(itemMeta);
 		return itemStack;
 	}

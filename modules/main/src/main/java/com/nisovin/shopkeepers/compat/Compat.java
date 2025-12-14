@@ -47,6 +47,8 @@ public final class Compat {
 	// Minecraft version instead.
 	static {
 		// Registered in the order from latest to oldest.
+		register(new CompatVersion("1_21_R9_paper", "1.21.11", "1.21.11"));
+		register(new CompatVersion("1_21_R9", "1.21.11", "e3cd927e07e6ff434793a0474c51b2b9"));
 		// 1.21.9: Not supported. Superseded by 1.21.10.
 		register(new CompatVersion("1_21_R8_paper", "1.21.10", "1.21.10"));
 		register(new CompatVersion("1_21_R8", "1.21.10", "614efe5192cd0510bc2ddc5feefa155d"));
