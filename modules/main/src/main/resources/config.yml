@@ -7,7 +7,7 @@
 # Determines the required config migrations. Do not edit manually!
 config-version: 9
 # Determines the required config item data migrations. Do not edit manually!
-data-version: 3839
+data-version: 4325
 # The initial debugging state of the plugin.
 debug: false
 # Additional debugging options.

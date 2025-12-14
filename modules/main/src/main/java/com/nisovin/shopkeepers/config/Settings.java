@@ -60,8 +60,8 @@ public class Settings extends Config {
 	 * General Settings
 	 */
 	public static int configVersion = 9;
-	// Initial value: Lowest supported Minecraft data version: MC 1.20.6
-	public static int dataVersion = 3839;
+	// Initial value: Lowest supported Minecraft data version: MC 1.21.5
+	public static int dataVersion = 4325;
 	public static boolean debug = false;
 	// See DebugOptions for all available options.
 	public static List<String> debugOptions = new ArrayList<>(0);
