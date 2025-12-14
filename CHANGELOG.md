@@ -39,6 +39,7 @@ Date format: (YYYY-MM-DD)
 * Debug: In debug mode, log the exception details when the loading of some config setting fails. Note that since the debug flag is itself loaded from the config, this might only have an effect during subsequent config reloads.
 * Build: Fix clean build: Spigot 1.21.7 was replaced by 1.21.8 and can no longer be built. However, the server should be identical to 1.21.7, so we can just reference 1.21.8 instead.
 * Build: Update Gradle 8.14 -> 9.2.1.
+* Build: Update SonarQube.
 * Build: Use Mojang mappings for the Paper modules: Earlier supported after Minecraft updates and avoids redundant remapping at runtime.
 
 **Message changes:**  
