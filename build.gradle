@@ -141,17 +141,22 @@ subprojects {
 
 		// Bukkit, Spigot-API
 		maven { url = 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+		// Paper
+		maven { url = 'https://repo.papermc.io/repository/maven-public/' }
 	}
 
 	// Shared plugin / task configurations:
 	project.plugins.withId('java-library') {
 		configurations {
 			ecj
+			paperCompileOnly
 		}
 
 		dependencies {
 			// ECJ compiler for null analysis
 			ecj 'org.eclipse.jdt:ecj:3.38.0'
+
+			paperCompileOnly libs.paper.api
 		}
 
 		java {
@@ -165,8 +170,7 @@ subprojects {
 		task ecjAnalysis(type: JavaCompile) {
 			source = sourceSets.main.java
 			classpath = sourceSets.main.compileClasspath
-			destinationDirectory = file(sourceSets.main.java.destinationDirectory.asFile.get().absolutePath.replace("classes", "classes-ecj"))
-			//println(destinationDirectory.get())
+			destinationDirectory = layout.buildDirectory.dir("classes-ecj")
 
 			// The Java version required to run ECJ:
 			def ECJ_REQUIRED_JAVA_VERSION = 11
@@ -208,6 +212,20 @@ subprojects {
 				def javaExecutablePath = javacExecutable.parentFile.toPath().resolve(javaExecutableName).toAbsolutePath()
 				options.forkOptions.executable = javaExecutablePath
 			}
+		}
+
+		// Check that we can build against Paper's version of the Bukkit API (i.e. verify that we
+		// don't use any Bukkit API that is not available on Paper):
+		// TODO This only check compatibility against the lowest supported API version. Also compile
+		// the shared API and main modules against all other supported API versions of Spigot and
+		// Paper?
+		task compileWithPaper(type: JavaCompile) {
+			source = sourceSets.main.java
+			classpath = configurations.paperCompileOnly + sourceSets.main.compileClasspath
+			destinationDirectory = layout.buildDirectory.dir("classes-paperCheck")
+
+			// Always re-run this task regardless of existing build output:
+			outputs.upToDateWhen { false }
 		}
 
 		// Configure all JavaCompile tasks (compileJava, compileTestJava, etc):

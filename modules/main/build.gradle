@@ -80,6 +80,11 @@ javadoc {
 }
 */
 
+check {
+	// Test compilation against Paper API:
+	dependsOn compileWithPaper
+}
+
 shadowJar {
 	configureJarTaskWithMavenMetadata(project, it)
 	// No classifier: Replaces the normal classifier-less jar file (if there is one).
