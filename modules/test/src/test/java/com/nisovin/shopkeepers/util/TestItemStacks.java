@@ -6,11 +6,14 @@ import java.util.List;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.block.data.type.Campfire;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemRarity;
@@ -21,16 +24,22 @@ import org.bukkit.inventory.meta.BookMeta.Generation;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.Repairable;
 import org.bukkit.inventory.meta.WritableBookMeta;
 import org.bukkit.inventory.meta.components.FoodComponent;
 import org.bukkit.inventory.meta.components.ToolComponent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
+import org.bukkit.tag.DamageTypeTags;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.util.bukkit.NamespacedKeyUtils;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 
 /**
@@ -52,14 +61,15 @@ public class TestItemStacks {
 				createItemStackComplete(),
 				// TODO Broken in MC 1.20.5+, until late MC 1.21. See SPIGOT-7857
 				// Tested again, still broken. See SPIGOT-8049
-				//createItemStackBlockData(),
+				// createItemStackBlockData(),
 				createItemStackUncommonMeta(),
 				createItemStackWritableBook(),
 				createItemStackWrittenBook(),
 				// TODO Broken in MC 1.20.5+, until late MC 1.21. See SPIGOT-7857
 				// Tested again, still broken. See SPIGOT-8049
-				//createItemStackTileEntityDisplayName(),
-				createItemStackBasicTileEntity()
+				// createItemStackTileEntityDisplayName(),
+				createItemStackBasicTileEntity(),
+				createItemStackPotion()
 		);
 	}
 
@@ -110,7 +120,7 @@ public class TestItemStacks {
 		customModelData.setFloats(Unsafe.castNonNull(customModelDataFloats));
 		itemMeta.setCustomModelDataComponent(customModelData);
 
-		//itemMeta.setFireResistant(true); // TODO Replaced with damage resistance in MC 1.21.2/3
+		itemMeta.setDamageResistant(DamageTypeTags.IS_EXPLOSION);
 		itemMeta.setUnbreakable(true);
 		((Damageable) itemMeta).setDamage(2);
 		((Damageable) itemMeta).setMaxDamage(10);
@@ -155,16 +165,43 @@ public class TestItemStacks {
 		food.setNutrition(2);
 		food.setSaturation(2.5f);
 		food.setCanAlwaysEat(true);
-		// TODO Removed in MC 1.21.2/3
-		// food.setEatSeconds(5.5f);
-		// food.addEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5, 1), 0.5f);
 		itemMeta.setFood(food);
-		// TODO MC 1.21.2/3:
-		// - EquippableComponent
-		// - UseCooldownComponent
-		// - enchantable, tooltip style, item model, is glider, damage resistance /replaces fire
-		// resistance), use remainder, equippable
-		// - PotionMeta: custom name
+
+		// TODO Not available on Paper
+		/*var consumable = itemMeta.getConsumable();
+		consumable.setAnimation(Animation.EAT);
+		consumable.setConsumeParticles(true);
+		consumable.setConsumeSeconds(5.5f);
+		consumable.setSound(Sound.ENTITY_PLAYER_BURP);
+		// TODO Not sure how to create consumable effects via the API.
+		itemMeta.setConsumable(consumable);*/
+
+		var equippable = itemMeta.getEquippable();
+		equippable.setSlot(EquipmentSlot.HEAD);
+		equippable.setEquipSound(Sound.ITEM_ARMOR_EQUIP_GENERIC);
+		equippable.setModel(RegistryUtils.getKeyOrThrow(Material.DIAMOND_HELMET));
+		equippable.setCameraOverlay(RegistryUtils.getKeyOrThrow(Material.CARVED_PUMPKIN));
+		equippable.setAllowedEntities(EntityType.PLAYER);
+		equippable.setDispensable(true);
+		equippable.setSwappable(true);
+		equippable.setDamageOnHurt(true);
+		equippable.setEquipOnInteract(true);
+		// TODO Added in 1.21.6
+		// equippable.setCanBeSheared(true);
+		// equippable.setShearingSound(Sound.ENTITY_SHEEP_SHEAR);
+		itemMeta.setEquippable(equippable);
+
+		var useCooldown = itemMeta.getUseCooldown();
+		useCooldown.setCooldownSeconds(1.5f);
+		useCooldown.setCooldownGroup(NamespacedKeyUtils.create("plugin", "cooldown"));
+		itemMeta.setUseCooldown(useCooldown);
+
+		itemMeta.setUseRemainder(new ItemStack(Material.BONE));
+
+		itemMeta.setEnchantable(15);
+		itemMeta.setTooltipStyle(NamespacedKeyUtils.create("plugin", "tooltip-style"));
+		itemMeta.setItemModel(NamespacedKeyUtils.create("plugin", "item-model"));
+		itemMeta.setGlider(true);
 
 		// Note: This data ends up getting stored in an arbitrary order internally.
 		PersistentDataContainer customTags = itemMeta.getPersistentDataContainer();
@@ -247,6 +284,19 @@ public class TestItemStacks {
 	public static ItemStack createItemStackTileEntityDisplayName() {
 		ItemStack itemStack = new ItemStack(Material.CHEST);
 		ItemUtils.setDisplayNameAndLore(itemStack, "{\"text\":\"Custom Name\",\"color\":\"red\"}", null);
+		return itemStack;
+	}
+
+	public static ItemStack createItemStackPotion() {
+		ItemStack itemStack = new ItemStack(Material.POTION);
+		PotionMeta potionMeta = Unsafe.castNonNull(itemStack.getItemMeta());
+		potionMeta.setBasePotionType(PotionType.HEALING);
+		potionMeta.addCustomEffect(new PotionEffect(PotionEffectType.BLINDNESS, 2, 1, true, true, true), true);
+		potionMeta.setColor(Color.RED);
+		potionMeta.setCustomName("MyPotion");
+		// TODO SPIGOT-8103: Additional "unhandled" data, breaks the item comparison.
+		// potionMeta.setDurationScale(1.5f);
+		itemStack.setItemMeta(potionMeta);
 		return itemStack;
 	}
 

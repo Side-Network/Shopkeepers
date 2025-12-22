@@ -4,6 +4,7 @@ Date format: (YYYY-MM-DD)
 ## v2.25.1 (TBA)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
 
+* Server assumption tests: Extend the tested item data.
 * Internal: Update code to make use of the new 1.21.5 Bukkit base version.
 * Build: Add additional compilation step targeting the Paper API to verify that only Paper-compatible parts of the Bukkit API are used in the plugin's API and main modules.
 

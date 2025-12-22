@@ -120,9 +120,6 @@ public class ItemDataTest extends AbstractItemStackSerializationTest<@Nullable S
 				"item:" + yamlNewline()
 						+ "  id: minecraft:diamond_sword" + yamlNewline()
 						+ "  components:" + yamlNewline()
-						+ "    minecraft:custom_model_data: '{floats:[1.0f]}'" + yamlNewline()
-						+ "    minecraft:lore: '[{color:\"green\",text:\"lore1\"},\"lore2\"]'" + yamlNewline()
-						+ "    minecraft:max_stack_size: '65'" + yamlNewline()
 						+ "    minecraft:attribute_modifiers: '["
 						+ "{amount:2.0d,id:\"some_plugin:attack-speed-bonus\",operation:\"add_value\",slot:\"hand\",type:\"minecraft:attack_speed\"},"
 						+ "{amount:0.5d,id:\"some_plugin:attack-speed-bonus-2\",operation:\"add_multiplied_total\",slot:\"offhand\",type:\"minecraft:attack_speed\"},"
@@ -131,15 +128,29 @@ public class ItemDataTest extends AbstractItemStackSerializationTest<@Nullable S
 						+ "    minecraft:tool: '{damage_per_block:2,default_mining_speed:1.5f,rules:[{blocks:\"minecraft:stone\",correct_for_drops:1b,speed:0.5f}]}'" + yamlNewline()
 						+ "    minecraft:damage: '2'" + yamlNewline()
 						+ "    minecraft:tooltip_display: '{hidden_components:[\"minecraft:enchantments\"],hide_tooltip:1b}'" + yamlNewline()
+						+ "    minecraft:glider: '{}'" + yamlNewline()
 						+ "    minecraft:enchantment_glint_override: 1b" + yamlNewline()
+						+ "    minecraft:damage_resistant: '{types:\"#minecraft:is_explosion\"}'" + yamlNewline()
 						+ "    minecraft:repair_cost: '3'" + yamlNewline()
-						+ "    minecraft:item_name: '{color:\"red\",text:\"Custom item name\"}'" + yamlNewline()
-						+ "    minecraft:food: '{can_always_eat:1b,nutrition:2,saturation:2.5f}'" + yamlNewline()
+						+ "    minecraft:use_cooldown: '{cooldown_group:\"plugin:cooldown\",seconds:1.5f}'" + yamlNewline()
+						+ "    minecraft:item_model: '\"plugin:item-model\"'" + yamlNewline()
 						+ "    minecraft:unbreakable: '{}'" + yamlNewline()
 						+ "    minecraft:custom_name: '{color:\"red\",text:\"Custom Name\"}'" + yamlNewline()
 						+ "    minecraft:rarity: '\"epic\"'" + yamlNewline()
-						+ "    minecraft:custom_data: '{PublicBukkitValues:{\"some_plugin:some-key\":\"some value\",\"some_plugin:some-other-key\":{\"inner_plugin:inner-key\":0.3f}}}'" + yamlNewline()
 						+ "    minecraft:max_damage: '10'" + yamlNewline()
+						+ "    minecraft:custom_model_data: '{floats:[1.0f]}'" + yamlNewline()
+						+ "    minecraft:enchantable: '{value:15}'" + yamlNewline()
+						+ "    minecraft:equippable: '{allowed_entities:\"minecraft:player\","
+						+ "asset_id:\"minecraft:diamond_helmet\","
+						+ "camera_overlay:\"minecraft:carved_pumpkin\",equip_on_interact:1b,"
+						+ "slot:\"head\"}'" + yamlNewline()
+						+ "    minecraft:lore: '[{color:\"green\",text:\"lore1\"},\"lore2\"]'" + yamlNewline()
+						+ "    minecraft:max_stack_size: '65'" + yamlNewline()
+						+ "    minecraft:use_remainder: '{count:1,id:\"minecraft:bone\"}'" + yamlNewline()
+						+ "    minecraft:item_name: '{color:\"red\",text:\"Custom item name\"}'" + yamlNewline()
+						+ "    minecraft:food: '{can_always_eat:1b,nutrition:2,saturation:2.5f}'" + yamlNewline()
+						+ "    minecraft:custom_data: '{PublicBukkitValues:{\"some_plugin:some-key\":\"some value\",\"some_plugin:some-other-key\":{\"inner_plugin:inner-key\":0.3f}}}'" + yamlNewline()
+						+ "    minecraft:tooltip_style: '\"plugin:tooltip-style\"'" + yamlNewline()
 		);
 	}
 
