@@ -10,8 +10,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
-import com.nisovin.shopkeepers.compat.MC_1_21_3;
-import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
@@ -25,20 +23,19 @@ import com.nisovin.shopkeepers.util.data.property.BasicProperty;
 import com.nisovin.shopkeepers.util.data.property.Property;
 import com.nisovin.shopkeepers.util.data.property.value.PropertyValue;
 import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
-import com.nisovin.shopkeepers.util.data.serialization.java.StringSerializers;
+import com.nisovin.shopkeepers.util.data.serialization.java.EnumSerializers;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
-import com.nisovin.shopkeepers.util.java.CollectionUtils;
+import com.nisovin.shopkeepers.util.java.EnumUtils;
 
 public class SalmonShop extends SKLivingShopObject<Salmon> {
 
-	// TODO Replace with the actual type once we only support MC 1.21.3+
-	public static final Property<String> VARIANT = new BasicProperty<String>()
-			.dataKeyAccessor("variant", StringSerializers.STRICT_NON_EMPTY)
+	public static final Property<Salmon.Variant> VARIANT = new BasicProperty<Salmon.Variant>()
+			.dataKeyAccessor("variant", EnumSerializers.lenient(Salmon.Variant.class))
 			.useDefaultIfMissing()
-			.defaultValue("MEDIUM")
+			.defaultValue(Salmon.Variant.MEDIUM)
 			.build();
 
-	private final PropertyValue<String> variantProperty = new PropertyValue<>(VARIANT)
+	private final PropertyValue<Salmon.Variant> variantProperty = new PropertyValue<>(VARIANT)
 			.onValueChanged(Unsafe.initialized(this)::applyVariant)
 			.build(properties);
 
@@ -72,31 +69,33 @@ public class SalmonShop extends SKLivingShopObject<Salmon> {
 	@Override
 	public List<Button> createEditorButtons() {
 		List<Button> editorButtons = super.createEditorButtons();
-		if (MC_1_21_3.isAvailable()) {
-			editorButtons.add(this.getVariantEditorButton());
-		}
+		editorButtons.add(this.getVariantEditorButton());
 		return editorButtons;
 	}
 
 	// VARIANT
 
-	public String getVariant() {
+	public Salmon.Variant getVariant() {
 		return variantProperty.getValue();
 	}
 
-	public void setVariant(String variant) {
+	public void setVariant(Salmon.Variant variant) {
 		variantProperty.setValue(variant);
 	}
 
 	public void cycleVariant(boolean backwards) {
-		this.setVariant(CollectionUtils.cycleValue(MC_1_21_3.SALMON_VARIANTS, this.getVariant(), backwards));
+		this.setVariant(EnumUtils.cycleEnumConstant(
+				Salmon.Variant.class,
+				this.getVariant(),
+				backwards
+		));
 	}
 
 	private void applyVariant() {
 		Salmon entity = this.getEntity();
 		if (entity == null) return; // Not spawned
 
-		Compat.getProvider().setSalmonVariant(entity, this.getVariant());
+		entity.setVariant(this.getVariant());
 	}
 
 	private ItemStack getVariantEditorItem() {

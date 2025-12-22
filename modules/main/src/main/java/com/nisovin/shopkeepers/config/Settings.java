@@ -134,14 +134,14 @@ public class Settings extends Config {
 			new ArrayList<>(Arrays.asList(EntityType.VILLAGER.name())),
 			CollectionUtils.sort(Arrays.asList(
 					EntityType.COW.name(),
-					"MOOSHROOM", // MC 1.20.5: Renamed "MUSHROOM_COW" to "MOOSHROOM"
+					EntityType.MOOSHROOM.name(),
 					EntityType.SHEEP.name(),
 					EntityType.PIG.name(),
 					EntityType.CHICKEN.name(),
 					EntityType.OCELOT.name(),
 					EntityType.RABBIT.name(),
 					EntityType.WOLF.name(),
-					"SNOW_GOLEM", // MC 1.20.5: Renamed "SNOWMAN" to "SNOW_GOLEM"
+					EntityType.SNOW_GOLEM.name(),
 					EntityType.IRON_GOLEM.name(),
 					EntityType.BLAZE.name(),
 					EntityType.SILVERFISH.name(),
@@ -197,19 +197,19 @@ public class Settings extends Config {
 					EntityType.ZOGLIN.name(), // MC 1.16
 					EntityType.STRIDER.name(), // MC 1.16
 					EntityType.PIGLIN_BRUTE.name(), // MC 1.16.2
-					"AXOLOTL", // MC 1.17
-					"GOAT", // MC 1.17
-					"GLOW_SQUID", // MC 1.17
-					"ALLAY", // MC 1.19
-					"FROG", // MC 1.19
-					"TADPOLE", // MC 1.19
-					"WARDEN", // MC 1.19
-					"CAMEL", // MC 1.20
-					"SNIFFER", // MC 1.20
-					"ARMADILLO", // MC 1.20.5
-					"BOGGED", // MC 1.21
-					"BREEZE", // MC 1.21
-					"CREAKING", // MC 1.21.4
+					EntityType.AXOLOTL.name(), // MC 1.17
+					EntityType.GOAT.name(), // MC 1.17
+					EntityType.GLOW_SQUID.name(), // MC 1.17
+					EntityType.ALLAY.name(), // MC 1.19
+					EntityType.FROG.name(), // MC 1.19
+					EntityType.TADPOLE.name(), // MC 1.19
+					EntityType.WARDEN.name(), // MC 1.19
+					EntityType.CAMEL.name(), // MC 1.20
+					EntityType.SNIFFER.name(), // MC 1.20
+					EntityType.ARMADILLO.name(), // MC 1.20.5
+					EntityType.BOGGED.name(), // MC 1.21
+					EntityType.BREEZE.name(), // MC 1.21
+					EntityType.CREAKING.name(), // MC 1.21.4
 					"HAPPY_GHAST", // MC 1.21.6
 					"COPPER_GOLEM", // MC 1.21.9
 					"MANNEQUIN", // MC 1.21.9

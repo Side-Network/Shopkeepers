@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.DyeColor;
-import org.bukkit.Registry;
 import org.bukkit.entity.Frog;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -31,7 +30,7 @@ import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 public class FrogShop extends BabyableShop<Frog> {
 
 	public static final Property<Frog.Variant> VARIANT = new BasicProperty<Frog.Variant>()
-			.dataKeyAccessor("frogVariant", KeyedSerializers.forRegistry(Frog.Variant.class, Registry.FROG_VARIANT))
+			.dataKeyAccessor("frogVariant", KeyedSerializers.forRegistry(Frog.Variant.class))
 			.defaultValue(Frog.Variant.TEMPERATE)
 			.build();
 
@@ -84,11 +83,7 @@ public class FrogShop extends BabyableShop<Frog> {
 	}
 
 	public void cycleVariant(boolean backwards) {
-		this.setVariant(RegistryUtils.cycleKeyed(
-				Registry.FROG_VARIANT,
-				this.getVariant(),
-				backwards
-		));
+		this.setVariant(RegistryUtils.cycleKeyed(Frog.Variant.class, this.getVariant(), backwards));
 	}
 
 	private void applyVariant() {

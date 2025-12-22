@@ -5,7 +5,6 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Registry;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -334,7 +333,7 @@ public final class VillagerEditorLayout extends EditorLayout {
 				// the old trades with their original data:
 				List<MerchantRecipe> previousRecipes = villager.getRecipes();
 				profession = RegistryUtils.cycleKeyed(
-						Registry.VILLAGER_PROFESSION,
+						Villager.Profession.class,
 						profession,
 						backwards
 				);
@@ -375,7 +374,7 @@ public final class VillagerEditorLayout extends EditorLayout {
 			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				boolean backwards = clickEvent.isRightClick();
 				villagerType = RegistryUtils.cycleKeyed(
-						Registry.VILLAGER_TYPE,
+						Villager.Type.class,
 						villagerType,
 						backwards
 				);

@@ -5,7 +5,6 @@ import java.util.List;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.Registry;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -46,7 +45,7 @@ public class WolfShop extends SittableShop<Wolf> {
 			.build();
 
 	public static final Property<Wolf.Variant> VARIANT = new BasicProperty<Wolf.Variant>()
-			.dataKeyAccessor("wolfVariant", KeyedSerializers.forRegistry(Wolf.Variant.class, Registry.WOLF_VARIANT))
+			.dataKeyAccessor("wolfVariant", KeyedSerializers.forRegistry(Wolf.Variant.class))
 			.defaultValue(Wolf.Variant.PALE)
 			.build();
 
@@ -236,11 +235,7 @@ public class WolfShop extends SittableShop<Wolf> {
 	}
 
 	public void cycleVariant(boolean backwards) {
-		this.setVariant(RegistryUtils.cycleKeyed(
-				Registry.WOLF_VARIANT,
-				this.getVariant(),
-				backwards
-		));
+		this.setVariant(RegistryUtils.cycleKeyed(Wolf.Variant.class, this.getVariant(), backwards));
 	}
 
 	private void applyVariant() {

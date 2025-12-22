@@ -3,10 +3,10 @@ package com.nisovin.shopkeepers.config.migration;
 import java.util.Locale;
 
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.bukkit.SoundEffect;
 import com.nisovin.shopkeepers.util.data.container.DataContainer;
@@ -79,7 +79,7 @@ public class ConfigMigration9 implements ConfigMigration {
 	private @Nullable Sound getSoundByEnumName(String name) {
 		var key = NamespacedKey.fromString(name.toLowerCase(Locale.ROOT));
 		if (key != null) {
-			var sound = Registry.SOUNDS.get(key);
+			var sound = Compat.getProvider().getRegistry(Sound.class).get(key);
 			if (sound != null) {
 				return sound;
 			}

@@ -4,6 +4,7 @@ Date format: (YYYY-MM-DD)
 ## v2.25.1 (TBA)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
 
+* Internal: Update code to make use of the new 1.21.5 Bukkit base version.
 
 ## v2.25.0 (2025-12-14)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5

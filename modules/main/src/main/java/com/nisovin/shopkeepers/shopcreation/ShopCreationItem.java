@@ -24,7 +24,8 @@ public final class ShopCreationItem {
 	/**
 	 * The item persistent data {@link NamespacedKey} by which we identify the shop creation item.
 	 */
-	private static final NamespacedKey KEY_SHOP_CREATION_ITEM = NamespacedKeyUtils.create("shopkeepers", "shop_creation_item");
+	private static final NamespacedKey KEY_SHOP_CREATION_ITEM
+			= NamespacedKeyUtils.create("shopkeepers", "shop_creation_item");
 
 	public static ItemStack create() {
 		return create(1);
@@ -52,8 +53,7 @@ public final class ShopCreationItem {
 
 		ItemMeta meta = Unsafe.assertNonNull(itemStack.getItemMeta());
 		PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
-		// TODO Use has(NamespacedKey) without the data type validation once we depend on 1.20.4+?
-		return dataContainer.has(KEY_SHOP_CREATION_ITEM, PersistentDataType.BOOLEAN);
+		return dataContainer.has(KEY_SHOP_CREATION_ITEM);
 	}
 
 	// Returns true if the tag was freshly added.
@@ -63,8 +63,7 @@ public final class ShopCreationItem {
 
 		ItemMeta meta = Unsafe.assertNonNull(itemStack.getItemMeta());
 		PersistentDataContainer dataContainer = meta.getPersistentDataContainer();
-		// TODO Use has(NamespacedKey) without the data type validation once we depend on 1.20.4+?
-		if (dataContainer.has(KEY_SHOP_CREATION_ITEM, PersistentDataType.BOOLEAN)) {
+		if (dataContainer.has(KEY_SHOP_CREATION_ITEM)) {
 			return false;
 		}
 

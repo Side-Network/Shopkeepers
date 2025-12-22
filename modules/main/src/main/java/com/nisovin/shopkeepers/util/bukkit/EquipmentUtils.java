@@ -38,10 +38,10 @@ public class EquipmentUtils {
 		return Mob.class.isAssignableFrom(entityClass);
 	}
 
-	// TODO Added in Bukkit 1.20.5
+	// Added in Bukkit 1.20.5
 	public static final Optional<EquipmentSlot> EQUIPMENT_SLOT_BODY;
 
-	// TODO Added in Bukkit 1.21.5
+	// Added in Bukkit 1.21.5
 	public static final Optional<EquipmentSlot> EQUIPMENT_SLOT_SADDLE;
 
 	// Common supported equipment slot combinations:

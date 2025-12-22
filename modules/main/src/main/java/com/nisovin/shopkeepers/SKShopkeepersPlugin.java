@@ -26,8 +26,6 @@ import com.nisovin.shopkeepers.api.shopkeeper.ShopType;
 import com.nisovin.shopkeepers.commands.Commands;
 import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.compat.MC_1_21_11;
-import com.nisovin.shopkeepers.compat.MC_1_21_3;
-import com.nisovin.shopkeepers.compat.MC_1_21_4;
 import com.nisovin.shopkeepers.compat.MC_1_21_9;
 import com.nisovin.shopkeepers.compat.ServerAssumptionsTest;
 import com.nisovin.shopkeepers.config.Settings;
@@ -321,8 +319,6 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 
 		// Check for and initialize version dependent utilities:
 		// Example: MC_1_20_6.init();
-		MC_1_21_3.init();
-		MC_1_21_4.init();
 		MC_1_21_9.init();
 		MC_1_21_11.init();
 

@@ -1,12 +1,12 @@
 package com.nisovin.shopkeepers.compat.v1_21_R8;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ExplosionResult;
+import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
 import org.bukkit.Registry;
 import org.bukkit.craftbukkit.v1_21_R6.CraftRegistry;
 import org.bukkit.craftbukkit.v1_21_R6.entity.CraftAbstractVillager;
@@ -19,26 +19,24 @@ import org.bukkit.craftbukkit.v1_21_R6.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_21_R6.inventory.CraftMerchant;
 import org.bukkit.craftbukkit.v1_21_R6.util.CraftMagicNumbers;
 import org.bukkit.entity.AbstractVillager;
-import org.bukkit.entity.Chicken;
 import org.bukkit.entity.CopperGolem;
-import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Golem;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Mob;
-import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
-import org.bukkit.entity.Salmon;
 import org.bukkit.entity.Villager;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MainHand;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantInventory;
+import org.bukkit.inventory.view.builder.InventoryViewBuilder;
+import org.bukkit.potion.PotionType;
 import org.bukkit.profile.PlayerProfile;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -48,7 +46,7 @@ import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.compat.CompatProvider;
 import com.nisovin.shopkeepers.shopobjects.living.LivingEntityAI;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
-import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
+import com.nisovin.shopkeepers.util.bukkit.ServerUtils;
 import com.nisovin.shopkeepers.util.data.container.DataContainer;
 import com.nisovin.shopkeepers.util.inventory.ItemStackComponentsData;
 import com.nisovin.shopkeepers.util.inventory.ItemStackMetaTag;
@@ -77,17 +75,10 @@ public final class CompatProviderImpl implements CompatProvider {
 	private final TagParser<Tag> tagParser = Unsafe.castNonNull(TagParser.create(NbtOps.INSTANCE));
 
 	private final Field craftItemStackHandleField;
-	private final Method cowSetVariantMethod;
 
 	public CompatProviderImpl() throws Exception {
 		craftItemStackHandleField = CraftItemStack.class.getDeclaredField("handle");
 		craftItemStackHandleField.setAccessible(true);
-
-		// TODO Spigot 1.21.5 remaps "Cow" to "AbstractCow" unless api-version <= "1.21.5". So we
-		// use reflection here to support the new cow variants anyway while still supporting older
-		// api versions.
-		var cowClass = Class.forName("org.bukkit.entity.Cow");
-		cowSetVariantMethod = cowClass.getMethod("setVariant", Cow.Variant.class);
 	}
 
 	@Override
@@ -230,6 +221,11 @@ public final class CompatProviderImpl implements CompatProvider {
 	}
 
 	@Override
+	public void setInventoryViewTitle(InventoryViewBuilder<?> builder, String title) {
+		builder.title(title);
+	}
+
+	@Override
 	public void updateTrades(Player player) {
 		Inventory openInventory = player.getOpenInventory().getTopInventory();
 		if (!(openInventory instanceof MerchantInventory)) {
@@ -279,19 +275,6 @@ public final class CompatProviderImpl implements CompatProvider {
 				regularVillager,
 				canRestock
 		);
-	}
-
-	@Override
-	public @Nullable String getItemSNBT(@ReadOnly ItemStack itemStack) {
-		Validate.notNull(itemStack, "itemStack is null");
-		assert itemStack != null;
-		if (ItemUtils.isEmpty(itemStack)) {
-			return null;
-		}
-
-		var nmsItem = this.asNMSItemStack(itemStack);
-		var itemTag = this.getItemStackTag(nmsItem);
-		return itemTag.toString();
 	}
 
 	@Override
@@ -374,7 +357,7 @@ public final class CompatProviderImpl implements CompatProvider {
 			itemTag.put("components", componentsTag);
 		}
 
-		var currentDataVersion = Bukkit.getUnsafe().getDataVersion();
+		var currentDataVersion = ServerUtils.getDataVersion();
 		var convertedItemTag = (CompoundTag) DataFixers.getDataFixer().update(
 				References.ITEM_STACK,
 				new Dynamic<>(Unsafe.castNonNull(NbtOps.INSTANCE), itemTag),
@@ -393,106 +376,21 @@ public final class CompatProviderImpl implements CompatProvider {
 		return Unsafe.assertNonNull(CraftItemStack.asCraftMirror(nmsItem));
 	}
 
-	// MC 1.21+ TODO Can be removed once we only support Bukkit 1.21+
-
 	@Override
-	public boolean isDestroyingBlocks(EntityExplodeEvent event) {
-		return isDestroyingBlocks(event.getExplosionResult());
-	}
-
-	@Override
-	public boolean isDestroyingBlocks(BlockExplodeEvent event) {
-		return isDestroyingBlocks(event.getExplosionResult());
-	}
-
-	private static boolean isDestroyingBlocks(ExplosionResult explosionResult) {
-		return explosionResult == ExplosionResult.DESTROY
-				|| explosionResult == ExplosionResult.DESTROY_WITH_DECAY;
-	}
-
-	// MC 1.21.3+ TODO Can be removed once we only support Bukkit 1.21.3+
-
-	@Override
-	public void setSalmonVariant(Salmon salmon, String variant) {
-		Salmon.Variant variantValue = EnumUtils.valueOf(Salmon.Variant.class, variant);
-		if (variantValue == null) {
-			variantValue = Salmon.Variant.MEDIUM; // Default
+	public <T extends Keyed> Registry<T> getRegistry(Class<T> clazz) {
+		// Some API-only registries might not be supported by Bukkit.getRegistry(Class):
+		if (clazz == EntityType.class) {
+			return Unsafe.castNonNull(Registry.ENTITY_TYPE);
+		} else if (clazz == Particle.class) {
+			return Unsafe.castNonNull(Registry.PARTICLE_TYPE);
+		} else if (clazz == PotionType.class) {
+			return Unsafe.castNonNull(Registry.POTION);
+		} else if (clazz == MemoryKey.class) {
+			return Unsafe.castNonNull(Registry.MEMORY_MODULE_TYPE);
+		} else {
+			// Non-null: Expected to only be used with known registry types.
+			return Unsafe.assertNonNull(Bukkit.getRegistry(clazz));
 		}
-		salmon.setVariant(variantValue);
-	}
-
-	// MC 1.21.5+ TODO Can be removed once we only support Bukkit 1.21.5+
-
-	@Override
-	public void setCowVariant(Cow cow, NamespacedKey variant) {
-		Cow.Variant variantValue = Registry.COW_VARIANT.get(variant);
-		if (variantValue == null) {
-			variantValue = Cow.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-
-		try {
-			cowSetVariantMethod.invoke(cow, variantValue);
-		} catch (Exception e) {
-			// Unexpected:
-			Log.severe("Failed to set cow variant!", e);
-		}
-	}
-
-	@Override
-	public NamespacedKey cycleCowVariant(NamespacedKey variant, boolean backwards) {
-		Cow.Variant variantValue = Registry.COW_VARIANT.get(variant);
-		if (variantValue == null) {
-			variantValue = Cow.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-
-		Registry<Cow.Variant> registry = Unsafe.castNonNull(Registry.COW_VARIANT);
-		return RegistryUtils.cycleKeyed(registry, variantValue, backwards).getKeyOrThrow();
-	}
-
-	@Override
-	public void setPigVariant(Pig pig, NamespacedKey variant) {
-		Pig.Variant variantValue = Registry.PIG_VARIANT.get(variant);
-		if (variantValue == null) {
-			variantValue = Pig.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-		pig.setVariant(variantValue);
-	}
-
-	@Override
-	public NamespacedKey cyclePigVariant(NamespacedKey variant, boolean backwards) {
-		Pig.Variant variantValue = Registry.PIG_VARIANT.get(variant);
-		if (variantValue == null) {
-			variantValue = Pig.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-
-		Registry<Pig.Variant> registry = Unsafe.castNonNull(Registry.PIG_VARIANT);
-		return RegistryUtils.cycleKeyed(registry, variantValue, backwards).getKeyOrThrow();
-	}
-
-	@Override
-	public void setChickenVariant(Chicken chicken, NamespacedKey variant) {
-		Chicken.Variant variantValue = Registry.CHICKEN_VARIANT.get(variant);
-		if (variantValue == null) {
-			variantValue = Chicken.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-		chicken.setVariant(variantValue);
-	}
-
-	@Override
-	public NamespacedKey cycleChickenVariant(NamespacedKey variant, boolean backwards) {
-		Chicken.Variant variantValue = Registry.CHICKEN_VARIANT.get(variant);
-		if (variantValue == null) {
-			variantValue = Chicken.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-
-		Registry<Chicken.Variant> registry = Unsafe.castNonNull(Registry.CHICKEN_VARIANT);
-		return RegistryUtils.cycleKeyed(registry, variantValue, backwards).getKeyOrThrow();
 	}
 
 	// MC 1.21.9+ TODO Can be removed once we only support Bukkit 1.21.9+

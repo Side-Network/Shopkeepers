@@ -6,7 +6,6 @@ import java.util.Map;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.Registry;
 import org.bukkit.entity.Cat;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -35,7 +34,7 @@ import com.nisovin.shopkeepers.util.java.EnumUtils;
 public class CatShop extends SittableShop<Cat> {
 
 	public static final Property<Cat.Type> CAT_TYPE = new BasicProperty<Cat.Type>()
-			.dataKeyAccessor("catType", KeyedSerializers.forRegistry(Cat.Type.class, Registry.CAT_VARIANT))
+			.dataKeyAccessor("catType", KeyedSerializers.forRegistry(Cat.Type.class))
 			.defaultValue(Cat.Type.TABBY)
 			.build();
 
@@ -101,11 +100,7 @@ public class CatShop extends SittableShop<Cat> {
 	}
 
 	public void cycleCatType(boolean backwards) {
-		this.setCatType(RegistryUtils.cycleKeyed(
-				Registry.CAT_VARIANT,
-				this.getCatType(),
-				backwards
-		));
+		this.setCatType(RegistryUtils.cycleKeyed(Cat.Type.class, this.getCatType(), backwards));
 	}
 
 	private void applyCatType() {

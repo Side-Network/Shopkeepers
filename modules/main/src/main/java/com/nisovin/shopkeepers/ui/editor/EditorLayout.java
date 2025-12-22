@@ -259,9 +259,9 @@ public abstract class EditorLayout {
 				"max_page", getMaxTradesPages()
 		);
 		ItemStack item = Settings.previousPageItem.createItemStack();
-		ItemUtils.setItemMeta(item, itemName, Messages.buttonPreviousPageLore, ItemUtils.MAX_STACK_SIZE);
+		ItemUtils.setItemMeta(item, itemName, Messages.buttonPreviousPageLore, ItemUtils.MAX_STACK_SIZE_64);
 		// Note: Can exceed the item's natural max stack size.
-		item.setAmount(MathUtils.clamp(prevPage, 1, ItemUtils.MAX_STACK_SIZE));
+		item.setAmount(MathUtils.clamp(prevPage, 1, ItemUtils.MAX_STACK_SIZE_64));
 		return item;
 	}
 
@@ -278,9 +278,9 @@ public abstract class EditorLayout {
 				"max_page", getMaxTradesPages()
 		);
 		ItemStack item = Settings.nextPageItem.createItemStack();
-		ItemUtils.setItemMeta(item, itemName, Messages.buttonNextPageLore, ItemUtils.MAX_STACK_SIZE);
+		ItemUtils.setItemMeta(item, itemName, Messages.buttonNextPageLore, ItemUtils.MAX_STACK_SIZE_64);
 		// Note: Can exceed the item's natural max stack size.
-		item.setAmount(MathUtils.clamp(nextPage, 1, ItemUtils.MAX_STACK_SIZE));
+		item.setAmount(MathUtils.clamp(nextPage, 1, ItemUtils.MAX_STACK_SIZE_64));
 		return item;
 	}
 
@@ -290,9 +290,9 @@ public abstract class EditorLayout {
 				"max_page", getMaxTradesPages()
 		);
 		ItemStack item = Settings.currentPageItem.createItemStack();
-		ItemUtils.setItemMeta(item, itemName, Messages.buttonCurrentPageLore, ItemUtils.MAX_STACK_SIZE);
+		ItemUtils.setItemMeta(item, itemName, Messages.buttonCurrentPageLore, ItemUtils.MAX_STACK_SIZE_64);
 		// Note: Can exceed the item's natural max stack size.
-		item.setAmount(MathUtils.clamp(page, 1, ItemUtils.MAX_STACK_SIZE));
+		item.setAmount(MathUtils.clamp(page, 1, ItemUtils.MAX_STACK_SIZE_64));
 		return item;
 	}
 

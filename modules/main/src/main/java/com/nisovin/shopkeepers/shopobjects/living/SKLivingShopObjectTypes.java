@@ -92,7 +92,7 @@ import com.nisovin.shopkeepers.util.java.Validate;
  * <li>IRON_GOLEM: okay
  * <li>MAGMA_CUBE: okay, would usually spawn with random size, weird behavior in water (no longer
  * the case, maybe due to using NoAI)
- * <li>MUSHROOM_COW: okay, renamed to MOOSHROOM in Spigot 1.20.5
+ * <li>MOOSHROOM: okay, renamed from MUSHROOM_COW in Spigot 1.20.5
  * <li>OCELOT: okay
  * <li>PIG: okay, saddle, 1.21.5: variant
  * <li>PIG_ZOMBIE: okay; replaced by ZOMBIFIED_PIGLIN in MC 1.16
@@ -101,7 +101,7 @@ import com.nisovin.shopkeepers.util.java.Validate;
  * NoAI
  * <li>SKELETON: okay
  * <li>SLIME: okay, would usually spawn with random size
- * <li>SNOWMAN: okay, renamed to SNOW_GOLEM in Spigot 1.20.5
+ * <li>SNOW_GOLEM: okay, renamed from SNOWMAN in Spigot 1.20.5
  * <li>SPIDER: okay
  * <li>SQUID: seems okay, slightly weird movement in water, MC 1.21.2: ageable (baby variant)
  * <li>WITCH: okay

@@ -2,6 +2,7 @@ package com.nisovin.shopkeepers.container.protection;
 
 import java.util.List;
 
+import org.bukkit.ExplosionResult;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,7 +12,6 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 
 import com.nisovin.shopkeepers.SKShopkeepersPlugin;
-import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.container.ShopContainers;
 
 class RemoveShopOnContainerBreakListener implements Listener {
@@ -39,7 +39,9 @@ class RemoveShopOnContainerBreakListener implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	void onEntityExplosion(EntityExplodeEvent event) {
-		if (!Compat.getProvider().isDestroyingBlocks(event)) return;
+		if (!isDestroyingBlocks(event.getExplosionResult())) {
+			return;
+		}
 
 		List<Block> blockList = event.blockList();
 		removeShopOnContainerBreak.handleBlocksBreakage(blockList);
@@ -47,9 +49,16 @@ class RemoveShopOnContainerBreakListener implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	void onBlockExplosion(BlockExplodeEvent event) {
-		if (!Compat.getProvider().isDestroyingBlocks(event)) return;
+		if (!isDestroyingBlocks(event.getExplosionResult())) {
+			return;
+		}
 
 		List<Block> blockList = event.blockList();
 		removeShopOnContainerBreak.handleBlocksBreakage(blockList);
+	}
+
+	private static boolean isDestroyingBlocks(ExplosionResult explosionResult) {
+		return explosionResult == ExplosionResult.DESTROY
+				|| explosionResult == ExplosionResult.DESTROY_WITH_DECAY;
 	}
 }

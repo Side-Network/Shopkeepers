@@ -6,6 +6,7 @@ import org.bukkit.Registry;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.util.data.serialization.DataSerializer;
 import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
 import com.nisovin.shopkeepers.util.java.Validate;
@@ -87,22 +88,19 @@ public final class KeyedSerializers {
 
 	/**
 	 * Gets a {@link DataSerializer} for values of the specified {@link Keyed} type that looks up
-	 * the objects from the given {@link Registry} during deserialization.
+	 * the objects from the type's {@link Registry} during deserialization.
 	 * 
 	 * @param <E>
 	 *            the {@link Keyed} type
 	 * @param keyedType
 	 *            the class of the serialized {@link Keyed} type that is being de-/serialized, not
 	 *            <code>null</code>
-	 * @param registry
-	 *            the {@link Registry} to use during deserialization
 	 * @return the data serializer, not <code>null</code>
 	 */
 	public static <E extends Keyed> DataSerializer<@NonNull E> forRegistry(
-			Class<@NonNull E> keyedType,
-			Registry<@NonNull E> registry
+			Class<@NonNull E> keyedType
 	) {
-		Validate.notNull(registry, "registry is null");
+		var registry = Compat.getProvider().getRegistry(keyedType);
 		return forResolver(keyedType, (key) -> registry.get(key));
 	}
 

@@ -12,9 +12,12 @@ import org.bukkit.Registry;
 import org.bukkit.Server;
 import org.bukkit.craftbukkit.v1_21_R4.CraftRegistry;
 import org.bukkit.craftbukkit.v1_21_R4.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_21_R4.inventory.CraftInventoryCustom;
 import org.bukkit.craftbukkit.v1_21_R4.inventory.CraftItemFactory;
 import org.bukkit.craftbukkit.v1_21_R4.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.v1_21_R4.util.Versioning;
+import org.bukkit.inventory.InventoryHolder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.util.java.Validate;
@@ -135,6 +138,17 @@ class ServerMock extends ProxyHandler<Server> {
 					assert args != null;
 					Material material = Unsafe.castNonNull(args[0]);
 					return CraftBlockData.newData(material.asBlockType(), Unsafe.uncheckedNull());
+				}
+		);
+
+		this.addHandler(
+				Server.class.getMethod("createInventory", InventoryHolder.class, int.class),
+				(proxy, args) -> {
+					Validate.notNull(args, "args is null");
+					assert args != null;
+					@Nullable InventoryHolder holder = Unsafe.cast(args[0]);
+					int size = Unsafe.cast(args[1]);
+					return new CraftInventoryCustom(holder, size);
 				}
 		);
 	}

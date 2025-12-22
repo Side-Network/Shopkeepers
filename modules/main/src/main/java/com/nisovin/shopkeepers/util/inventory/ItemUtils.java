@@ -37,8 +37,9 @@ import com.nisovin.shopkeepers.util.logging.Log;
  */
 public final class ItemUtils {
 
-	// TODO MC 1.20.5: The max stack size is now 99, but requires a component on the item stack.
-	public static final int MAX_STACK_SIZE = 64;
+	// Note: Since MC 1.20.5, the max stack size is 99 now, but requires a component on the item
+	// stack. For our current purposes of this value, 64 is sufficient.
+	public static final int MAX_STACK_SIZE_64 = 64;
 
 	// Material utilities:
 

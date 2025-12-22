@@ -3,7 +3,6 @@ package com.nisovin.shopkeepers.shopobjects.living.types;
 import java.util.List;
 
 import org.bukkit.Material;
-import org.bukkit.Registry;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -39,12 +38,12 @@ import com.nisovin.shopkeepers.util.java.MathUtils;
 public class VillagerShop extends BabyableShop<Villager> {
 
 	public static final Property<Profession> PROFESSION = new BasicProperty<Profession>()
-			.dataKeyAccessor("profession", KeyedSerializers.forRegistry(Profession.class, Registry.VILLAGER_PROFESSION))
+			.dataKeyAccessor("profession", KeyedSerializers.forRegistry(Profession.class))
 			.defaultValue(Profession.NONE)
 			.build();
 
 	public static final Property<Villager.Type> VILLAGER_TYPE = new BasicProperty<Villager.Type>()
-			.dataKeyAccessor("villagerType", KeyedSerializers.forRegistry(Villager.Type.class, Registry.VILLAGER_TYPE))
+			.dataKeyAccessor("villagerType", KeyedSerializers.forRegistry(Villager.Type.class))
 			.defaultValue(Villager.Type.PLAINS)
 			.build();
 
@@ -159,7 +158,7 @@ public class VillagerShop extends BabyableShop<Villager> {
 
 	public void cycleProfession(boolean backwards) {
 		this.setProfession(RegistryUtils.cycleKeyed(
-				Registry.VILLAGER_PROFESSION,
+				Villager.Profession.class,
 				this.getProfession(),
 				backwards
 		));
@@ -210,7 +209,7 @@ public class VillagerShop extends BabyableShop<Villager> {
 
 	public void cycleVillagerType(boolean backwards) {
 		this.setVillagerType(RegistryUtils.cycleKeyed(
-				Registry.VILLAGER_TYPE,
+				Villager.Type.class,
 				this.getVillagerType(),
 				backwards
 		));

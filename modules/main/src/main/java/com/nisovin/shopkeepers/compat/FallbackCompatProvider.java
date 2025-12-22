@@ -7,15 +7,20 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.function.BiConsumer;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Keyed;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.Registry;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.view.builder.InventoryViewBuilder;
+import org.bukkit.potion.PotionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
@@ -72,10 +77,7 @@ public final class FallbackCompatProvider implements CompatProvider {
 	private final Method obcGetHandleMethod;
 
 	// Bukkit
-
-	// null if not supported yet (e.g. pre 1.21):
-	private @Nullable Method b_EntityExplodeEvent_GetExplosionResultMethod = null;
-	private @Nullable Method b_BlockExplodeEvent_GetExplosionResultMethod = null;
+	private final @Nullable Method inventoryViewBuilderTitleMethod;
 
 	public FallbackCompatProvider() throws Exception {
 		String cbPackage = ServerUtils.getCraftBukkitPackage();
@@ -197,12 +199,15 @@ public final class FallbackCompatProvider implements CompatProvider {
 
 		// Bukkit
 
+		// Only supported on Spigot:
+		// Note: We use reflection here instead of calling the Spigot API directly, since this would
+		// break our Paper-API compilation check.
+		@Nullable Method localInventoryViewBuilderTitleMethod = null;
 		try {
-			b_EntityExplodeEvent_GetExplosionResultMethod = EntityExplodeEvent.class.getMethod("getExplosionResult");
-			b_BlockExplodeEvent_GetExplosionResultMethod = BlockExplodeEvent.class.getMethod("getExplosionResult");
+			localInventoryViewBuilderTitleMethod = InventoryViewBuilder.class.getMethod("title", String.class);
 		} catch (NoSuchMethodException e) {
-			// Not found, e.g. pre 1.21.
 		}
+		inventoryViewBuilderTitleMethod = localInventoryViewBuilderTitleMethod;
 	}
 
 	private static @Nullable Object findDataFixerConverterType(String typeName) throws Exception {
@@ -303,10 +308,16 @@ public final class FallbackCompatProvider implements CompatProvider {
 
 	@Override
 	public void setInventoryViewTitle(InventoryViewBuilder<?> builder, String title) {
-		// Only works on Spigot:
+		// Only supported on Spigot:
+		if (inventoryViewBuilderTitleMethod == null) {
+			return;
+		}
+		assert inventoryViewBuilderTitleMethod != null;
+
 		try {
-			builder.title(title);
-		} catch (NoSuchMethodError e) {
+			inventoryViewBuilderTitleMethod.invoke(builder, title);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			// Unexpected, but silently ignored.
 		}
 	}
 
@@ -327,11 +338,6 @@ public final class FallbackCompatProvider implements CompatProvider {
 		);
 		var itemTag = nmsDataResultGetOrThrowMethod.invoke(itemTagResult);
 		return Unsafe.assertNonNull(itemTag);
-	}
-
-	@Override
-	public @Nullable String getItemSNBT(@ReadOnly ItemStack itemStack) {
-		return null; // Not supported.
 	}
 
 	@Override
@@ -480,43 +486,21 @@ public final class FallbackCompatProvider implements CompatProvider {
 		}
 	}
 
-	// MC 1.21+ TODO Can be removed once we only support Bukkit 1.21+
-
+	// Might not work in future Paper versions.
 	@Override
-	public boolean isDestroyingBlocks(EntityExplodeEvent event) {
-		if (b_EntityExplodeEvent_GetExplosionResultMethod == null) return true;
-
-		try {
-			assert b_EntityExplodeEvent_GetExplosionResultMethod != null;
-			var explosionResult = b_EntityExplodeEvent_GetExplosionResultMethod.invoke(event);
-			assert explosionResult != null;
-			return isDestroyingBlocks(explosionResult);
-		} catch (Exception e) {
-			// Something unexpected went wrong. Assume pre 1.21 behavior. Wind charges may break
-			// player shops when container protection is disabled (#921).
-			return true;
+	public <T extends Keyed> Registry<T> getRegistry(Class<T> clazz) {
+		// Some API-only registries might not be supported by Bukkit.getRegistry(Class):
+		if (clazz == EntityType.class) {
+			return Unsafe.castNonNull(Registry.ENTITY_TYPE);
+		} else if (clazz == Particle.class) {
+			return Unsafe.castNonNull(Registry.PARTICLE_TYPE);
+		} else if (clazz == PotionType.class) {
+			return Unsafe.castNonNull(Registry.POTION);
+		} else if (clazz == MemoryKey.class) {
+			return Unsafe.castNonNull(Registry.MEMORY_MODULE_TYPE);
+		} else {
+			// Non-null: Expected to only be used with known registry types.
+			return Unsafe.assertNonNull(Bukkit.getRegistry(clazz));
 		}
-	}
-
-	@Override
-	public boolean isDestroyingBlocks(BlockExplodeEvent event) {
-		if (b_BlockExplodeEvent_GetExplosionResultMethod == null) return true;
-
-		try {
-			assert b_BlockExplodeEvent_GetExplosionResultMethod != null;
-			var explosionResult = b_BlockExplodeEvent_GetExplosionResultMethod.invoke(event);
-			assert explosionResult != null;
-			return isDestroyingBlocks(explosionResult);
-		} catch (Exception e) {
-			// Something unexpected went wrong. Assume pre 1.21 behavior. Wind charges may break
-			// player shops when container protection is disabled (#921).
-			return true;
-		}
-	}
-
-	private static boolean isDestroyingBlocks(Object explosionResult) {
-		var explosionResultString = explosionResult.toString();
-		return explosionResultString.equals("DESTROY")
-				|| explosionResultString.equals("DESTROY_WITH_DECAY");
 	}
 }

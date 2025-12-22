@@ -2,7 +2,7 @@ package com.nisovin.shopkeepers.shopobjects.living.types;
 
 import java.util.List;
 
-import org.bukkit.Registry;
+import org.bukkit.entity.Villager;
 import org.bukkit.entity.Villager.Profession;
 import org.bukkit.entity.ZombieVillager;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -31,7 +31,7 @@ import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 public class ZombieVillagerShop extends ZombieShop<ZombieVillager> {
 
 	public static final Property<Profession> PROFESSION = new BasicProperty<Profession>()
-			.dataKeyAccessor("profession", KeyedSerializers.forRegistry(Profession.class, Registry.VILLAGER_PROFESSION))
+			.dataKeyAccessor("profession", KeyedSerializers.forRegistry(Profession.class))
 			.defaultValue(Profession.NONE)
 			.build();
 
@@ -85,7 +85,7 @@ public class ZombieVillagerShop extends ZombieShop<ZombieVillager> {
 
 	public void cycleProfession(boolean backwards) {
 		this.setProfession(RegistryUtils.cycleKeyed(
-				Registry.VILLAGER_PROFESSION,
+				Villager.Profession.class,
 				this.getProfession(),
 				backwards
 		));

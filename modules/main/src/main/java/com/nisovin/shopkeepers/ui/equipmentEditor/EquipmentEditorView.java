@@ -119,10 +119,10 @@ public class EquipmentEditorView extends View {
 		case "HEAD":
 			displayName = Messages.equipmentSlotHead;
 			break;
-		case "BODY": // TODO Added in Bukkit 1.20.5
+		case "BODY": // Added in Bukkit 1.20.5
 			displayName = Messages.equipmentSlotBody;
 			break;
-		case "SADDLE": // TODO Added in Bukkit 1.21.5
+		case "SADDLE": // Added in Bukkit 1.21.5
 			displayName = Messages.equipmentSlotSaddle;
 			break;
 		default:

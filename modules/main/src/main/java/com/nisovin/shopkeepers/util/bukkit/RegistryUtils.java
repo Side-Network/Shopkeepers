@@ -8,6 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.util.java.CollectionUtils;
 import com.nisovin.shopkeepers.util.java.PredicateUtils;
 
@@ -34,20 +35,21 @@ public class RegistryUtils {
 	}
 
 	public static <T extends Keyed> @NonNull T cycleKeyed(
-			Registry<@NonNull T> registry,
+			Class<T> type,
 			@NonNull T current,
 			boolean backwards
 	) {
-		return cycleKeyed(registry, current, backwards, PredicateUtils.alwaysTrue());
+		return cycleKeyed(type, current, backwards, PredicateUtils.alwaysTrue());
 	}
 
 	// Cycled through all values but none got accepted: Returns current value.
 	public static <T extends Keyed> @NonNull T cycleKeyed(
-			Registry<@NonNull T> registry,
+			Class<T> type,
 			@NonNull T current,
 			boolean backwards,
 			Predicate<? super @NonNull T> predicate
 	) {
+		var registry = Compat.getProvider().getRegistry(type);
 		// TODO Cache the registry values? Or use the iterator/stream directly to get the next
 		// value.
 		List<@NonNull T> values = getValues(registry);

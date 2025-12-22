@@ -51,12 +51,14 @@ public class TestItemStacks {
 				createItemStackDisplayName(),
 				createItemStackComplete(),
 				// TODO Broken in MC 1.20.5+, until late MC 1.21. See SPIGOT-7857
-				// createItemStackBlockData(),
+				// Tested again, still broken. See SPIGOT-8049
+				//createItemStackBlockData(),
 				createItemStackUncommonMeta(),
 				createItemStackWritableBook(),
 				createItemStackWrittenBook(),
 				// TODO Broken in MC 1.20.5+, until late MC 1.21. See SPIGOT-7857
-				// createItemStackTileEntityDisplayName(),
+				// Tested again, still broken. See SPIGOT-8049
+				//createItemStackTileEntityDisplayName(),
 				createItemStackBasicTileEntity()
 		);
 	}

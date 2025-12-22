@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
-import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.debug.Debug;
 import com.nisovin.shopkeepers.debug.DebugOptions;
 import com.nisovin.shopkeepers.spigot.SpigotFeatures;
@@ -295,26 +294,15 @@ public final class SpigotText {
 				return new net.md_5.bungee.api.chat.HoverEvent(action, content);
 			} else if (hoverEventContent instanceof ItemContent itemContent) {
 				var item = ItemUtils.asItemStack(itemContent.getItem());
-				String itemSnbt = null;
-				if (Compat.getProvider().supportsItemSNBTHoverEvents()) {
-					itemSnbt = Compat.getProvider().getItemSNBT(item);
-				}
-
-				if (itemSnbt != null) {
-					var action = net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_ITEM;
-					var value = new BaseComponent[] { toSpigot(Text.of(itemSnbt)) };
-					return new net.md_5.bungee.api.chat.HoverEvent(action, value);
-				} else {
-					// TODO https://github.com/SpigotMC/BungeeCord/issues/3688: Component data is
-					// not supported currently.
-					var action = net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_ITEM;
-					var content = new net.md_5.bungee.api.chat.hover.content.Item(
-							RegistryUtils.getKeyOrThrow(item.getType()).toString(),
-							item.getAmount(),
-							null
-					);
-					return new net.md_5.bungee.api.chat.HoverEvent(action, content);
-				}
+				// TODO https://github.com/SpigotMC/BungeeCord/issues/3688: Component data is
+				// not supported currently.
+				var action = net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_ITEM;
+				var content = new net.md_5.bungee.api.chat.hover.content.Item(
+						RegistryUtils.getKeyOrThrow(item.getType()).toString(),
+						item.getAmount(),
+						null
+				);
+				return new net.md_5.bungee.api.chat.HoverEvent(action, content);
 			} else if (hoverEventContent instanceof EntityContent entityContent) {
 				var action = net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_ENTITY;
 				var nameText = entityContent.getName();
