@@ -232,11 +232,6 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 		plugin = this;
 		InternalShopkeepersAPI.enable(this);
 
-		// Loading all plugin classes up front ensures that we don't run into missing classes
-		// (usually during shutdown) when the plugin jar gets replaced during runtime (e.g. for hot
-		// reloads):
-		this.loadAllPluginClasses();
-
 		// Validate that this server is running a minimum required version:
 		this.outdatedServer = this.isOutdatedServerVersion();
 		if (this.outdatedServer) {
@@ -270,6 +265,13 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 
 		// Register defaults:
 		this.registerDefaults();
+
+		// Load all plugin classes up front to ensure that we don't run into missing classes
+		// (usually during shutdown) when the plugin jar gets dynamically replaced during runtime
+		// (e.g. for hot reloads):
+		// This must be done after the compatibility provider has been initialized, because some
+		// class initialization logic may already depend on it (e.g. to retrieve Bukkit registries).
+		this.loadAllPluginClasses();
 	}
 
 	@Override
