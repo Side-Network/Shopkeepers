@@ -142,8 +142,10 @@ public class ItemDataTest extends AbstractItemStackSerializationTest<@Nullable S
 						+ "    minecraft:enchantable: '{value:15}'" + yamlNewline()
 						+ "    minecraft:equippable: '{allowed_entities:\"minecraft:player\","
 						+ "asset_id:\"minecraft:diamond_helmet\","
-						+ "camera_overlay:\"minecraft:carved_pumpkin\",equip_on_interact:1b,"
-						+ "slot:\"head\"}'" + yamlNewline()
+						+ "camera_overlay:\"minecraft:carved_pumpkin\",damage_on_hurt:0b,"
+						+ "dispensable:0b,equip_on_interact:1b,"
+						+ "equip_sound:\"minecraft:item.armor.equip_chain\",slot:\"head\","
+						+ "swappable:0b}'" + yamlNewline()
 						+ "    minecraft:lore: '[{color:\"green\",text:\"lore1\"},\"lore2\"]'" + yamlNewline()
 						+ "    minecraft:max_stack_size: '65'" + yamlNewline()
 						+ "    minecraft:use_remainder: '{count:1,id:\"minecraft:bone\"}'" + yamlNewline()

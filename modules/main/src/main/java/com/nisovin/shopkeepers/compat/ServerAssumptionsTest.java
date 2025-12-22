@@ -6,13 +6,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.attribute.AttributeModifier.Operation;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -32,7 +29,6 @@ import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.util.bukkit.ConfigUtils;
 import com.nisovin.shopkeepers.util.bukkit.NamespacedKeyUtils;
-import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.bukkit.TextUtils;
 import com.nisovin.shopkeepers.util.inventory.ItemMigration;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
@@ -249,20 +245,22 @@ public class ServerAssumptionsTest {
 		// TODO Not sure how to create consumable effects via the API.
 		itemMeta.setConsumable(consumable);*/
 
-		var equippable = itemMeta.getEquippable();
+		// TODO SPIGOT-8104: Affects the shearing sound during deserialization, breaking the item
+		// comparison.
+		/*var equippable = itemMeta.getEquippable();
 		equippable.setSlot(EquipmentSlot.HEAD);
-		equippable.setEquipSound(Sound.ITEM_ARMOR_EQUIP_GENERIC);
+		equippable.setEquipSound(Sound.ITEM_ARMOR_EQUIP_CHAIN);
 		equippable.setModel(RegistryUtils.getKeyOrThrow(Material.DIAMOND_HELMET));
 		equippable.setCameraOverlay(RegistryUtils.getKeyOrThrow(Material.CARVED_PUMPKIN));
 		equippable.setAllowedEntities(EntityType.PLAYER);
-		equippable.setDispensable(true);
-		equippable.setSwappable(true);
-		equippable.setDamageOnHurt(true);
+		equippable.setDispensable(false);
+		equippable.setSwappable(false);
+		equippable.setDamageOnHurt(false);
 		equippable.setEquipOnInteract(true);
 		// TODO Added in 1.21.6
 		// equippable.setCanBeSheared(true);
 		// equippable.setShearingSound(Sound.ENTITY_SHEEP_SHEAR);
-		itemMeta.setEquippable(equippable);
+		itemMeta.setEquippable(equippable);*/
 
 		var useCooldown = itemMeta.getUseCooldown();
 		useCooldown.setCooldownSeconds(1.5f);

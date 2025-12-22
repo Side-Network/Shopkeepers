@@ -178,13 +178,15 @@ public class TestItemStacks {
 
 		var equippable = itemMeta.getEquippable();
 		equippable.setSlot(EquipmentSlot.HEAD);
-		equippable.setEquipSound(Sound.ITEM_ARMOR_EQUIP_GENERIC);
+		// Note: SPIGOT-8104: 1.21.6: Affects the shearing sound during config deserialization. But:
+		// Does not affect our custom serialization format.
+		equippable.setEquipSound(Sound.ITEM_ARMOR_EQUIP_CHAIN);
 		equippable.setModel(RegistryUtils.getKeyOrThrow(Material.DIAMOND_HELMET));
 		equippable.setCameraOverlay(RegistryUtils.getKeyOrThrow(Material.CARVED_PUMPKIN));
 		equippable.setAllowedEntities(EntityType.PLAYER);
-		equippable.setDispensable(true);
-		equippable.setSwappable(true);
-		equippable.setDamageOnHurt(true);
+		equippable.setDispensable(false);
+		equippable.setSwappable(false);
+		equippable.setDamageOnHurt(false);
 		equippable.setEquipOnInteract(true);
 		// TODO Added in 1.21.6
 		// equippable.setCanBeSheared(true);
