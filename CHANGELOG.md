@@ -4,9 +4,17 @@ Date format: (YYYY-MM-DD)
 ## v2.25.1 (TBA)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
 
+* Config: Rename some settings, since they might also affect non-mob entities.
+  * Rename `silence-living-shop-entities` to `silence-shop-entities`.
+  * Rename `mobe-behavior-tick-period` to `entity-behavior-tick-period`.
+  * The config is automatically migrated (version `10`).
 * Server assumption tests: Extend the tested item data.
 * Internal: Update code to make use of the new 1.21.5 Bukkit base version.
+* Internal: Refactors to simplify adding entity-based shopkeepers for non-living entity types.
 * Build: Add additional compilation step targeting the Paper API to verify that only Paper-compatible parts of the Bukkit API are used in the plugin's API and main modules.
+
+**Message changes:**  
+* Renamed `shop-object-type-living` to `shop-object-type-entity`.
 
 ## v2.25.0 (2025-12-14)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5

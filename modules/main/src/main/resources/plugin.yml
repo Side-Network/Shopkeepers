@@ -183,7 +183,7 @@ permissions:
     # https://hub.spigotmc.org/javadocs/spigot/org/bukkit/entity/EntityType.html
     # The permissions use the lower case entity type name.
     # shopkeeper.entity.<mob-type>:
-    #   description: Create shopkeepers of the specific mob type
+    #   description: Create shopkeepers of the specific entity type
     #   default: false
 
     shopkeeper.trade-notifications.admin:

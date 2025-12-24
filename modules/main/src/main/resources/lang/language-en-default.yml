@@ -20,7 +20,7 @@ shop-type-desc-buying: "buys items from players"
 shop-type-desc-trading: "trades items with players"
 shop-type-desc-book: "sells book copies"
 
-shop-object-type-living: "{type}"
+shop-object-type-entity: "{type}"
 shop-object-type-sign: "sign"
 shop-object-type-hanging-sign: "hanging sign"
 shop-object-type-npc: "npc"

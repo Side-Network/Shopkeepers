@@ -1,4 +1,4 @@
-package com.nisovin.shopkeepers.shopobjects.living;
+package com.nisovin.shopkeepers.shopobjects.entity.base;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +13,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -40,18 +40,21 @@ import com.nisovin.shopkeepers.util.timer.Timings;
 
 /**
  * Handles the gravity and AI behavior, e.g. looking at nearby players, of
- * {@link SKLivingShopObject}s.
+ * {@link BaseEntityShopObject}s.
  * <p>
- * Shop objects must be {@link #addShopObject(SKLivingShopObject) added} when their entity has been
- * spawned, and {@link #removeShopObject(SKLivingShopObject) removed} again when their entity is
- * despawned.
+ * Note: Our gravity and entity AI is also available for non-living entity shop objects. It is up to
+ * the {@link BaseEntityShopObject#tickAI()} to implement the behavior for the entity.
+ * <p>
+ * Shop objects must be {@link #addShopObject(BaseEntityShopObject) added} when their entity has
+ * been spawned, and {@link #removeShopObject(BaseEntityShopObject) removed} again when their entity
+ * is despawned.
  * <p>
  * It is assumed that the shop objects / entities don't change their initial location (chunk). If
  * they do change their location, the AI system must be informed via
- * {@link #updateLocation(SKLivingShopObject)} in order for their gravity and AI activation to still
- * function correctly.
+ * {@link #updateLocation(BaseEntityShopObject)} in order for their gravity and AI activation to
+ * still function correctly.
  */
-public class LivingEntityAI implements Listener {
+public class EntityAI implements Listener {
 
 	/**
 	 * The range at which shopkeeper mobs look at players.
@@ -136,7 +139,7 @@ public class LivingEntityAI implements Listener {
 
 	private static class EntityData {
 
-		private final SKLivingShopObject<?> shopObject;
+		private final BaseEntityShopObject<?> shopObject;
 		private final ChunkData chunkData;
 		// Initial threshold between [1, FALLING_CHECK_PERIOD_TICKS] for load balancing:
 		public final RateLimiter fallingCheckLimiter = new RateLimiter(
@@ -146,7 +149,7 @@ public class LivingEntityAI implements Listener {
 		public boolean falling = false;
 		public double distanceToGround = 0.0D;
 
-		public EntityData(SKLivingShopObject<?> shopObject, ChunkData chunkData) {
+		public EntityData(BaseEntityShopObject<?> shopObject, ChunkData chunkData) {
 			this.shopObject = shopObject;
 			this.chunkData = chunkData;
 		}
@@ -178,7 +181,7 @@ public class LivingEntityAI implements Listener {
 
 	private final Map<ChunkCoords, ChunkData> chunks = new LinkedHashMap<>();
 	// Index for fast removal: Shop object -> EntityData
-	private final Map<SKLivingShopObject<?>, EntityData> shopObjects = new HashMap<>();
+	private final Map<BaseEntityShopObject<?>, EntityData> shopObjects = new HashMap<>();
 
 	private @Nullable BukkitTask aiTask = null;
 	private boolean currentlyRunning = false;
@@ -198,14 +201,14 @@ public class LivingEntityAI implements Listener {
 	private final Timer gravityTimings = new Timer();
 	private final Timer aiTimings = new Timer();
 
-	public LivingEntityAI(SKShopkeepersPlugin plugin) {
+	public EntityAI(SKShopkeepersPlugin plugin) {
 		this.plugin = plugin;
 	}
 
 	public void onEnable() {
 		// Setup values based on settings:
 		// TODO: Also update these on dynamic setting changes.
-		maxFallingDistancePerUpdate = Settings.mobBehaviorTickPeriod * MAX_FALLING_DISTANCE_PER_TICK;
+		maxFallingDistancePerUpdate = Settings.entityBehaviorTickPeriod * MAX_FALLING_DISTANCE_PER_TICK;
 		gravityCollisionCheckRange = maxFallingDistancePerUpdate + 0.1D;
 		customGravityEnabled = _isCustomGravityEnabled();
 
@@ -227,14 +230,14 @@ public class LivingEntityAI implements Listener {
 
 	// SHOP OBJECTS
 
-	public void addShopObject(SKLivingShopObject<?> shopObject) {
+	public void addShopObject(BaseEntityShopObject<?> shopObject) {
 		Validate.notNull(shopObject, "shopObject is null");
 		Validate.State.isTrue(!currentlyRunning,
 				"Cannot add shop objects while the AI task is running!");
 		Validate.isTrue(!shopObjects.containsKey(shopObject), "shopObject is already added");
 
 		// Note: We expect that the shop object is unregistered again when its entity is despawned.
-		LivingEntity entity = shopObject.getEntity();
+		Entity entity = shopObject.getEntity();
 		Validate.notNull(entity, "shopObject is not spawned currently!");
 		assert entity != null;
 		Validate.isTrue(entity.isValid(), "entity is invalid");
@@ -278,7 +281,7 @@ public class LivingEntityAI implements Listener {
 		this.startTask();
 	}
 
-	public void removeShopObject(SKLivingShopObject<?> shopObject) {
+	public void removeShopObject(BaseEntityShopObject<?> shopObject) {
 		Validate.State.isTrue(!currentlyRunning,
 				"Cannot remove entities while the AI task is running!");
 		// Remove shop object:
@@ -308,7 +311,7 @@ public class LivingEntityAI implements Listener {
 		}
 	}
 
-	public void updateLocation(SKLivingShopObject<?> shopObject) {
+	public void updateLocation(BaseEntityShopObject<?> shopObject) {
 		this.removeShopObject(shopObject);
 		this.addShopObject(shopObject);
 	}
@@ -370,7 +373,7 @@ public class LivingEntityAI implements Listener {
 		if (aiTask != null) return; // Already running
 
 		// Start AI task:
-		int tickPeriod = Settings.mobBehaviorTickPeriod;
+		int tickPeriod = Settings.entityBehaviorTickPeriod;
 		aiTask = Bukkit.getScheduler().runTaskTimer(
 				plugin,
 				new TickTask(),
@@ -411,7 +414,7 @@ public class LivingEntityAI implements Listener {
 
 			// Freshly determine active chunks/entities (near players) every AI_ACTIVATION_TICK_RATE
 			// ticks:
-			if (aiActivationLimiter.request(Settings.mobBehaviorTickPeriod)) {
+			if (aiActivationLimiter.request(Settings.entityBehaviorTickPeriod)) {
 				updateChunkActivations();
 			}
 
@@ -575,7 +578,7 @@ public class LivingEntityAI implements Listener {
 
 	private void processEntity(EntityData entityData) {
 		assert entityData != null;
-		LivingEntity entity = entityData.shopObject.getEntity();
+		Entity entity = entityData.shopObject.getEntity();
 
 		// Unexpected: The shop object is supposed to unregister itself from the AI system when it
 		// despawns its entity.
@@ -628,7 +631,7 @@ public class LivingEntityAI implements Listener {
 		// ensures that once the entity stops its current fall the limiter will wait a full cycle
 		// before we check again if the entity is falling again.
 		if (entityData.falling
-				|| entityData.fallingCheckLimiter.request(Settings.mobBehaviorTickPeriod)) {
+				|| entityData.fallingCheckLimiter.request(Settings.entityBehaviorTickPeriod)) {
 			// Check if the entity is supposed to (continue to) fall by performing a ray cast
 			// towards the ground:
 			// Note: One attempt of optimizing this has been to only perform the raytrace if the
@@ -636,7 +639,7 @@ public class LivingEntityAI implements Listener {
 			// performance-wise, even accessing the chunk / the block's type is already comparable
 			// to the raytrace itself, and that this optimization attempt even adds a small
 			// performance impact on top instead.
-			LivingEntity entity = Unsafe.assertNonNull(entityData.shopObject.getEntity());
+			Entity entity = Unsafe.assertNonNull(entityData.shopObject.getEntity());
 			Location entityLocation = Unsafe.assertNonNull(entity.getLocation(sharedLocation));
 
 			// The entity may be able to stand on certain types of fluids:
@@ -686,7 +689,7 @@ public class LivingEntityAI implements Listener {
 	// Gets run every behavior update while falling:
 	private void tickFalling(EntityData entityData) {
 		assert entityData.falling && entityData.distanceToGround >= DISTANCE_TO_GROUND_THRESHOLD;
-		LivingEntity entity = Unsafe.assertNonNull(entityData.shopObject.getEntity());
+		Entity entity = Unsafe.assertNonNull(entityData.shopObject.getEntity());
 
 		// Determine falling step size:
 		double fallingStepSize;

@@ -7,6 +7,7 @@ import com.nisovin.shopkeepers.SKShopkeepersPlugin;
 import com.nisovin.shopkeepers.api.shopobjects.DefaultShopObjectTypes;
 import com.nisovin.shopkeepers.shopobjects.block.base.BaseBlockShops;
 import com.nisovin.shopkeepers.shopobjects.citizens.SKCitizensShopObjectType;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShops;
 import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectTypes;
 import com.nisovin.shopkeepers.shopobjects.sign.SKHangingSignShopObjectType;
 import com.nisovin.shopkeepers.shopobjects.sign.SKSignShopObjectType;
@@ -20,10 +21,18 @@ public final class SKDefaultShopObjectTypes implements DefaultShopObjectTypes {
 	private final SKSignShopObjectType signShopObjectType;
 	private final SKHangingSignShopObjectType hangingSignShopObjectType;
 
-	public SKDefaultShopObjectTypes(SKShopkeepersPlugin plugin, BaseBlockShops blockShops) {
+	public SKDefaultShopObjectTypes(
+			SKShopkeepersPlugin plugin,
+			BaseBlockShops blockShops,
+			BaseEntityShops entityShops
+	) {
 		this.plugin = plugin;
 		this.signShopObjectType = new SKSignShopObjectType(blockShops);
 		this.hangingSignShopObjectType = new SKHangingSignShopObjectType(blockShops);
+	}
+
+	public void onRegisterDefaults() {
+		this.getLivingShopObjectTypes().onRegisterDefaults();
 	}
 
 	@Override

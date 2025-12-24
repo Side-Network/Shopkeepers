@@ -59,7 +59,7 @@ public class Settings extends Config {
 	/*
 	 * General Settings
 	 */
-	public static int configVersion = 9;
+	public static int configVersion = 10;
 	// Initial value: Lowest supported Minecraft data version: MC 1.21.5
 	public static int dataVersion = 4325;
 	public static boolean debug = false;
@@ -229,7 +229,7 @@ public class Settings extends Config {
 	// instead result in higher performance impacts per individual behavior update.
 	// The gravity updates at a tick period of 2 actually appear less smooth in my testing than at a
 	// period of 3 (maybe due to some interpolation artifact by the client).
-	public static int mobBehaviorTickPeriod = 3;
+	public static int entityBehaviorTickPeriod = 3;
 
 	public static boolean shulkerPeekIfPlayerNearby = true;
 	public static float shulkerPeekHeight = 0.3F;
@@ -237,7 +237,7 @@ public class Settings extends Config {
 	public static int slimeMaxSize = 5;
 	public static int magmaCubeMaxSize = 5;
 
-	public static boolean silenceLivingShopEntities = true;
+	public static boolean silenceShopEntities = true;
 
 	public static boolean showNameplates = true;
 	public static boolean alwaysShowNameplates = false;
@@ -881,9 +881,9 @@ public class Settings extends Config {
 			Log.warning(this.getLogPrefix() + "'gravity-chunk-range' cannot be negative.");
 			gravityChunkRange = 0;
 		}
-		if (mobBehaviorTickPeriod <= 0) {
-			Log.warning(this.getLogPrefix() + "'mob-behavior-tick-period' has to be positive.");
-			mobBehaviorTickPeriod = 1;
+		if (entityBehaviorTickPeriod <= 0) {
+			Log.warning(this.getLogPrefix() + "'entity-behavior-tick-period' has to be positive.");
+			entityBehaviorTickPeriod = 1;
 		}
 		if (shulkerPeekHeight < 0 || shulkerPeekHeight > 1) {
 			Log.warning(this.getLogPrefix() + "'shulker-peek-height' must be between 0.0 and 1.0.");

@@ -16,8 +16,8 @@ import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
-import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
-import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectCreationContext;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectType;
 import com.nisovin.shopkeepers.shopobjects.living.types.villager.VillagerEditorItems;
 import com.nisovin.shopkeepers.shopobjects.living.types.villager.VillagerSounds;
 import com.nisovin.shopkeepers.ui.editor.Button;
@@ -68,12 +68,12 @@ public class VillagerShop extends BabyableShop<Villager> {
 	private final VillagerSounds villagerSounds;
 
 	public VillagerShop(
-			LivingShops livingShops,
-			SKLivingShopObjectType<VillagerShop> livingObjectType,
+			BaseEntityShopObjectCreationContext context,
+			BaseEntityShopObjectType<VillagerShop> shopObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
-		super(livingShops, livingObjectType, shopkeeper, creationData);
+		super(context, shopObjectType, shopkeeper, creationData);
 		villagerSounds = new VillagerSounds(Unsafe.initialized(this));
 	}
 

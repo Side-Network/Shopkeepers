@@ -17,9 +17,9 @@ import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
-import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectCreationContext;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectType;
 import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObject;
-import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
 import com.nisovin.shopkeepers.ui.editor.Button;
 import com.nisovin.shopkeepers.ui.editor.EditorView;
 import com.nisovin.shopkeepers.ui.editor.ShopkeeperActionButton;
@@ -56,12 +56,12 @@ public class NautilusShop extends SKLivingShopObject<Tameable> {
 			.build(properties);
 
 	public NautilusShop(
-			LivingShops livingShops,
-			SKLivingShopObjectType<NautilusShop> livingObjectType,
+			BaseEntityShopObjectCreationContext context,
+			BaseEntityShopObjectType<NautilusShop> shopObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
-		super(livingShops, livingObjectType, shopkeeper, creationData);
+		super(context, shopObjectType, shopkeeper, creationData);
 	}
 
 	@Override

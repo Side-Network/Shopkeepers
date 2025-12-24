@@ -56,6 +56,7 @@ import com.nisovin.shopkeepers.shopobjects.SKDefaultShopObjectTypes;
 import com.nisovin.shopkeepers.shopobjects.SKShopObjectTypesRegistry;
 import com.nisovin.shopkeepers.shopobjects.block.base.BaseBlockShops;
 import com.nisovin.shopkeepers.shopobjects.citizens.CitizensShops;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShops;
 import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
 import com.nisovin.shopkeepers.spigot.SpigotFeatures;
 import com.nisovin.shopkeepers.storage.SKShopkeeperStorage;
@@ -71,7 +72,7 @@ import com.nisovin.shopkeepers.util.java.ClassUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
 import com.nisovin.shopkeepers.util.logging.Log;
 import com.nisovin.shopkeepers.villagers.RegularVillagers;
-import com.nisovin.shopkeepers.world.ForcingCreatureSpawner;
+import com.nisovin.shopkeepers.world.ForcingEntitySpawner;
 import com.nisovin.shopkeepers.world.ForcingEntityTeleporter;
 
 public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepersPlugin {
@@ -102,7 +103,7 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 	private final Executor syncExecutor = SchedulerUtils.createSyncExecutor(Unsafe.initialized(this));
 	private final Executor asyncExecutor = SchedulerUtils.createAsyncExecutor(Unsafe.initialized(this));
 
-	private final ForcingCreatureSpawner forcingCreatureSpawner = new ForcingCreatureSpawner(Unsafe.initialized(this));
+	private final ForcingEntitySpawner forcingEntitySpawner = new ForcingEntitySpawner(Unsafe.initialized(this));
 	private final ForcingEntityTeleporter forcingEntityTeleporter = new ForcingEntityTeleporter(Unsafe.initialized(this));
 
 	private final ApiInternals apiInternals = new SKApiInternals();
@@ -157,19 +158,19 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 			protectedContainers
 	);
 
-	private final LivingShops livingShops = new LivingShops(Unsafe.initialized(this));
 	private final BaseBlockShops blockShops = new BaseBlockShops(Unsafe.initialized(this));
+	private final BaseEntityShops entityShops = new BaseEntityShops(Unsafe.initialized(this));
+	private final LivingShops livingShops = new LivingShops(Unsafe.initialized(this), entityShops);
 	private final CitizensShops citizensShops = new CitizensShops(Unsafe.initialized(this));
 
-	private final RegularVillagers regularVillagers = new RegularVillagers(
-			Unsafe.initialized(this)
-	);
+	private final RegularVillagers regularVillagers = new RegularVillagers(Unsafe.initialized(this));
 
 	// Default shop and shop object types:
 	private final SKDefaultShopTypes defaultShopTypes = new SKDefaultShopTypes();
 	private final SKDefaultShopObjectTypes defaultShopObjectTypes = new SKDefaultShopObjectTypes(
 			Unsafe.initialized(this),
-			blockShops
+			blockShops,
+			entityShops
 	);
 
 	private final PluginMetrics pluginMetrics = new PluginMetrics(Unsafe.initialized(this));
@@ -215,7 +216,7 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 
 	private void registerDefaults() {
 		Log.info("Registering defaults.");
-		livingShops.onRegisterDefaults();
+		defaultShopObjectTypes.onRegisterDefaults();
 		uiRegistry.registerAll(defaultUITypes.getAllUITypes());
 		shopTypesRegistry.registerAll(defaultShopTypes.getAll());
 		shopObjectTypesRegistry.registerAll(defaultShopObjectTypes.getAll());
@@ -364,7 +365,7 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 		// we register default shop types, etc., during onLoad).
 		Bukkit.getPluginManager().callEvent(new ShopkeepersStartupEvent());
 
-		forcingCreatureSpawner.onEnable();
+		forcingEntitySpawner.onEnable();
 		forcingEntityTeleporter.onEnable();
 
 		// Enable UI system:
@@ -381,13 +382,14 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 
 		// DEFAULT SHOP OBJECT TYPES
 
-		// Enable living entity shops:
-		livingShops.onEnable();
-
 		// Enable block shops:
 		// Note: This has to be enabled before the shop creation listener, so that interactions with
 		// block shops take precedence over interactions with the shop creation item.
 		blockShops.onEnable();
+
+		// Enable living entity shops:
+		entityShops.onEnable();
+		livingShops.onEnable();
 
 		// Enable citizens shops:
 		citizensShops.onEnable();
@@ -474,11 +476,12 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 		// unloading all shopkeepers):
 		shopkeeperRegistry.getChunkActivator().deactivateShopkeepersInAllWorlds();
 
-		// Disable living entity shops:
-		livingShops.onDisable();
-
 		// Disable block shops:
 		blockShops.onDisable();
+
+		// Disable living entity shops:
+		livingShops.onDisable();
+		entityShops.onDisable();
 
 		// Disable citizens shops:
 		citizensShops.onDisable();
@@ -528,7 +531,7 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 		uiRegistry.clearAll();
 
 		forcingEntityTeleporter.onDisable();
-		forcingCreatureSpawner.onDisable();
+		forcingEntitySpawner.onDisable();
 
 		// Plugin metrics:
 		pluginMetrics.onDisable();
@@ -585,8 +588,8 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 		return asyncExecutor;
 	}
 
-	public ForcingCreatureSpawner getForcingCreatureSpawner() {
-		return forcingCreatureSpawner;
+	public ForcingEntitySpawner getForcingEntitySpawner() {
+		return forcingEntitySpawner;
 	}
 
 	public ForcingEntityTeleporter getForcingEntityTeleporter() {
@@ -670,7 +673,11 @@ public class SKShopkeepersPlugin extends JavaPlugin implements InternalShopkeepe
 		return removeShopOnContainerBreak;
 	}
 
-	// LIVING ENTITY SHOPS
+	// ENTITY SHOPS
+
+	public BaseEntityShops getEntityShops() {
+		return entityShops;
+	}
 
 	public LivingShops getLivingShops() {
 		return livingShops;

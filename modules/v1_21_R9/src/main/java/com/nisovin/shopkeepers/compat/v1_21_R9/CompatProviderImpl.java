@@ -45,7 +45,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Dynamic;
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.compat.CompatProvider;
-import com.nisovin.shopkeepers.shopobjects.living.LivingEntityAI;
+import com.nisovin.shopkeepers.shopobjects.entity.base.EntityAI;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
 import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.bukkit.ServerUtils;
@@ -112,7 +112,7 @@ public final class CompatProviderImpl implements CompatProvider {
 					new LookAtPlayerGoal(
 							mcMob,
 							net.minecraft.world.entity.player.Player.class,
-							LivingEntityAI.LOOK_RANGE,
+							EntityAI.LOOK_RANGE,
 							1.0F
 					)
 			);

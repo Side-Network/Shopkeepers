@@ -14,7 +14,7 @@ shop-type-desc-buying: "kauft Gegenstände"
 shop-type-desc-trading: "tauscht Gegenstände für andere Gegenstände"
 shop-type-desc-book: "verkauft Kopien von Büchern"
 
-shop-object-type-living: "{type}"
+shop-object-type-entity: "{type}"
 shop-object-type-sign: "Schild"
 shop-object-type-hanging-sign: "Hängeschild"
 shop-object-type-npc: "NPC"

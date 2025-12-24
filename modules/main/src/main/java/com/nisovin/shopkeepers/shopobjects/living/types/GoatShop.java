@@ -14,8 +14,8 @@ import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
-import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
-import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectCreationContext;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectType;
 import com.nisovin.shopkeepers.ui.editor.Button;
 import com.nisovin.shopkeepers.ui.editor.EditorView;
 import com.nisovin.shopkeepers.ui.editor.ShopkeeperActionButton;
@@ -54,12 +54,12 @@ public class GoatShop extends BabyableShop<Goat> {
 			.build(properties);
 
 	public GoatShop(
-			LivingShops livingShops,
-			SKLivingShopObjectType<GoatShop> livingObjectType,
+			BaseEntityShopObjectCreationContext context,
+			BaseEntityShopObjectType<GoatShop> shopObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
-		super(livingShops, livingObjectType, shopkeeper, creationData);
+		super(context, shopObjectType, shopkeeper, creationData);
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class GoatShop extends BabyableShop<Goat> {
 	public List<Button> createEditorButtons() {
 		List<Button> editorButtons = super.createEditorButtons();
 		// The screaming option is hidden if shopkeeper mobs are silent.
-		if (!Settings.silenceLivingShopEntities) {
+		if (!Settings.silenceShopEntities) {
 			editorButtons.add(this.getScreamingEditorButton());
 		}
 		editorButtons.add(this.getLeftHornEditorButton());

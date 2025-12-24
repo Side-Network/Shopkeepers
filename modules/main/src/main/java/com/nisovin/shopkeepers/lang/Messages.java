@@ -43,7 +43,7 @@ public class Messages extends Config {
 	public static String shopTypeDescTrading = c("trades items with players");
 	public static String shopTypeDescBook = c("sells book copies");
 
-	public static String shopObjectTypeLiving = c("{type}");
+	public static String shopObjectTypeEntity = c("{type}");
 	public static String shopObjectTypeSign = c("sign");
 	public static String shopObjectTypeHangingSign = c("hanging sign");
 	public static String shopObjectTypeNpc = c("npc");

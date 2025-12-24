@@ -5,7 +5,7 @@
 # *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
 
 # Determines the required config migrations. Do not edit manually!
-config-version: 9
+config-version: 10
 # Determines the required config item data migrations. Do not edit manually!
 data-version: 4325
 # The initial debugging state of the plugin.
@@ -80,8 +80,8 @@ save-instantly: true
 # setting is enabled, or has been enabled in the past.
 ignore-failed-server-assumption-tests: false
 
-# If enabled, Shopkeepers tries to bypass other plugins that deny mob spawning
-# (e.g. land protection plugins).
+# If enabled, Shopkeepers tries to bypass other plugins that deny entity
+# spawning (e.g. land protection plugins).
 bypass-spawn-blocking: true
 # If enabled, Shopkeepers takes into account whether other plugins deny
 # interaction with the shopkeepers.
@@ -307,30 +307,32 @@ enabled-living-shops:
 - ZOMBIE_VILLAGER
 - ZOMBIFIED_PIGLIN
 
-# Whether shopkeeper mobs shall not be affected by gravity.
+# Whether shopkeeper entities shall not be affected by gravity.
 disable-gravity: false
-# The range in chunks around players in which shopkeeper mobs will be affected
-# by gravity. Setting this too high may have a negative impact on performance.
-# And setting it below the server's entity tracking range will result in
-# players being able to see mobs floating in mid-air until they get close
-# enough. A value of 0 will limit the gravity to mobs within chunks that
-# contain a player. This has no effect if gravity is disabled.
+# The range in chunks around players in which shopkeeper entities will be
+# affected by gravity. This has no effect if gravity is disabled.
+# Setting this too high may have a negative impact on performance. And setting
+# it below the server's entity tracking range will result in players being able
+# to see entities floating in mid-air until they get close enough.
+# A value of 0 will limit the gravity to entities within chunks that contain a
+# player.
 gravity-chunk-range: 4
 
-# The number of Minecraft ticks between behavior updates of shopkeeper mobs.
+# The number of Minecraft ticks between behavior updates of shopkeeper
+# entities.
 # This controls the rate at which we update the gravity and AI of shopkeeper
-# mobs. Values above 1 indicate a reduced tick rate and result in a less
+# entities. Values above 1 indicate a reduced tick rate and result in a less
 # smooth, less reactive, and possibly slower behavior in comparison to the
 # behavior of mobs in vanilla Minecraft.
 # In order to compensate for a reduced tick rate some activities may be scaled
 # accordingly. This ensures, for example, that mobs still rotate their head at
-# the same speed towards nearby players, or that mobs still fall at the same
-# speed when being affected by gravity.
+# the same speed towards nearby players, or that entities still fall at the
+# same speed when being affected by gravity.
 # Consequently, a reduced tick rate is less performance-intensive in total, but
 # may on the other hand be slightly more performance-intensive per individual
 # behavior update.
 # Values above 3 are clearly noticeable and offer little additional benefit.
-mob-behavior-tick-period: 3
+entity-behavior-tick-period: 3
 
 # Whether shulker shopkeepers shall peek when a player is nearby.
 shulker-peek-if-player-nearby: true
@@ -343,10 +345,10 @@ slime-max-size: 5
 # The maximum size of magma cube shopkeepers. Must be a value in the range of 1 to 10.
 magma-cube-max-size: 5
 
-# Whether mob shopkeepers make sounds.
-silence-living-shop-entities: true
+# Whether shopkeeper entities make sounds.
+silence-shop-entities: true
 
-# Whether to show nameplates of mob shopkeepers.
+# Whether to show nameplates of entity shopkeepers.
 show-nameplates: true
 # Whether to always show nameplates. If disabled, nameplates will only be shown
 # when looking directly at the shopkeeper.

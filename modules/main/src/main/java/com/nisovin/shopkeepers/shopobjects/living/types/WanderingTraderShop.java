@@ -11,8 +11,8 @@ import com.nisovin.shopkeepers.api.ui.DefaultUITypes;
 import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
-import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
-import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectCreationContext;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectType;
 import com.nisovin.shopkeepers.shopobjects.living.types.villager.WanderingTraderSounds;
 import com.nisovin.shopkeepers.ui.editor.Button;
 import com.nisovin.shopkeepers.ui.trading.TradingViewProvider;
@@ -23,12 +23,12 @@ public class WanderingTraderShop extends BabyableShop<WanderingTrader> {
 	private final WanderingTraderSounds wanderingTraderSounds;
 
 	public WanderingTraderShop(
-			LivingShops livingShops,
-			SKLivingShopObjectType<WanderingTraderShop> livingObjectType,
+			BaseEntityShopObjectCreationContext context,
+			BaseEntityShopObjectType<WanderingTraderShop> shopObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
-		super(livingShops, livingObjectType, shopkeeper, creationData);
+		super(context, shopObjectType, shopkeeper, creationData);
 		wanderingTraderSounds = new WanderingTraderSounds(Unsafe.initialized(this));
 	}
 
