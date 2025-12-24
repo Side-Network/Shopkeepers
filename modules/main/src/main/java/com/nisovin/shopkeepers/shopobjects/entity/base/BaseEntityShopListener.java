@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.EntityBlockFormEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityCombustByBlockEvent;
@@ -392,6 +393,16 @@ class BaseEntityShopListener implements Listener {
 
 		Entity entity = event.getEntity();
 		if (shopkeeperRegistry.isShopkeeper(entity)) {
+			event.setCancelled(true);
+		}
+	}
+
+	// TODO Called repeatedly once per tick! Issue?
+	// Example: End crystal when placed in the end during a dragon fight.
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	void onBlockIgnited(BlockIgniteEvent event) {
+		var entity = event.getIgnitingEntity();
+		if (entity != null && shopkeeperRegistry.isShopkeeper(entity)) {
 			event.setCancelled(true);
 		}
 	}

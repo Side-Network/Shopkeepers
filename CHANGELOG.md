@@ -4,6 +4,11 @@ Date format: (YYYY-MM-DD)
 ## v2.25.1 (TBA)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
 
+* Add end crystal shop object.
+  * Permission: `shopkeeper.entity.end_crystal` (default: `false`, but included in `shopkeeper.entity.*`).
+  * Config: Add `enable-end-crystal-shops` (default: `true`).
+  * Config: Add `allow-end-crystal-shops-in-the-end` (default: `false`).
+  * Placing end crystal shops in the end is disabled by default, because they can for example affect dragon fights.
 * Config: Rename some settings, since they might also affect non-mob entities.
   * Rename `silence-living-shop-entities` to `silence-shop-entities`.
   * Rename `mobe-behavior-tick-period` to `entity-behavior-tick-period`.
@@ -15,6 +20,9 @@ Date format: (YYYY-MM-DD)
 
 **Message changes:**  
 * Renamed `shop-object-type-living` to `shop-object-type-entity`.
+* Added `button-end-crystal-bottom-slab`.
+* Added `button-end-crystal-bottom-slab-lore`.
+* Added `end-crystal-disabled-in-the-end`.
 
 ## v2.25.0 (2025-12-14)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5

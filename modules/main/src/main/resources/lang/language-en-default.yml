@@ -288,6 +288,10 @@ button-zombie-nautilus-variant: "&aChoose variant"
 button-zombie-nautilus-variant-lore:
 - "Changes the look of"
 - "the zombie nautilus."
+button-end-crystal-bottom-slab: "&aToggle bottom slab"
+button-end-crystal-bottom-slab-lore:
+- "Toggles the bottom slab"
+- "of the end crystal"
 
 mannequin-enter-profile: |-
   &aPlease enter in chat the name or id of the player whose profile you want to apply to the mannequin.
@@ -338,6 +342,7 @@ invalid-spawn-block-face: "&7The shopkeeper cannot be placed on this side of the
 mob-cannot-spawn-on-peaceful-difficulty: "&7The selected mob type cannot spawn here on peaceful difficulty."
 restricted-area: "&7You cannot place a shopkeeper in this area."
 location-already-in-use: "&7This location is already used by another shopkeeper."
+end-crystal-disabled-in-the-end: "&7End crystal shops cannot be placed in the end."
 
 container-selected: "&aContainer selected! Right-click a block to place your shopkeeper."
 unsupported-container: "&7This type of container cannot be used for shops."

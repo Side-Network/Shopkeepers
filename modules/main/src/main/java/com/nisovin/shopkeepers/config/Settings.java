@@ -220,6 +220,9 @@ public class Settings extends Config {
 			), String::compareTo)
 	);
 
+	public static boolean enableEndCrystalShops = true;
+	public static boolean allowEndCrystalShopsInTheEnd = false;
+
 	public static boolean disableGravity = false;
 	public static int gravityChunkRange = 4;
 

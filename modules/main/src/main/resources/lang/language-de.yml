@@ -295,6 +295,10 @@ button-zombie-nautilus-variant: "&aVariante ändern"
 button-zombie-nautilus-variant-lore:
 - "Ändert das Aussehen"
 - "des Zombie-Nautilus"
+button-end-crystal-bottom-slab: "&aSockel umschalten"
+button-end-crystal-bottom-slab-lore:
+- "Schaltet den Sockel"
+- "an oder aus"
 
 mannequin-enter-profile: |-
   &aBitte gib im Chat den Namen oder die Id des Spielers ein, dessen Profil du auf die Spielerpuppe anwenden möchtest.
@@ -346,6 +350,7 @@ invalid-spawn-block-face: "&7Der Shop kann nicht auf dieser Seite des Blocks pla
 mob-cannot-spawn-on-peaceful-difficulty: "&7Der gewählte Mob-Typ kann hier bei friedlichem Schwierigkeitsgrad nicht spawnen."
 restricted-area: "&7Du kannst in dieser Gegend keinen Shop platzieren."
 location-already-in-use: "&7An diesem Ort befindet sich bereits ein anderer Shop."
+end-crystal-disabled-in-the-end: "&7Enderkristall-Shops können nicht im Ende platziert werden."
 
 container-selected:  "&aBehälter ausgewählt! Klicke mit rechts auf einen Block, um den Shop zu platzieren."
 unsupported-container: "&7Diese Art von Behälter kann nicht für Shops benutzt werden."

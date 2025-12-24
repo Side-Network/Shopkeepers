@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.nisovin.shopkeepers.api.ShopkeepersAPI;
 import com.nisovin.shopkeepers.api.shopobjects.citizens.CitizensShopObjectType;
+import com.nisovin.shopkeepers.api.shopobjects.endcrystal.EndCrystalShopObjectType;
 import com.nisovin.shopkeepers.api.shopobjects.living.LivingShopObjectTypes;
 import com.nisovin.shopkeepers.api.shopobjects.sign.HangingSignShopObjectType;
 import com.nisovin.shopkeepers.api.shopobjects.sign.SignShopObjectType;
@@ -27,6 +28,13 @@ public interface DefaultShopObjectTypes {
 	 * @return the {@link LivingShopObjectTypes}
 	 */
 	public LivingShopObjectTypes getLivingShopObjectTypes();
+
+	/**
+	 * Gets the default {@link EndCrystalShopObjectType}.
+	 * 
+	 * @return the default {@link EndCrystalShopObjectType}
+	 */
+	public EndCrystalShopObjectType<?> getEndCrystalShopObjectType();
 
 	/**
 	 * Gets the default {@link ShopObjectType} of sign shopkeepers.

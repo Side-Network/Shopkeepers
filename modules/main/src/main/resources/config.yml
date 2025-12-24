@@ -307,6 +307,14 @@ enabled-living-shops:
 - ZOMBIE_VILLAGER
 - ZOMBIFIED_PIGLIN
 
+# Whether to allow the creation of end crystal shops.
+enable-end-crystal-shops: true
+# Whether to allow placing end crystal shops in the end.
+# Disabled by default, because end crystal shops might have unexpected effects in the end, such as
+# affecting dragon fights (they, for example, heal nearby ender dragons).
+# Changes to this setting do no affect already existing shops.
+allow-end-crystal-shops-in-the-end: false
+
 # Whether shopkeeper entities shall not be affected by gravity.
 disable-gravity: false
 # The range in chunks around players in which shopkeeper entities will be

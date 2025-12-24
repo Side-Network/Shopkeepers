@@ -373,6 +373,11 @@ public class Messages extends Config {
 			"Changes the look of",
 			"the zombie nautilus."
 	));
+	public static String buttonEndCrystalBottomSlab = c("&aToggle bottom slab");
+	public static List<String> buttonEndCrystalBottomSlabLore = c(Arrays.asList(
+			"Toggles the bottom slab",
+			"of the end crystal"
+	));
 
 	public static Text mannequinEnterProfile = Text.parse(
 			"&aPlease enter in chat the name or id of the player whose profile you want to apply to"
@@ -426,6 +431,7 @@ public class Messages extends Config {
 	public static Text mobCannotSpawnOnPeacefulDifficulty = Text.parse("&7The selected mob type cannot spawn here on peaceful difficulty.");
 	public static Text restrictedArea = Text.parse("&7You cannot place a shopkeeper in this area.");
 	public static Text locationAlreadyInUse = Text.parse("&7This location is already used by another shopkeeper.");
+	public static Text endCrystalDisabledInTheEnd = Text.parse("&7End crystal shops cannot be placed in the end.");
 
 	public static Text containerSelected = Text.parse("&aContainer selected! Right-click a block to place your shopkeeper.");
 	public static Text unsupportedContainer = Text.parse("&7This type of container cannot be used for shops.");

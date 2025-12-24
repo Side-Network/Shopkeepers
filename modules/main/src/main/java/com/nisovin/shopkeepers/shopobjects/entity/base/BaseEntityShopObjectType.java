@@ -10,6 +10,7 @@ import java.util.Map;
 import org.bukkit.Difficulty;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.World.Environment;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
@@ -22,6 +23,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
+import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.entity.AbstractEntityShopObjectType;
@@ -217,6 +219,15 @@ public abstract class BaseEntityShopObjectType<T extends BaseEntityShopObject<?>
 		assert spawnLocation != null;
 
 		World world = Unsafe.assertNonNull(spawnLocation.getWorld());
+
+		if (entityType == EntityType.END_CRYSTAL
+				&& !Settings.allowEndCrystalShopsInTheEnd
+				&& world.getEnvironment() == Environment.THE_END) {
+			if (creator != null) {
+				TextUtils.sendMessage(creator, Messages.endCrystalDisabledInTheEnd);
+			}
+			return false;
+		}
 
 		Block spawnBlock = spawnLocation.getBlock();
 		// TODO Require an empty block for shulkers? However, placing a shulker on a non-empty block
