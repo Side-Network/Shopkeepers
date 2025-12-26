@@ -146,6 +146,10 @@ public class EntityAI implements Listener {
 				FALLING_CHECK_PERIOD_TICKS,
 				nextFallingCheckOffset.getAndIncrement()
 		);
+		// Note: This is used to check if the mob is currently falling and should therefore receive
+		// more frequent gravity updates. Flying entities do not use this 'falling' state, since
+		// they are expected to remain in their flying state for longer, so we can use the reduced
+		// fallingCheckLimiter rate for them.
 		public boolean falling = false;
 		public double distanceToGround = 0.0D;
 
@@ -155,6 +159,8 @@ public class EntityAI implements Listener {
 		}
 
 		public boolean isAffectedByGravity() {
+			// Note: Flying mobs are also "affected" by gravity: The gravity logic periodically
+			// checks if the mob is still flying and should therefore play its flying animation.
 			switch (shopObject.getEntityType()) {
 			case SHULKER:
 				return false;
@@ -669,19 +675,27 @@ public class EntityAI implements Listener {
 					collidableFluids
 			);
 			sharedLocation.setWorld(null); // Reset
-			boolean falling = (entityData.distanceToGround >= DISTANCE_TO_GROUND_THRESHOLD);
+			boolean isInAir = (entityData.distanceToGround >= DISTANCE_TO_GROUND_THRESHOLD);
+			boolean falling = isInAir && !EntityUtils.canFly(entity.getType());
 			entityData.falling = falling;
 
-			// Tick falling:
-			if (falling) {
-				// Prevents SPIGOT-3948 / MC-130725
+			if (isInAir && !falling) {
+				// The entity is flying.
+				// Required for flying mobs to play their flying animation.
 				Compat.getProvider().setOnGround(entity, false);
-				this.tickFalling(entityData);
-			}
+			} else {
+				if (falling) {
+					// Tick falling:
+					// Prevents SPIGOT-3948 / MC-130725
+					Compat.getProvider().setOnGround(entity, false);
+					this.tickFalling(entityData);
+				}
 
-			if (!entityData.falling) {
-				// Prevents SPIGOT-3948 / MC-130725
-				Compat.getProvider().setOnGround(entity, true);
+				if (!entityData.falling) {
+					// No longer falling (and also not flying):
+					// Prevents SPIGOT-3948 / MC-130725
+					Compat.getProvider().setOnGround(entity, true);
+				}
 			}
 		}
 	}
@@ -717,9 +731,6 @@ public class EntityAI implements Listener {
 
 	// Gets run every behavior update while in range of players:
 	private void processAI(EntityData entityData) {
-		// Only tick AI if not currently falling:
-		if (entityData.falling) return;
-
 		entityData.shopObject.tickAI();
 	}
 

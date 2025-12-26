@@ -13,6 +13,11 @@ Date format: (YYYY-MM-DD)
   * Rename `silence-living-shop-entities` to `silence-shop-entities`.
   * Rename `mobe-behavior-tick-period` to `entity-behavior-tick-period`.
   * The config is automatically migrated (version `10`).
+* Disable the gravity for flying mobs.
+  * Certain mobs can now be placed in the air without dropping to the ground due to gravity: Allay, bat, bee, chicken, blaze, ender dragon, ghast, happy ghast, parrot, phantom, vex, wither.
+  * When spawned, we still adjust their spawn location within their spawn location block, but we no longer automatically place them on the block below that, like we do for other mobs, allowing them to hover one block above the ground.
+  * We periodically check if the mob is still in the air and update their onGround state accordingly for some of these mobs to play their flying animation.
+  * Also: Entities tick their AI now while falling.
 * Server assumption tests: Extend the tested item data.
 * Internal: Update code to make use of the new 1.21.5 Bukkit base version.
 * Internal: Refactors to simplify adding entity-based shopkeepers for non-living entity types.

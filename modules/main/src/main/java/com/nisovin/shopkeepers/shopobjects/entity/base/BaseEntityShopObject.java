@@ -62,6 +62,10 @@ public abstract class BaseEntityShopObject<E extends Entity>
 	 */
 	protected static final double SPAWN_LOCATION_OFFSET = 0.98D;
 	protected static final double SPAWN_LOCATION_RANGE = 2.0D;
+	/**
+	 * Flying mobs can be placed one block above the ground without falling down.
+	 */
+	protected static final double SPAWN_LOCATION_RANGE_FLYING = 1.0D;
 
 	protected static final int CHECK_PERIOD_SECONDS = 10;
 	protected static final int CHECK_PERIOD_TICKS = Ticks.PER_SECOND * CHECK_PERIOD_SECONDS;
@@ -191,13 +195,16 @@ public abstract class BaseEntityShopObject<E extends Entity>
 		// We check for collisions from the top of the block:
 		spawnLocation.add(0.0D, SPAWN_LOCATION_OFFSET, 0.0D);
 
+		var spawnLocationRange = EntityUtils.canFly(this.getEntityType())
+				? SPAWN_LOCATION_RANGE_FLYING
+				: SPAWN_LOCATION_RANGE;
 		double distanceToGround = WorldUtils.getCollisionDistanceToGround(
 				spawnLocation,
-				SPAWN_LOCATION_RANGE,
+				spawnLocationRange,
 				collidableFluids
 		);
 
-		if (distanceToGround == SPAWN_LOCATION_RANGE) {
+		if (distanceToGround == spawnLocationRange) {
 			// No collision within the checked range: Remove the initial offset from the spawn
 			// location again.
 			distanceToGround = SPAWN_LOCATION_OFFSET;
@@ -656,8 +663,8 @@ public abstract class BaseEntityShopObject<E extends Entity>
 	/**
 	 * This is called whenever the AI of the entity is ticked, while it is in range of players.
 	 * <p>
-	 * The tick rate is defined by {@link Settings#entityBehaviorTickPeriod}. The AI might not be
-	 * ticked while the entity is currently falling.
+	 * The tick rate is defined by {@link Settings#entityBehaviorTickPeriod}. The AI is also ticked
+	 * while the entity is currently falling.
 	 */
 	public void tickAI() {
 		Entity entity = this.getEntity();

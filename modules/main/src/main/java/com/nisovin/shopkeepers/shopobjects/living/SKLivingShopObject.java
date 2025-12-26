@@ -226,8 +226,10 @@ public class SKLivingShopObject<E extends LivingEntity>
 		// issues and also automatically handles other cases, like players pushing entities around
 		// by hitting them.
 
-		// Making sure that Spigot's entity activation range does not keep this entity ticking,
-		// because it assumes that it is currently falling:
+		// Minor optimization: Make sure that Spigot's entity activation range does not keep this
+		// entity ticking, because it assumes that it is currently falling:
+		// Note: For flying mobs, the EntityAI will reset this flag back to false every few ticks to
+		// play their flying animation.
 		// TODO This can be removed once Spigot ignores NoAI entities.
 		Compat.getProvider().setOnGround(entity, true);
 	}

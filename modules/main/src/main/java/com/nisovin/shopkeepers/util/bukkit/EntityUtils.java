@@ -121,6 +121,33 @@ public final class EntityUtils {
 	}
 
 	/**
+	 * Checks if the given entity type can fly.
+	 * 
+	 * @param entityType
+	 *            the entity type
+	 * @return <code>true</code> if the entity of this type can fly
+	 */
+	public static boolean canFly(EntityType entityType) {
+		switch (entityType.name()) {
+		case "ALLAY":
+		case "BAT":
+		case "BEE":
+		case "CHICKEN":
+		case "BLAZE":
+		case "ENDER_DRAGON":
+		case "GHAST":
+		case "HAPPY_GHAST":
+		case "PARROT":
+		case "PHANTOM":
+		case "VEX":
+		case "WITHER":
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/**
 	 * Checks if the given {@link Pose} is a valid mannequin pose.
 	 * 
 	 * @param pose
