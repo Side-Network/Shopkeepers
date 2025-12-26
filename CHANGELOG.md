@@ -18,6 +18,7 @@ Date format: (YYYY-MM-DD)
   * When spawned, we still adjust their spawn location within their spawn location block, but we no longer automatically place them on the block below that, like we do for other mobs, allowing them to hover one block above the ground.
   * We periodically check if the mob is still in the air and update their onGround state accordingly for some of these mobs to play their flying animation.
   * Also: Entities tick their AI now while falling.
+* Fix: Bat shopkeepers are awake now unless they have a solid block above them.
 * Server assumption tests: Extend the tested item data.
 * Internal: Update code to make use of the new 1.21.5 Bukkit base version.
 * Internal: Refactors to simplify adding entity-based shopkeepers for non-living entity types.

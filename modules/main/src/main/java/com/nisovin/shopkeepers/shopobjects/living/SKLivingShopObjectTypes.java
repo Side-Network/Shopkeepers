@@ -25,6 +25,7 @@ import com.nisovin.shopkeepers.shopobjects.living.types.AbstractHorseShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.ArmorStandShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.AxolotlShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.BabyableShop;
+import com.nisovin.shopkeepers.shopobjects.living.types.BatShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.CatShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.ChestedHorseShop;
 import com.nisovin.shopkeepers.shopobjects.living.types.ChickenShop;
@@ -68,7 +69,9 @@ import com.nisovin.shopkeepers.util.java.ClassUtils;
  * <ul>
  * <li>VILLAGER: okay, default, MC 1.14: shake their head when clicked (TODO might be an upstream
  * bug)
- * <li>BAT: experimental: requires NoAI, sleeping by default, but starts flying when 'hit'
+ * <li>BAT: okay, requires NoAI, sleeping by default, but starts flying when 'hit', we set its awake
+ * state dynamically based on whether there is a solid block above it, does not face the player
+ * while resting TODO invert facing direction while resting?
  * <li>BLAZE: experimental: starts flying upwards -> requires NoAI, seems okay
  * <li>CAVE_SPIDER: okay
  * <li>CHICKEN: okay, laying eggs: canceled (EntityDropItemEvent), 1.21.5: variant
@@ -526,6 +529,14 @@ public final class SKLivingShopObjectTypes implements LivingShopObjectTypes {
 					entityType,
 					ArmorStandShop.class,
 					ArmorStandShop::new
+			);
+			break;
+		case BAT:
+			objectType = new SKLivingShopObjectType<>(
+					context,
+					entityType,
+					BatShop.class,
+					BatShop::new
 			);
 			break;
 		default:
