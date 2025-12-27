@@ -588,7 +588,9 @@ public class Settings extends Config {
 			// If enabled, add the shop creation item tag:
 			if (addShopCreationItemTag) {
 				ItemStack shopCreationItemStack = shopCreationItem.createItemStack();
-				ShopCreationItem.addTag(shopCreationItemStack);
+				var shopCreationItemHelper = new ShopCreationItem(shopCreationItemStack);
+				shopCreationItemHelper.addTag();
+				shopCreationItemHelper.applyItemMeta();
 				shopCreationItemData = new ItemData(UnmodifiableItemStack.ofNonNull(
 						shopCreationItemStack
 				));

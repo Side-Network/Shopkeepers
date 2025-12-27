@@ -152,7 +152,7 @@ public class ShopkeepersCommand extends BaseCommand {
 		BlockFace targetBlockFace = Unsafe.assertNonNull(targetBlockInfo.getHitBlockFace());
 
 		ShopType<?> shopType = context.getOrNull(ARGUMENT_SHOP_TYPE);
-		ShopObjectType<?> shopObjType = context.getOrNull(ARGUMENT_OBJECT_TYPE);
+		ShopObjectType<?> shopObjectType = context.getOrNull(ARGUMENT_OBJECT_TYPE);
 
 		// We use different defaults depending on whether the player might be trying to create a
 		// player or admin shop:
@@ -172,15 +172,15 @@ public class ShopkeepersCommand extends BaseCommand {
 			}
 		}
 
-		if (shopObjType == null) {
-			shopObjType = plugin.getShopObjectTypeRegistry().getDefaultSelection(player);
+		if (shopObjectType == null) {
+			shopObjectType = plugin.getShopObjectTypeRegistry().getDefaultSelection(player);
 		}
-		if (shopType == null || shopObjType == null) {
+		if (shopType == null || shopObjectType == null) {
 			// The player cannot create shops at all:
 			TextUtils.sendMessage(player, Messages.noPermission);
 			return;
 		}
-		assert shopType != null && shopObjType != null;
+		assert shopType != null && shopObjectType != null;
 		boolean isPlayerShopType = (shopType instanceof PlayerShopType);
 
 		if (isPlayerShopType) {
@@ -209,7 +209,7 @@ public class ShopkeepersCommand extends BaseCommand {
 			shopCreationData = PlayerShopCreationData.create(
 					player,
 					(PlayerShopType<?>) shopType,
-					shopObjType,
+					shopObjectType,
 					spawnLocation,
 					targetBlockFace,
 					targetBlock
@@ -219,7 +219,7 @@ public class ShopkeepersCommand extends BaseCommand {
 			shopCreationData = AdminShopCreationData.create(
 					player,
 					(AdminShopType<?>) shopType,
-					shopObjType,
+					shopObjectType,
 					spawnLocation, targetBlockFace
 			);
 		}

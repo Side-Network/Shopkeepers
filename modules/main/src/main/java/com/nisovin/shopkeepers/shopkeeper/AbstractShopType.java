@@ -204,6 +204,7 @@ public abstract class AbstractShopType<T extends AbstractShopkeeper>
 			TextUtils.sendMessage(creator, Messages.noPermission);
 			return null;
 		}
+
 		if (!shopType.isEnabled()) {
 			TextUtils.sendMessage(creator, Messages.shopTypeDisabled,
 					"type", shopType.getIdentifier()
@@ -216,6 +217,7 @@ public abstract class AbstractShopType<T extends AbstractShopkeeper>
 			TextUtils.sendMessage(creator, Messages.noPermission);
 			return null;
 		}
+
 		if (!shopObjectType.isEnabled()) {
 			TextUtils.sendMessage(creator, Messages.shopObjectTypeDisabled,
 					"type", shopObjectType.getIdentifier()

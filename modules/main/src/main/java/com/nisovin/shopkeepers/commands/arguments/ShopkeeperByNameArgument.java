@@ -13,7 +13,6 @@ import com.nisovin.shopkeepers.commands.lib.argument.filter.ArgumentFilter;
 import com.nisovin.shopkeepers.commands.lib.argument.filter.ArgumentRejectedException;
 import com.nisovin.shopkeepers.commands.lib.arguments.ObjectByIdArgument;
 import com.nisovin.shopkeepers.commands.lib.arguments.ObjectIdArgument;
-import com.nisovin.shopkeepers.commands.lib.arguments.PlayerNameArgument;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContextView;
 import com.nisovin.shopkeepers.commands.util.ShopkeeperArgumentUtils.ShopkeeperNameMatchers;
 import com.nisovin.shopkeepers.lang.Messages;
@@ -33,7 +32,7 @@ public class ShopkeeperByNameArgument extends ObjectByIdArgument<String, Shopkee
 			String name,
 			ArgumentFilter<? super Shopkeeper> filter
 	) {
-		this(name, false, filter, PlayerNameArgument.DEFAULT_MINIMUM_COMPLETION_INPUT);
+		this(name, false, filter, ShopkeeperNameArgument.DEFAULT_MINIMUM_COMPLETION_INPUT);
 	}
 
 	public ShopkeeperByNameArgument(

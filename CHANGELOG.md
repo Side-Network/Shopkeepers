@@ -4,6 +4,13 @@ Date format: (YYYY-MM-DD)
 ## v2.25.1 (TBA)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
 
+* Add shop creation items that create shopkeepers with a pre-defined shop and/or object type.
+  * Command: The `/shopkeeper give` command optionally accepts a `shop-type` and `object-type` argument now. When specified, the created shop creation item only spawns shopkeepers of the respective type.
+  * Only player shop types are supported in combination with the shop creation item.
+  * When a player tries to use the shop creation item with a pre-defined shop or object type, we still perform the usual shop and object type disabled and permission checks. I.e. shop creation items can become useless if the respective shop or object type gets disabled or the player misses or loses their permission to use it.
+  * The shop creation message was slightly adapted to omit the non-relevant instructions for switching the selected shop or object type.
+  * Internally, the shop type and shop object type ids are stored in the item's `custom_data` in `PublicBukkitValues` with the keys `shopkeepers:shop_type` and `shopkeepers:object_type`. In combination with the `shopkeepers:shop_creation_item` tag, you can use third-party item editing plugins to create custom shop creation items that spawn specific shopkeeper types.
+  * Debug: Extend the output of the `checkItem` command to include whether the held items specify a pre-defined shop or object type.
 * Add end crystal shop object.
   * Permission: `shopkeeper.entity.end_crystal` (default: `false`, but included in `shopkeeper.entity.*`).
   * Config: Add `enable-end-crystal-shops` (default: `true`).
@@ -20,11 +27,17 @@ Date format: (YYYY-MM-DD)
   * Also: Entities tick their AI now while falling.
 * Fix: Bat shopkeepers are awake now unless they have a solid block above them.
 * Server assumption tests: Extend the tested item data.
+* API: Add `SelectableTypeRegistry#canBeSelected`.
 * Internal: Update code to make use of the new 1.21.5 Bukkit base version.
 * Internal: Refactors to simplify adding entity-based shopkeepers for non-living entity types.
 * Build: Add additional compilation step targeting the Paper API to verify that only Paper-compatible parts of the Bukkit API are used in the plugin's API and main modules.
 
 **Message changes:**  
+* Changed `creation-item-selected`.
+* Added `creation-item-shop-type-selection`.
+* Added `creation-item-object-type-selection`.
+* Added `command-shop-type-argument-no-admin-shop`.
+* Added `command-shop-type-argument-no-player-shop`.
 * Renamed `shop-object-type-living` to `shop-object-type-entity`.
 * Added `button-end-crystal-bottom-slab`.
 * Added `button-end-crystal-bottom-slab-lore`.

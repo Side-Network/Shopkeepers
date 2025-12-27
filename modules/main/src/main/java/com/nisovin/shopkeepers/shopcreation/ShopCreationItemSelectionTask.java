@@ -110,7 +110,11 @@ class ShopCreationItemSelectionTask implements Runnable {
 		cleanup(player);
 
 		if (!player.isOnline()) return; // No longer online
-		if (!ShopCreationItem.isShopCreationItem(player.getInventory().getItemInMainHand())) {
+
+		var itemInHand = player.getInventory().getItemInMainHand();
+		var shopCreationItem = new ShopCreationItem(itemInHand);
+
+		if (!shopCreationItem.isShopCreationItem()) {
 			// No longer holding the shop creation item in hand:
 			return;
 		}
@@ -120,7 +124,14 @@ class ShopCreationItemSelectionTask implements Runnable {
 		// to that in the meantime, there is no major harm caused by sending the selection message
 		// anyway. The task's delay is short enough that this does not matter.
 
+		// Skip the shop / object type selection instructions if they are fixed:
+		var hasShopType = shopCreationItem.hasShopType();
+		var hasObjectType = shopCreationItem.hasObjectType();
+
 		// Inform the player about the shop creation item's usage:
-		TextUtils.sendMessage(player, Messages.creationItemSelected);
+		TextUtils.sendMessage(player, Messages.creationItemSelected,
+				"shopTypeSelection", hasShopType ? "" : Messages.creationItemShopTypeSelection.copy(),
+				"objectTypeSelection", hasObjectType ? "" : Messages.creationItemObjectTypeSelection.copy()
+		);
 	}
 }

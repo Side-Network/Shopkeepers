@@ -52,12 +52,13 @@ public class Messages extends Config {
 	public static Text selectedShopObjectType = Text.parse("&aSelected object type: &6{type}");
 
 	public static Text creationItemSelected = Text.parse("&aShop creation:\n"
-			+ "&e  Do not aim at any block. Then:\n"
-			+ "&e  Left/Right-click to select the shop type.\n"
-			+ "&e  Sneak + left/right-click to select the object type.\n"
+			+ "&e  Do not aim at any block. Then:{shopTypeSelection}{objectTypeSelection}\n"
 			+ "&e  Right-click a container to select it.\n"
 			+ "&e  Then right-click a block to place the shopkeeper."
 	);
+
+	public static Text creationItemShopTypeSelection = Text.parse("\n&e  Left/Right-click to select the shop type.");
+	public static Text creationItemObjectTypeSelection = Text.parse("\n&e  Sneak + left/right-click to select the object type.");
 
 	public static String stateEnabled = c("&2Enabled");
 	public static String stateDisabled = c("&4Disabled");
@@ -865,6 +866,8 @@ public class Messages extends Config {
 	public static Text commandPlayerArgumentMissing = Text.parse("&cNo player specified for '&e{argumentFormat}&c'.");
 	public static Text commandPlayerArgumentInvalid = Text.parse("&cNo player found for '&e{argument}&c'.");
 	public static Text commandShopTypeArgumentInvalid = Text.parse("&cUnknown shop type '&e{argument}&c'.");
+	public static Text commandShopTypeArgumentNoAdminShop = Text.parse("&cShop type '&e{argument}&c' is no admin shop.");
+	public static Text commandShopTypeArgumentNoPlayerShop = Text.parse("&cShop type '&e{argument}&c' is no player shop.");
 	public static Text commandShopObjectTypeArgumentInvalid = Text.parse("&cUnknown shop object type '&e{argument}&c'.");
 	public static Text commandShopkeeperArgumentInvalid = Text.parse("&cNo shopkeeper found for '&e{argument}&c'.");
 	public static Text commandShopkeeperArgumentNoAdminShop = Text.parse("&cShopkeeper '&e{argument}&c' is no admin shopkeeper.");

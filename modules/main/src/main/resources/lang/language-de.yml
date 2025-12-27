@@ -24,11 +24,12 @@ selected-shop-object-type: "&aAusgewählter Objekt-Typ: &6{type}"
 
 creation-item-selected: |-
   &aShop-Erstellung:
-  &e  Visiere keinen Block an. Dann:
-  &e  Links-/Rechtsklick, um den Shop-Typ auszuwählen.
-  &e  Shift + Links-/Rechtsklick, um den Objekt-Typ auszuwählen.
+  &e  Visiere keinen Block an. Dann:{shopTypeSelection}{objectTypeSelection}
   &e  Rechtsklick auf einen Behälter, um diesen auszuwählen.
   &e  Dann Rechtsklick auf einen Block, um dort den Händler zu erstellen.
+
+creation-item-shop-type-selection: "\n&e  Links-/Rechtsklick, um den Shop-Typ auszuwählen."
+creation-item-object-type-selection: "\n&e  Shift + Links-/Rechtsklick, um den Objekt-Typ auszuwählen."
 
 state-enabled: "&2Aktiviert"
 state-disabled: "&4Deaktiviert"
@@ -743,6 +744,8 @@ command-argument-invalid: "&cUngültiges Argument '&e{argument}&c'."
 command-player-argument-missing: "&cEs wurde kein Spieler angegeben für '&e{argumentFormat}&c'."
 command-player-argument-invalid: "&cEs wurde kein Spieler gefunden für '&e{argument}&c'."
 command-shop-type-argument-invalid: "&cUnbekannter Shop-Typ '&e{argument}&c'."
+command-shop-type-argument-no-admin-shop: "&cShop-Typ '&e{argument}&c' ist kein Admin-Shop."
+command-shop-type-argument-no-player-shop: "&cShop-Typ '&e{argument}&c' ist kein Spieler-Shop."
 command-shop-object-type-argument-invalid: "&cUnbekannter Shop-Objekt-Typ '&e{argument}&c'."
 command-shopkeeper-argument-invalid: "&cEs wurde kein Shop gefunden für '&e{argument}&c'."
 command-shopkeeper-argument-no-admin-shop: "&cShop '&e{argument}&c' ist kein Admin-Shop."

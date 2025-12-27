@@ -30,11 +30,12 @@ selected-shop-object-type: "&aSelected object type: &6{type}"
 
 creation-item-selected: |-
   &aShop creation:
-  &e  Do not aim at any block. Then:
-  &e  Left/Right-click to select the shop type.
-  &e  Sneak + left/right-click to select the object type.
+  &e  Do not aim at any block. Then:{shopTypeSelection}{objectTypeSelection}
   &e  Right-click a container to select it.
   &e  Then right-click a block to place the shopkeeper.
+
+creation-item-shop-type-selection: "\n&e  Left/Right-click to select the shop type."
+creation-item-object-type-selection: "\n&e  Sneak + left/right-click to select the object type."
 
 state-enabled: "&2Enabled"
 state-disabled: "&4Disabled"
@@ -735,6 +736,8 @@ command-argument-invalid: "&cInvalid argument '&e{argument}&c'."
 command-player-argument-missing: "&cNo player specified for '&e{argumentFormat}&c'."
 command-player-argument-invalid: "&cNo player found for '&e{argument}&c'."
 command-shop-type-argument-invalid: "&cUnknown shop type '&e{argument}&c'."
+command-shop-type-argument-no-admin-shop: "&cShop type '&e{argument}&c' is no admin shop."
+command-shop-type-argument-no-player-shop: "&cShop type '&e{argument}&c' is no player shop."
 command-shop-object-type-argument-invalid: "&cUnknown shop object type '&e{argument}&c'."
 command-shopkeeper-argument-invalid: "&cNo shopkeeper found for '&e{argument}&c'."
 command-shopkeeper-argument-no-admin-shop: "&cShopkeeper '&e{argument}&c' is no admin shopkeeper."
