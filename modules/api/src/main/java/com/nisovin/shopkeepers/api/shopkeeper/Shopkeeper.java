@@ -238,6 +238,23 @@ public interface Shopkeeper {
 	 */
 	public @Nullable ChunkCoords getChunkCoords();
 
+	// OPEN STATE
+
+	/**
+	 * Checks if this shop is currently open, i.e. can be traded with, hired, etc.
+	 * 
+	 * @return <code>true</code> if the shop is open
+	 */
+	public boolean isOpen();
+
+	/**
+	 * Sets the shop's open state.
+	 * 
+	 * @param open
+	 *            <code>true</code> to open the shop, <code>false</code> to close it
+	 */
+	public void setOpen(boolean open);
+
 	// NAMING
 
 	/**

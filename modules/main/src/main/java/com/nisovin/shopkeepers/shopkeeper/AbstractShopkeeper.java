@@ -76,6 +76,7 @@ import com.nisovin.shopkeepers.util.data.serialization.DataAccessor;
 import com.nisovin.shopkeepers.util.data.serialization.DataSerializer;
 import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
 import com.nisovin.shopkeepers.util.data.serialization.bukkit.ColoredStringSerializers;
+import com.nisovin.shopkeepers.util.data.serialization.java.BooleanSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.DataContainerSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.NumberSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.StringSerializers;
@@ -152,6 +153,7 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 	private @Nullable ChunkCoords chunkCoords; // Null for virtual shops
 	// The ChunkCoords by which the shopkeeper is currently stored:
 	private @Nullable ChunkCoords lastChunkCoords = null;
+	private boolean open = true;
 	private String name = ""; // Not null, can be empty
 
 	private final List<SKShopkeeperSnapshot> snapshots = new ArrayList<>();
@@ -457,6 +459,7 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 		ShopType<?> shopType = this.getAndValidateShopType(shopkeeperData);
 		assert shopType != null;
 
+		this._setOpen(shopkeeperData.get(OPEN));
 		this._setName(shopkeeperData.get(NAME));
 
 		// Optional shop object data:
@@ -546,6 +549,7 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 	public void saveDynamicState(ShopkeeperData shopkeeperData, boolean saveAll) {
 		Validate.notNull(shopkeeperData, "shopkeeperData is null");
 		shopkeeperData.set(SHOP_TYPE, this.getType());
+		shopkeeperData.set(OPEN, open);
 		shopkeeperData.set(NAME, name);
 
 		// Shop object:
@@ -1263,6 +1267,43 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 		messageArguments.put("location", this::getPositionString);
 		messageArguments.put("type", () -> this.getType().getIdentifier());
 		messageArguments.put("object_type", () -> this.getShopObject().getType().getIdentifier());
+	}
+
+	// OPEN STATE
+
+	public static final Property<Boolean> OPEN = new BasicProperty<Boolean>()
+			.dataKeyAccessor("open", BooleanSerializers.STRICT)
+			.useDefaultIfMissing()
+			.defaultValue(true)
+			.build();
+
+	@Override
+	public boolean isOpen() {
+		return open;
+	}
+
+	@Override
+	public void setOpen(boolean open) {
+		this._setOpen(open);
+		this.markDirty();
+	}
+
+	private void _setOpen(boolean open) {
+		this.open = open;
+
+		if (!open) {
+			this.onClosed();
+		}
+	}
+
+	/**
+	 * Called when the shop is {@link #setOpen(boolean) closed}.
+	 */
+	protected void onClosed() {
+		UISessionManager.getInstance()
+				.abortUISessionsForContextDelayed(this, DefaultUITypes.TRADING());
+		UISessionManager.getInstance()
+				.abortUISessionsForContextDelayed(this, DefaultUITypes.HIRING());
 	}
 
 	// NAMING

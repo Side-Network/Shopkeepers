@@ -290,6 +290,11 @@ public final class UISessionManager {
 		this.getUISessionsForContext(contextObject).forEach(View::abort);
 	}
 
+	public void abortUISessionsForContext(Object contextObject, UIType uiType) {
+		// Note: The returned collection is already a copy.
+		this.getUISessionsForContext(contextObject, uiType).forEach(View::abort);
+	}
+
 	public void abortUISessionsForContextDelayed(Object contextObject) {
 		Validate.notNull(contextObject, "context is null");
 
@@ -301,10 +306,32 @@ public final class UISessionManager {
 		});
 	}
 
+	public void abortUISessionsForContextDelayed(Object contextObject, UIType uiType) {
+		Validate.notNull(contextObject, "context is null");
+		Validate.notNull(uiType, "uiType is null");
+
+		// Deactivate currently active UIs for this subject:
+		this.deactivateUIsForContext(contextObject, uiType);
+
+		SchedulerUtils.runTaskOrOmit(plugin, () -> {
+			this.abortUISessionsForContext(contextObject, uiType);
+		});
+	}
+
 	private void deactivateUIsForContext(Object contextObject) {
 		assert contextObject != null;
 		uiSessionsView.forEach(uiSession -> {
 			if (uiSession.getContext().getObject() == contextObject) {
+				uiSession.deactivateUI();
+			}
+		});
+	}
+
+	private void deactivateUIsForContext(Object contextObject, UIType uiType) {
+		assert contextObject != null;
+		uiSessionsView.forEach(uiSession -> {
+			if (uiSession.getContext().getObject() == contextObject
+					&& uiSession.getUIType() == uiType) {
 				uiSession.deactivateUI();
 			}
 		});

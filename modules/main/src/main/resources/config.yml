@@ -502,6 +502,10 @@ shop-information-item: 'minecraft:paper'
 # Set this to AIR to disable the use of placeholder items.
 placeholder-item: 'minecraft:paper'
 
+# The editor items to represent the shop's open and closed states.
+shop-open-item: 'minecraft:green_banner'
+shop-closed-item: 'minecraft:red_banner'
+
 # The item used for the set-name button, and the naming item (if enabled).
 name-item: 'minecraft:name_tag'
 

@@ -30,4 +30,22 @@ public abstract class HiringViewProvider extends AbstractShopkeeperViewProvider 
 		}
 		return true;
 	}
+
+	@Override
+	public boolean canOpen(Player player, boolean silent) {
+		Validate.notNull(player, "player is null");
+		if (!super.canOpen(player, silent)) return false;
+
+		AbstractShopkeeper shopkeeper = this.getShopkeeper();
+
+		if (!shopkeeper.isOpen()) {
+			if (!silent) {
+				this.debugNotOpeningUI(player, "Shopkeeper is closed.");
+				TextUtils.sendMessage(player, Messages.shopCurrentlyClosed);
+			}
+			return false;
+		}
+
+		return true;
+	}
 }

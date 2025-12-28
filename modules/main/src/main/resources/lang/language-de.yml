@@ -43,6 +43,16 @@ button-next-page-lore: []
 button-current-page: "&6Seite {page} von {max_page}"
 button-current-page-lore: []
 
+button-shop-open: "&aLaden schließen"
+button-shop-open-lore:
+- "Schließt den Laden vorübergehend."
+- "Aktuell: &2Offen"
+- "&2Spieler können handeln."
+button-shop-closed: "&aLaden öffnen"
+button-shop-closed-lore:
+- "Öffnet den Laden."
+- "Aktuell: &4Geschlossen"
+- "&4Spieler können nicht handeln."
 button-name: "&aShop Namen ändern"
 button-name-lore:
 - Gib deinem Shop
@@ -417,6 +427,7 @@ villager-for-hire: "&aDieser Dorfbewohner bietet dir im Tausch für &6{costs}x {
 
 missing-trade-perm: "&7Du hast nicht die nötige Befugnis, um mit diesem Shop zu handeln."
 missing-custom-trade-perm: "&7Du hast nicht die nötige Befugnis, um mit diesem Shop zu handeln."
+shop-currently-closed: "&7Dieser Shop ist derzeit geschlossen. Schaue später nochmal vorbei!"
 cannot-trade-no-offers: "&7Dieser Shop hat derzeit keine Angebote. Schaue später nochmal vorbei!"
 no-offers-open-editor-description: "&eDu kannst diesen Shop mit Shift+Rechtsklick bearbeiten."
 cannot-trade-with-own-shop: "&7Du kannst nicht mit deinem eigenen Shop handeln."

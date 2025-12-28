@@ -70,6 +70,15 @@ public class TradingViewProvider extends AbstractShopkeeperViewProvider {
 		if (!super.canOpen(player, silent)) return false;
 
 		AbstractShopkeeper shopkeeper = this.getShopkeeper();
+
+		if (!shopkeeper.isOpen()) {
+			if (!silent) {
+				this.debugNotOpeningUI(player, "Shopkeeper is closed.");
+				TextUtils.sendMessage(player, Messages.shopCurrentlyClosed);
+			}
+			return false;
+		}
+
 		if (!shopkeeper.hasTradingRecipes(player)) {
 			if (!silent) {
 				this.debugNotOpeningUI(player, "Shopkeeper has no offers.");

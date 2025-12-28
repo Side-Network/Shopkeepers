@@ -302,6 +302,8 @@ public class Settings extends Config {
 
 	public static ItemData placeholderItem = new ItemData(Material.PAPER);
 
+	public static ItemData shopOpenItem = new ItemData(Material.GREEN_BANNER);
+	public static ItemData shopClosedItem = new ItemData(Material.RED_BANNER);
 	public static ItemData nameItem = new ItemData(Material.NAME_TAG);
 
 	public static boolean enableAllEquipmentEditorSlots = false;
@@ -414,6 +416,8 @@ public class Settings extends Config {
 		public static ItemData namingItemData = Unsafe.uncheckedNull();
 
 		// Button items:
+		public static ItemData shopOpenButtonItem = Unsafe.uncheckedNull();
+		public static ItemData shopClosedButtonItem = Unsafe.uncheckedNull();
 		public static ItemData nameButtonItem = Unsafe.uncheckedNull();
 		public static ItemData moveButtonItem = Unsafe.uncheckedNull();
 		public static ItemData containerButtonItem = Unsafe.uncheckedNull();
@@ -609,6 +613,16 @@ public class Settings extends Config {
 			));
 
 			// Button items:
+			shopOpenButtonItem = new ItemData(
+					shopOpenItem,
+					Messages.buttonShopOpen,
+					Messages.buttonShopOpenLore
+			);
+			shopClosedButtonItem = new ItemData(
+					shopClosedItem,
+					Messages.buttonShopClosed,
+					Messages.buttonShopClosedLore
+			);
 			nameButtonItem = new ItemData(
 					nameItem,
 					Messages.buttonName,

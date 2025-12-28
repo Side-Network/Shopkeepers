@@ -72,6 +72,18 @@ public class Messages extends Config {
 	public static String buttonCurrentPage = c("&6Page {page} of {max_page}");
 	public static List<String> buttonCurrentPageLore = c(Arrays.asList());
 
+	public static String buttonShopOpen = c("&aClose shop");
+	public static List<String> buttonShopOpenLore = c(Arrays.asList(
+			"Temporarily closes the shop.",
+			"Currently: &2Open",
+			"&2Players can trade."
+	));
+	public static String buttonShopClosed = c("&aOpen shop");
+	public static List<String> buttonShopClosedLore = c(Arrays.asList(
+			"Re-opens the shop.",
+			"Currently: &4Closed",
+			"&4Players cannot trade."
+	));
 	public static String buttonName = c("&aSet shop name");
 	public static List<String> buttonNameLore = c(Arrays.asList(
 			"Lets you rename",
@@ -502,6 +514,7 @@ public class Messages extends Config {
 
 	public static Text missingTradePerm = Text.parse("&7You do not have the permission to trade with this shop.");
 	public static Text missingCustomTradePerm = Text.parse("&7You do not have the permission to trade with this shop.");
+	public static Text shopCurrentlyClosed = Text.parse("&7This shop is currently closed. Check again later!");
 	public static Text cannotTradeNoOffers = Text.parse("&7This shop currently has no offers. Check again later!");
 	public static String noOffersOpenEditorDescription = c("&eYou can edit this shop by right clicking it while sneaking.");
 	public static Text cannotTradeWithOwnShop = Text.parse("&7You cannot trade with your own shop.");

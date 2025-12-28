@@ -49,6 +49,16 @@ button-next-page-lore: []
 button-current-page: "&6Page {page} of {max_page}"
 button-current-page-lore: []
 
+button-shop-open: "&aClose shop"
+button-shop-open-lore:
+- "Temporarily closes the shop."
+- "Currently: &2Open"
+- "&2Players can trade."
+button-shop-closed: "&aOpen shop"
+button-shop-closed-lore:
+- "Re-opens the shop."
+- "Currently: &4Closed"
+- "&4Players cannot trade."
 button-name: "&aSet shop name"
 button-name-lore:
 - Lets you rename
@@ -409,6 +419,7 @@ villager-for-hire: "&aThe villager offered his services as a shopkeeper in excha
 
 missing-trade-perm: "&7You do not have the permission to trade with this shop."
 missing-custom-trade-perm: "&7You do not have the permission to trade with this shop."
+shop-currently-closed: "&7This shop is currently closed. Check again later!"
 cannot-trade-no-offers: "&7This shop currently has no offers. Check again later!"
 no-offers-open-editor-description: "&eYou can edit this shop by right clicking it while sneaking."
 cannot-trade-with-own-shop: "&7You cannot trade with your own shop."

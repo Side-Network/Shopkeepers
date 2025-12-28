@@ -35,6 +35,7 @@ Date format: (YYYY-MM-DD)
 * Add an item with shopkeeper information to the editor UI. The item's lore includes: The shop id, unique id, name, shop type, object type, location and owner (for player shops).
   * In the regular villager editor, we show entity information instead (entity id, unique id and location).
   * Config: Add `shop-information-item` (default: `minecraft:paper`).
+* Add an editor option to temporarily close the shop: Players cannot trade with or hire the shop while it is closed.
 * Fix: Bat shopkeepers are awake now unless they have a solid block above them.
 * Server assumption tests: Extend the tested item data.
 * API: Add `SelectableTypeRegistry#canBeSelected`.
@@ -60,6 +61,11 @@ Date format: (YYYY-MM-DD)
 * Removed `no-player-shops-via-command`.
 * Added `command-create-no-permission`.
 * Added `cannot-spawn-midair`.
+* Added `button-shop-open`.
+* Added `button-shop-open-lore`.
+* Added `button-shop-closed`.
+* Added `button-shop-closed-lore`.
+* Added `shop-currently-closed`.
 
 ## v2.25.0 (2025-12-14)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5

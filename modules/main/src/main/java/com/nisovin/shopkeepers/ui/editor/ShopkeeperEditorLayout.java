@@ -73,6 +73,7 @@ public class ShopkeeperEditorLayout extends EditorLayout {
 
 	protected void setupShopkeeperButtons() {
 		this.addButtonOrIgnore(this.createDeleteButton());
+		this.addButtonOrIgnore(this.createOpenButton());
 		this.addButtonOrIgnore(this.createNamingButton());
 		this.addButtonOrIgnore(this.createMoveButton());
 	}
@@ -143,6 +144,23 @@ public class ShopkeeperEditorLayout extends EditorLayout {
 				}
 		);
 		ConfirmationUI.requestConfirmation(player, config);
+	}
+
+	protected Button createOpenButton() {
+		return new ActionButton() {
+			@Override
+			public @Nullable ItemStack getIcon(EditorView editorView) {
+				return shopkeeper.isOpen() ? DerivedSettings.shopOpenButtonItem.createItemStack()
+						: DerivedSettings.shopClosedButtonItem.createItemStack();
+			}
+
+			@Override
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
+				var newState = !shopkeeper.isOpen();
+				shopkeeper.setOpen(newState);
+				return true;
+			}
+		};
 	}
 
 	protected @Nullable Button createNamingButton() {
