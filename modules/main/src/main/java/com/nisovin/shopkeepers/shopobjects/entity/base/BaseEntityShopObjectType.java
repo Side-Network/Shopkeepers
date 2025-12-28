@@ -220,21 +220,21 @@ public abstract class BaseEntityShopObjectType<T extends BaseEntityShopObject<?>
 
 		World world = Unsafe.assertNonNull(spawnLocation.getWorld());
 
+		// Check if the world's difficulty would prevent the mob from spawning:
+		if (EntityUtils.isRemovedOnPeacefulDifficulty(entityType)) {
+			if (world.getDifficulty() == Difficulty.PEACEFUL) {
+				if (creator != null) {
+					TextUtils.sendMessage(creator, Messages.mobCannotSpawnOnPeacefulDifficulty);
+				}
+				return false;
+			}
+		}
+
 		if (entityType == EntityType.END_CRYSTAL
 				&& !Settings.allowEndCrystalShopsInTheEnd
 				&& world.getEnvironment() == Environment.THE_END) {
 			if (creator != null) {
 				TextUtils.sendMessage(creator, Messages.endCrystalDisabledInTheEnd);
-			}
-			return false;
-		}
-
-		Block spawnBlock = spawnLocation.getBlock();
-		// TODO Require an empty block for shulkers? However, placing a shulker on a non-empty block
-		// actually works fine and preserves the block.
-		if (!spawnBlock.isPassable()) {
-			if (creator != null) {
-				TextUtils.sendMessage(creator, Messages.spawnBlockNotEmpty);
 			}
 			return false;
 		}
@@ -247,15 +247,26 @@ public abstract class BaseEntityShopObjectType<T extends BaseEntityShopObject<?>
 			return false;
 		}
 
-		// Check if the world's difficulty would prevent the mob from spawning:
-		if (EntityUtils.isRemovedOnPeacefulDifficulty(entityType)) {
-			if (world.getDifficulty() == Difficulty.PEACEFUL) {
+		Block spawnBlock = spawnLocation.getBlock();
+		// Note: We don't require a fully empty block for shulkers either, since shulkers can be
+		// placed on non-empty blocks just fine (the block is preserved).
+		if (!spawnBlock.isPassable()) {
+			if (creator != null) {
+				TextUtils.sendMessage(creator, Messages.spawnBlockNotEmpty);
+			}
+			return false;
+		}
+
+		if (!EntityUtils.canFly(entityType) && entityType != EntityType.SHULKER) {
+			Location standingLocation = EntityUtils.getStandingLocation(entityType, spawnBlock);
+			if (standingLocation == null) {
 				if (creator != null) {
-					TextUtils.sendMessage(creator, Messages.mobCannotSpawnOnPeacefulDifficulty);
+					TextUtils.sendMessage(creator, Messages.cannotSpawnMidair);
 				}
 				return false;
 			}
 		}
+
 		return true;
 	}
 

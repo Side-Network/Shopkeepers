@@ -16,6 +16,7 @@ import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -34,6 +35,9 @@ import com.nisovin.shopkeepers.util.java.Validate;
 import com.nisovin.shopkeepers.util.logging.Log;
 
 public final class EntityUtils {
+
+	private static final double GROUND_DISTANCE_CHECK_OFFSET = 0.98D;
+	private static final double GROUND_DISTANCE_CHECK_RANGE = 1.0D;
 
 	// Temporarily re-used location object:
 	private static final Location SHARED_LOCATION = new Location(null, 0, 0, 0);
@@ -61,6 +65,32 @@ public final class EntityUtils {
 			return LAVA;
 		default:
 			return Collections.emptySet();
+		}
+	}
+
+	public static @Nullable Location getStandingLocation(EntityType entityType, Block block) {
+		try {
+			// We check for collisions from slightly below the top of the block:
+			Location location = Unsafe.assertNonNull(block.getLocation(SHARED_LOCATION))
+					.add(0.5, GROUND_DISTANCE_CHECK_OFFSET, 0.5);
+
+			double distanceToGround = WorldUtils.getCollisionDistanceToGround(
+					location,
+					GROUND_DISTANCE_CHECK_RANGE,
+					EntityUtils.getCollidableFluids(entityType)
+			);
+			if (distanceToGround == GROUND_DISTANCE_CHECK_RANGE) {
+				// No collision within the checked range, i.e. no block for the entity to stand on:
+				return null;
+			}
+
+			// Adjust the location:
+			location.add(0.0D, -distanceToGround, 0.0D);
+
+			return location.clone();
+		} finally {
+			// Cleanup temporarily used location
+			SHARED_LOCATION.setWorld(null);
 		}
 	}
 

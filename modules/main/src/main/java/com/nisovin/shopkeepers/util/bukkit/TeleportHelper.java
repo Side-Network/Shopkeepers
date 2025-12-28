@@ -17,7 +17,6 @@ import org.bukkit.util.BoundingBox;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.debug.Debug;
 import com.nisovin.shopkeepers.debug.DebugOptions;
 import com.nisovin.shopkeepers.util.java.Validate;
@@ -46,10 +45,6 @@ import com.nisovin.shopkeepers.util.logging.Log;
  * </ul>
  */
 public final class TeleportHelper {
-
-	private static final double GROUND_DISTANCE_CHECK_OFFSET = 0.98D;
-	private static final double GROUND_DISTANCE_CHECK_RANGE = 1.0D;
-	private static final Location TEMP_LOCATION = new Location(null, 0, 0, 0);
 
 	private static final Set<Material> AVOIDED_BLOCK_TYPES = new HashSet<>();
 
@@ -172,116 +167,97 @@ public final class TeleportHelper {
 
 	// boundingBox: Reused instance.
 	private @Nullable Location getSafeTeleportLocation(Block block, Entity entity, BoundingBox boundingBox) {
-		try {
-			// TODO If the entity bounding box spans multiple blocks, check all of the blocks below
-			// it?
-			Block blockBelow = block.getRelative(0, -1, 0);
+		// TODO If the entity bounding box spans multiple blocks, check all of the blocks below it?
+		Block blockBelow = block.getRelative(0, -1, 0);
 
-			// Skip if the block below is air:
-			if (blockBelow.getType().isAir()) {
-				debugUnsafeTeleportLocation(block, "Block below is air!");
-				return null;
-			}
-
-			// Skip if the block below is unsafe / to be avoided:
-			// TODO Not all of these blocks are unsafe for all entity types, e.g. striders can stand
-			// on lava and magma blocks.
-			if (AVOIDED_BLOCK_TYPES.contains(blockBelow.getType())) {
-				debugUnsafeTeleportLocation(block, "Block below is avoided!");
-				return null;
-			}
-
-			// Avoid teleporting into or above liquids:
-			// The blocks above are checked later as part of the bounding box check.
-			if (block.isLiquid()) {
-				debugUnsafeTeleportLocation(block, "Block is liquid!");
-				return null;
-			}
-
-			if (blockBelow.isLiquid()) {
-				debugUnsafeTeleportLocation(block, "Block below is liquid!");
-				return null;
-			}
-
-			if (!WorldUtils.isBlockInsideWorldHeightBounds(block)) {
-				debugUnsafeTeleportLocation(block, "Block is outside of world height bounds!");
-				return null;
-			}
-
-			if (!WorldUtils.isBlockInsideWorldBorder(block)) {
-				debugUnsafeTeleportLocation(block, "Block is  outside of world border!");
-				return null;
-			}
-
-			// We check for collisions from slightly below the top of the block:
-			Location location = Unsafe.assertNonNull(block.getLocation(TEMP_LOCATION))
-					.add(0.5, GROUND_DISTANCE_CHECK_OFFSET, 0.5);
-
-			// TODO Collidable fluids (which liquids the entity can stand on): No effect currently
-			// since we always reject teleporting entities above of liquids currently.
-			double distanceToGround = WorldUtils.getCollisionDistanceToGround(
-					location,
-					GROUND_DISTANCE_CHECK_RANGE,
-					EntityUtils.getCollidableFluids(entity.getType())
-			);
-			if (distanceToGround == GROUND_DISTANCE_CHECK_RANGE) {
-				// No collision within the checked range, i.e. no block for the entity to stand on:
-				debugUnsafeTeleportLocation(block, "No block to stand on!");
-				return null;
-			}
-
-			// Adjust the location:
-			location.add(0.0D, -distanceToGround, 0.0D);
-
-			// Check if there is enough space, taking the block collision shapes into account:
-
-			// Shift the entity bounding box to the origin's center block location, at the found
-			// height above the ground: Block collision shapes are not shifted by the block's
-			// location.
-			var bbShiftX = 0.5 - boundingBox.getCenterX();
-			var bbShiftY = location.getY() - location.getBlockY() - boundingBox.getMinY();
-			var bbShiftZ = 0.5 - boundingBox.getCenterZ();
-			boundingBox.shift(bbShiftX, bbShiftY, bbShiftZ);
-			// Note: No slight shrinking of the bounding box required: The overlap checks only
-			// return true if the bounding boxes actually overlap, and not only touch (i.e. if the
-			// edge coordinates are the same).
-
-			// TODO We can end up checking block collision shapes multiple times when the entity
-			// bounding box overlaps with multiple checked blocks (e.g. at different heights).
-			// Optimize?
-
-			// TODO Some entity bounding boxes span more than one block wide.
-			int blockHeight = (int) Math.ceil(boundingBox.getHeight());
-			for (int modY = 0; modY < blockHeight; modY++) {
-				// Shift the entity bounding box according to the offset from the checked block
-				// (i.e. by 1 in each iteration except the first iteration), since the block
-				// collision shapes are not offset from the origin:
-				if (modY != 0) {
-					boundingBox.shift(0, -1, 0);
-				}
-
-				Block blockInBoundingBox = block.getRelative(0, modY, 0);
-				if (blockInBoundingBox.isLiquid()) {
-					debugUnsafeTeleportLocation(block, "Block above is liquid!");
-					return null;
-				}
-
-				if (Debug.isDebugging(DebugOptions.unsafeTeleports)) {
-					Log.info("Block shape: "
-							+ Arrays.toString(blockInBoundingBox.getCollisionShape().getBoundingBoxes().toArray())
-							+ " | Entity bounding box: " + boundingBox.toString());
-				}
-
-				if (blockInBoundingBox.getCollisionShape().overlaps(boundingBox)) {
-					debugUnsafeTeleportLocation(block, "Not enough space available!");
-					return null;
-				}
-			}
-
-			return location.clone();
-		} finally {
-			// Cleanup temporarily used location
-			TEMP_LOCATION.setWorld(null);
+		// Skip if the block below is air:
+		if (blockBelow.getType().isAir()) {
+			debugUnsafeTeleportLocation(block, "Block below is air!");
+			return null;
 		}
+
+		// Skip if the block below is unsafe / to be avoided:
+		// TODO Not all of these blocks are unsafe for all entity types, e.g. striders can stand on
+		// lava and magma blocks.
+		if (AVOIDED_BLOCK_TYPES.contains(blockBelow.getType())) {
+			debugUnsafeTeleportLocation(block, "Block below is avoided!");
+			return null;
+		}
+
+		// Avoid teleporting into or above liquids:
+		// The blocks above are checked later as part of the bounding box check.
+		if (block.isLiquid()) {
+			debugUnsafeTeleportLocation(block, "Block is liquid!");
+			return null;
+		}
+
+		if (blockBelow.isLiquid()) {
+			debugUnsafeTeleportLocation(block, "Block below is liquid!");
+			return null;
+		}
+
+		if (!WorldUtils.isBlockInsideWorldHeightBounds(block)) {
+			debugUnsafeTeleportLocation(block, "Block is outside of world height bounds!");
+			return null;
+		}
+
+		if (!WorldUtils.isBlockInsideWorldBorder(block)) {
+			debugUnsafeTeleportLocation(block, "Block is outside of world border!");
+			return null;
+		}
+
+		// TODO Collidable fluids (which liquids the entity can stand on): No effect currently since
+		// we always reject teleporting entities above of liquids currently.
+		var location = EntityUtils.getStandingLocation(entity.getType(), block);
+		if (location == null) {
+			debugUnsafeTeleportLocation(block, "No block to stand on!");
+			return null;
+		}
+
+		// Check if there is enough space, taking the block collision shapes into account:
+
+		// Shift the entity bounding box to the origin's center block location, at the found height
+		// above the ground: Block collision shapes are not shifted by the block's location.
+		var bbShiftX = 0.5 - boundingBox.getCenterX();
+		var bbShiftY = location.getY() - location.getBlockY() - boundingBox.getMinY();
+		var bbShiftZ = 0.5 - boundingBox.getCenterZ();
+		boundingBox.shift(bbShiftX, bbShiftY, bbShiftZ);
+		// Note: No slight shrinking of the bounding box required: The overlap checks only return
+		// true if the bounding boxes actually overlap, and not only touch (i.e. if the edge
+		// coordinates are the same).
+
+		// TODO We can end up checking block collision shapes multiple times when the entity
+		// bounding box overlaps with multiple checked blocks (e.g. at different heights).
+		// Optimize?
+
+		// TODO Some entity bounding boxes span more than one block wide.
+		int blockHeight = (int) Math.ceil(boundingBox.getHeight());
+		for (int modY = 0; modY < blockHeight; modY++) {
+			// Shift the entity bounding box according to the offset from the checked block (i.e. by
+			// 1 in each iteration except the first iteration), since the block collision shapes are
+			// not offset from the origin:
+			if (modY != 0) {
+				boundingBox.shift(0, -1, 0);
+			}
+
+			Block blockInBoundingBox = block.getRelative(0, modY, 0);
+			if (blockInBoundingBox.isLiquid()) {
+				debugUnsafeTeleportLocation(block, "Block above is liquid!");
+				return null;
+			}
+
+			if (Debug.isDebugging(DebugOptions.unsafeTeleports)) {
+				Log.info("Block shape: "
+						+ Arrays.toString(blockInBoundingBox.getCollisionShape().getBoundingBoxes().toArray())
+						+ " | Entity bounding box: " + boundingBox.toString());
+			}
+
+			if (blockInBoundingBox.getCollisionShape().overlaps(boundingBox)) {
+				debugUnsafeTeleportLocation(block, "Not enough space available!");
+				return null;
+			}
+		}
+
+		return location;
 	}
 }

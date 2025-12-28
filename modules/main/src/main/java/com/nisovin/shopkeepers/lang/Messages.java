@@ -428,6 +428,7 @@ public class Messages extends Config {
 	public static Text mustTargetBlock = Text.parse("&7You must look at a block to place the shopkeeper.");
 	public static Text missingSpawnLocation = Text.parse("&7You must specify a spawn location for this type of shop.");
 	public static Text spawnBlockNotEmpty = Text.parse("&7The spawn location must be empty.");
+	public static Text cannotSpawnMidair = Text.parse("&7The selected shop object cannot be placed in midair.");
 	public static Text invalidSpawnBlockFace = Text.parse("&7The shopkeeper cannot be placed on this side of the block.");
 	public static Text mobCannotSpawnOnPeacefulDifficulty = Text.parse("&7The selected mob type cannot spawn here on peaceful difficulty.");
 	public static Text restrictedArea = Text.parse("&7You cannot place a shopkeeper in this area.");
