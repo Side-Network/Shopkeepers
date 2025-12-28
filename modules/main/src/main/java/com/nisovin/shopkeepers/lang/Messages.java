@@ -444,7 +444,6 @@ public class Messages extends Config {
 	public static Text containerAlreadyInUse = Text.parse("&7Another shopkeeper is already using the selected container!");
 	public static Text noContainerAccess = Text.parse("&7You cannot access the selected container!");
 	public static Text tooManyShops = Text.parse("&7You have already reached the limit of how many shops you can own!");
-	public static Text noPlayerShopsViaCommand = Text.parse("&7Player shops can only be created via the shop creation item!");
 
 	public static Text typeNewName = Text.parse("&aPlease enter the shop's new name in chat.\n"
 			+ "  &aEnter a dash (-) to remove the current name.");
@@ -878,6 +877,8 @@ public class Messages extends Config {
 	public static Text historyEntryTradeCount = Text.parse("&7 (&6{count}x&7)");
 
 	public static Text noPermission = Text.parse("&cYou don't have the permission to do that.");
+	public static Text commandCreateNoPermission = Text.parse("&cYou don't have the permission to do that.\n"
+			+ "&eIf you are trying to create a player shop, use the shop creation item instead.");
 
 	public static Text commandUnknown = Text.parse("&cUnknown command '&e{command}&c'!");
 	public static Text commandArgumentUnexpected = Text.parse("&cUnexpected argument '&e{argument}&c'.");

@@ -129,6 +129,9 @@ permissions:
     shopkeeper.hire:
         description: Allows hiring of shopkeepers
         default: true
+    shopkeeper.create:
+        description: Allows the creation of shopkeepers via command
+        default: op
     shopkeeper.bypass:
         description: Bypass player shop restrictions (access player shops of others)
         default: op

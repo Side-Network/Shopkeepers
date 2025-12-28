@@ -26,10 +26,10 @@ import com.nisovin.shopkeepers.commands.lib.BaseCommand;
 import com.nisovin.shopkeepers.commands.lib.CommandException;
 import com.nisovin.shopkeepers.commands.lib.CommandInput;
 import com.nisovin.shopkeepers.commands.lib.CommandRegistry;
+import com.nisovin.shopkeepers.commands.lib.NoPermissionException;
 import com.nisovin.shopkeepers.commands.lib.commands.PlayerCommand;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContextView;
 import com.nisovin.shopkeepers.commands.shopkeepers.snapshot.CommandSnapshot;
-import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopcreation.ShopkeeperPlacement;
 import com.nisovin.shopkeepers.shopkeeper.registry.SKShopkeeperRegistry;
@@ -111,8 +111,14 @@ public class ShopkeepersCommand extends BaseCommand {
 	@Override
 	public boolean testPermission(CommandSender sender) {
 		if (!super.testPermission(sender)) return false;
-		return Settings.createPlayerShopWithCommand
-				|| PermissionUtils.hasPermission(sender, ShopkeepersPlugin.ADMIN_PERMISSION);
+		return PermissionUtils.hasPermission(sender, ShopkeepersPlugin.CREATE_PERMISSION);
+	}
+
+	@Override
+	protected NoPermissionException noPermissionException() {
+		// Custom no-permission message to note about using the shop creation item to create player
+		// shops:
+		return new NoPermissionException(Messages.commandCreateNoPermission);
 	}
 
 	@Override
@@ -184,10 +190,7 @@ public class ShopkeepersCommand extends BaseCommand {
 		boolean isPlayerShopType = (shopType instanceof PlayerShopType);
 
 		if (isPlayerShopType) {
-			if (!Settings.createPlayerShopWithCommand) {
-				TextUtils.sendMessage(player, Messages.noPlayerShopsViaCommand);
-				return;
-			} else if (!containerTargeted) {
+			if (!containerTargeted) {
 				TextUtils.sendMessage(player, Messages.mustTargetContainer);
 				return;
 			}

@@ -53,6 +53,10 @@ public interface ShopkeepersPlugin extends Plugin {
 	 */
 	public static final String TRADE_PERMISSION = "shopkeeper.trade";
 	/**
+	 * The <code>shopkeeper.create</code> permission.
+	 */
+	public static final String CREATE_PERMISSION = "shopkeeper.create";
+	/**
 	 * The <code>shopkeeper.reload</code> permission.
 	 */
 	public static final String RELOAD_PERMISSION = "shopkeeper.reload";

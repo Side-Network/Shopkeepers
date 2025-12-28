@@ -111,8 +111,6 @@ public class Settings extends Config {
 	public static boolean invertShopTypeAndObjectTypeSelection = false;
 	public static boolean deletingPlayerShopReturnsCreationItem = false;
 
-	public static boolean createPlayerShopWithCommand = false;
-
 	public static boolean requireContainerRecentlyPlaced = true;
 	public static int maxContainerDistance = 15;
 	public static int maxShopsPerPlayer = -1;

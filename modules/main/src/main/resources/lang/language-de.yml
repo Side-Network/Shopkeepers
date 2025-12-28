@@ -363,7 +363,6 @@ container-not-placed: "&7Du musst einen Behälter auswählen, den du kürzlich p
 container-already-in-use: "&7Ein anderer Shop benutzt bereits den ausgewählten Behälter!"
 no-container-access: "&7Du hast keinen Zugriff auf den ausgewählten Behälter!"
 too-many-shops: "&7Du hast bereits das Limit an Shops erreicht, die du besitzen kannst!"
-no-player-shops-via-command: "&7Spieler-Shops können nur mit dem Shop-Erstellungsgegenstand erzeugt werden!"
 
 type-new-name: "&aBitte gib den neuen Namen des Shops im Chat ein.\n  &aEin Minus (-) entfernt den aktuellen Namen."
 name-set: "&aDer Name des Shops wurde auf '&e{name}&a' gesetzt!"
@@ -752,7 +751,10 @@ history-entry-player-shop: "&e{owner}"
 history-entry-admin-shop: "&eAdmin-Shop"
 history-entry-trade-count: "&7 (&6{count}x&7)"
 
-no-permission: "&cDafür hast du nicht die nötigen Berechtigungen."
+no-permission: "&cDafür hast du nicht die nötige Berechtigung."
+command-create-no-permission: |-
+  &cDafür hast du nicht die nötige Berechtigung.
+  &eFalls du versuchst einen Spieler-Shop zu erstellen, benutze stattdessen den Shop-Erstellungsgegenstand.
 
 command-unknown: "&cUnbekannter Befehl '&e{command}&c'!"
 command-argument-unexpected: "&cUnerwartetes Argument '&e{argument}&c'."

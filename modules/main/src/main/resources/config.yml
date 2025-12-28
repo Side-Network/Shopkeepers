@@ -173,9 +173,6 @@ invert-shop-type-and-object-type-selection: false
 # shop creation item.
 deleting-player-shop-returns-creation-item: false
 
-# Whether to allow creating player shops with the /shopkeeper command.
-create-player-shop-with-command: false
-
 # Whether the selected container must have been recently placed by the player
 # who is attempting to create the shopkeeper.
 require-container-recently-placed: true

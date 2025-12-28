@@ -4,6 +4,12 @@ Date format: (YYYY-MM-DD)
 ## v2.25.1 (TBA)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
 
+* Permission: Add `shopkeeper.create` (default: `op`).
+  * Only players with this permission can create shopkeepers via command (both admin and player shops).
+  * Config: This permission replaces the previous `create-player-shop-with-command` setting. The setting is automatically removed during config migration 10.
+  * Compared to the previous setting, this permission offers additional flexibility: It is now possible to only allow admins to create player shops via command while still requiring normal players to use the shop creation item.
+  * The "no-permission" message for the shopkeeper creation command includes a note now about using the shop creation item to create player shops.
+  * Manual migration: If you previously allowed your players to create player shops via command, you will have to assign them this new permission now.
 * Add shop creation items that create shopkeepers with a pre-defined shop and/or object type.
   * Command: The `/shopkeeper give` command optionally accepts a `shop-type` and `object-type` argument now. When specified, the created shop creation item only spawns shopkeepers of the respective type.
   * Only player shop types are supported in combination with the shop creation item.
@@ -50,6 +56,8 @@ Date format: (YYYY-MM-DD)
 * Added `player-shop-information`.
 * Added `villager-editor-information-header`.
 * Added `villager-editor-information`.
+* Removed `no-player-shops-via-command`.
+* Added `command-create-no-permission`.
 
 ## v2.25.0 (2025-12-14)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
