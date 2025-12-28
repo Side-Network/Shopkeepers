@@ -204,6 +204,8 @@ public class SKLivingShopObject<E extends LivingEntity>
 
 	@Override
 	protected void overwriteAI() {
+		super.overwriteAI();
+
 		E entity = Unsafe.assertNonNull(this.getEntity());
 
 		// Setting the entity non-collidable:
