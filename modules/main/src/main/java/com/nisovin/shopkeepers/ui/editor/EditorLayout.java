@@ -38,6 +38,7 @@ public abstract class EditorLayout {
 	public static final int TRADES_PAGE_BAR_END = TRADES_PAGE_BAR_START + TRADES_COLUMNS - 1;
 	public static final int TRADES_PAGE_ICON = TRADES_PAGE_BAR_START + (TRADES_PAGE_BAR_END - TRADES_PAGE_BAR_START) / 2;
 	public static final int TRADES_SETUP_ICON = TRADES_PAGE_ICON - 1;
+	public static final int SHOP_INFORMATION_ICON = TRADES_PAGE_ICON + 1;
 
 	public static final int BUTTONS_START = TRADES_PAGE_BAR_END + (COLUMNS_PER_ROW - TRADES_COLUMNS) + 1;
 	// TODO If there are more buttons than we can fit into two rows, move the excess buttons into a
@@ -154,6 +155,10 @@ public abstract class EditorLayout {
 		currentPageButton.setSlot(TRADES_PAGE_ICON);
 		tradesPageBarButtons[TRADES_PAGE_ICON - TRADES_PAGE_BAR_START] = currentPageButton;
 
+		Button shopInformationButton = this.createShopInformationButton();
+		shopInformationButton.setSlot(SHOP_INFORMATION_ICON);
+		tradesPageBarButtons[SHOP_INFORMATION_ICON - TRADES_PAGE_BAR_START] = shopInformationButton;
+
 		Button nextPageButton = this.createNextPageButton();
 		nextPageButton.setSlot(TRADES_PAGE_BAR_END);
 		tradesPageBarButtons[TRADES_PAGE_BAR_END - TRADES_PAGE_BAR_START] = nextPageButton;
@@ -232,6 +237,20 @@ public abstract class EditorLayout {
 		};
 	}
 
+	protected Button createShopInformationButton() {
+		return new Button() {
+			@Override
+			public @Nullable ItemStack getIcon(EditorView editorView) {
+				return createShopInformationIcon();
+			}
+
+			@Override
+			protected void onClick(EditorView editorView, InventoryClickEvent clickEvent) {
+				// Shop information button: Does nothing.
+			}
+		};
+	}
+
 	protected Button createTradeSetupButton() {
 		return new Button() {
 			@Override
@@ -295,6 +314,8 @@ public abstract class EditorLayout {
 		item.setAmount(MathUtils.clamp(page, 1, ItemUtils.MAX_STACK_SIZE_64));
 		return item;
 	}
+
+	protected abstract ItemStack createShopInformationIcon();
 
 	protected abstract ItemStack createTradeSetupIcon();
 

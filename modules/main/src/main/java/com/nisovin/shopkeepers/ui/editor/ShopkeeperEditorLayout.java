@@ -43,6 +43,19 @@ public class ShopkeeperEditorLayout extends EditorLayout {
 	}
 
 	@Override
+	protected ItemStack createShopInformationIcon() {
+		var shopkeeper = this.getShopkeeper();
+		String itemName = Messages.shopInformationHeader;
+		List<String> itemLore = shopkeeper.getInformation();
+		TextUtils.wrap(itemLore, TextUtils.LORE_MAX_LENGTH);
+		return ItemUtils.setDisplayNameAndLore(
+				Settings.shopInformationItem.createItemStack(),
+				itemName,
+				itemLore
+		);
+	}
+
+	@Override
 	protected ItemStack createTradeSetupIcon() {
 		ShopType<?> shopType = this.getShopkeeper().getType();
 		String itemName = StringUtils.replaceArguments(Messages.tradeSetupDescHeader,

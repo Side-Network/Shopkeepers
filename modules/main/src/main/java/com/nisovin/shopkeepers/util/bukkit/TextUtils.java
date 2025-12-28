@@ -44,6 +44,12 @@ import com.nisovin.shopkeepers.util.text.MessageArguments;
  */
 public final class TextUtils {
 
+	/**
+	 * A recommended maximum length limit (defined by us) for item lore lines to avoid the item
+	 * hover to become to large in width.
+	 */
+	public static final int LORE_MAX_LENGTH = 32;
+
 	/*
 	 * PLAIN TEXT
 	 */
@@ -387,6 +393,108 @@ public final class TextUtils {
 			hexCode.append(c);
 		}
 		return hexCode.toString();
+	}
+
+	// Wraps the individual texts in the list.
+	// Tries to wrap at whitespace, but falls back to wrapping at the length limit.
+	// Color and formatting codes do not count towards the limit and are preserved in the next line.
+	public static void wrap(List<String> source, int maxVisibleLength) {
+		var iterator = source.listIterator();
+
+		var activeFormat = new StringBuilder();
+		var currentLine = new StringBuilder();
+
+		while (iterator.hasNext()) {
+			String line = Unsafe.assertNonNull(iterator.next());
+			if (getVisibleLength(line) <= maxVisibleLength) {
+				continue;
+			}
+
+			iterator.remove();
+
+			activeFormat.setLength(0);
+			currentLine.setLength(0);
+
+			int visibleLength = 0;
+			int lastWhitespaceIndex = -1;
+			int lastWhitespaceVisibleLength = -1;
+
+			for (int i = 0; i < line.length(); i++) {
+				char c = line.charAt(i);
+
+				// Formatting code:
+				if (c == ChatColor.COLOR_CHAR) {
+					currentLine.append(c);
+					activeFormat.append(c);
+
+					i++;
+					if (i < line.length()) {
+						char code = line.charAt(i);
+						var chatColor = ChatColor.getByChar(code);
+						if (chatColor != null
+								&& (chatColor.isColor() || chatColor == ChatColor.RESET)) {
+							// Reset the active format at colors and reset:
+							activeFormat.setLength(0);
+							activeFormat.append(c);
+						}
+						currentLine.append(code);
+						activeFormat.append(code);
+					}
+					continue;
+				}
+
+				// Track whitespace for word wrap:
+				if (Character.isWhitespace(c)) {
+					lastWhitespaceIndex = currentLine.length();
+					lastWhitespaceVisibleLength = visibleLength;
+				}
+
+				currentLine.append(c);
+				visibleLength++;
+
+				if (visibleLength >= maxVisibleLength) {
+					if (lastWhitespaceIndex != -1) {
+						// Word wrap at last whitespace:
+						iterator.add(currentLine.substring(0, lastWhitespaceIndex));
+
+						// Remainder without the whitespace:
+						String remainder = currentLine.substring(lastWhitespaceIndex + 1);
+						currentLine.setLength(0);
+						currentLine.append(activeFormat).append(remainder);
+
+						visibleLength -= (lastWhitespaceVisibleLength + 1);
+						lastWhitespaceIndex = -1;
+						lastWhitespaceVisibleLength = -1;
+					} else {
+						// Hard wrap:
+						iterator.add(currentLine.toString());
+						currentLine.setLength(0);
+						currentLine.append(activeFormat);
+						visibleLength = 0;
+					}
+				}
+			}
+
+			if (currentLine.length() > 0) {
+				iterator.add(currentLine.toString());
+			}
+		}
+	}
+
+	// Calculates the visible length (ignores formatting codes)
+	private static int getVisibleLength(String text) {
+		int length = 0;
+		for (int i = 0; i < text.length(); i++) {
+			char c = text.charAt(i);
+			if (c == ChatColor.COLOR_CHAR) {
+				// The color char is not counted and neither is the subsequent char:
+				i++;
+				continue;
+			}
+
+			length++;
+		}
+		return length;
 	}
 
 	// SENDING

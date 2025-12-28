@@ -498,6 +498,7 @@ previous-page-item: 'minecraft:writable_book'
 next-page-item: 'minecraft:writable_book'
 current-page-item: 'minecraft:writable_book'
 trade-setup-item: 'minecraft:paper'
+shop-information-item: 'minecraft:paper'
 
 # The item that players can rename and then use as a substitute for items they
 # don't have yet when they set up their trade offers or mob equipment.

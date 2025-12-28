@@ -46,6 +46,7 @@ import com.nisovin.shopkeepers.api.util.ChunkCoords;
 import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.debug.Debug;
 import com.nisovin.shopkeepers.debug.DebugOptions;
+import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.migration.Migration;
 import com.nisovin.shopkeepers.shopkeeper.migration.MigrationPhase;
 import com.nisovin.shopkeepers.shopkeeper.migration.ShopkeeperDataMigrator;
@@ -1675,6 +1676,21 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 			// command senders):
 			return PermissionUtils.hasPermission(sender, ShopkeepersPlugin.BYPASS_PERMISSION);
 		}
+	}
+
+	// EDITOR
+
+	/**
+	 * Gets a user-friendly short multi-line overview of the primary properties of this shopkeeper
+	 * (id, unique id, name, shop type, object type, location, owner, etc.).
+	 * <p>
+	 * Sub-types may add additional properties.
+	 * 
+	 * @return the shop information
+	 */
+	public List<String> getInformation() {
+		var messageArguments = this.getMessageArguments("shop_");
+		return StringUtils.replaceArguments(Messages.shopInformation, messageArguments);
 	}
 
 	// INTERACTION HANDLING

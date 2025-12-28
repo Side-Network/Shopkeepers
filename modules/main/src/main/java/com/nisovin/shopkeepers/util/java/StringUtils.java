@@ -13,6 +13,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
+import com.nisovin.shopkeepers.text.Text;
+import com.nisovin.shopkeepers.util.annotations.ReadWrite;
 import com.nisovin.shopkeepers.util.text.MessageArguments;
 
 /**
@@ -296,6 +298,47 @@ public final class StringUtils {
 			}
 		}
 		return sb.toString();
+	}
+
+	// Wraps the individual texts in the list.
+	// Tries to wrap at whitespace, but falls back to wrapping at the length limit.
+	public static void wrap(@ReadWrite List<String> source, int maxLength) {
+		Validate.isTrue(maxLength >= 1, "maxLength must be positive!");
+
+		var iterator = source.listIterator();
+		while (iterator.hasNext()) {
+			String text = Unsafe.assertNonNull(iterator.next());
+
+			if (text.length() <= maxLength) {
+				continue;
+			}
+			assert text.length() > 0;
+
+			iterator.remove();
+
+			int startIndexInclusive = 0;
+			while (startIndexInclusive < text.length()) {
+				int endIndexExclusive = Math.min(startIndexInclusive + maxLength, text.length());
+
+				// Try to find a whitespace to wrap at:
+				int wrapAt = -1;
+				for (int i = endIndexExclusive - 1; i > startIndexInclusive; i--) {
+					if (Character.isWhitespace(text.charAt(i))) {
+						wrapAt = i;
+						break;
+					}
+				}
+
+				if (wrapAt != -1) {
+					iterator.add(text.substring(startIndexInclusive, wrapAt));
+					startIndexInclusive = wrapAt + 1; // Skip whitespace
+				} else {
+					// No word boundary found -> hard wrap:
+					iterator.add(text.substring(startIndexInclusive, endIndexExclusive));
+					startIndexInclusive = endIndexExclusive;
+				}
+			}
+		}
 	}
 
 	// ARGUMENTS REPLACEMENT
@@ -591,11 +634,16 @@ public final class StringUtils {
 		// The argument to replace the current key:
 		protected @Nullable Object resolveArgument(String key) {
 			Object argument = Unsafe.assertNonNull(arguments).get(key);
-			if (argument instanceof Supplier) {
-				return ((Supplier<?>) argument).get(); // Can be null
-			} else {
-				return argument; // Can be null
+			if (argument instanceof Supplier supplier) {
+				argument = supplier.get(); // Can be null
 			}
+
+			// String replacement only supports plain strings:
+			if (argument instanceof Text text) {
+				argument = text.toPlainText();
+			}
+
+			return argument; // Can be null
 		}
 
 		protected void appendPrefix() {

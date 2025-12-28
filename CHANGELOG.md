@@ -25,6 +25,9 @@ Date format: (YYYY-MM-DD)
   * When spawned, we still adjust their spawn location within their spawn location block, but we no longer automatically place them on the block below that, like we do for other mobs, allowing them to hover one block above the ground.
   * We periodically check if the mob is still in the air and update their onGround state accordingly for some of these mobs to play their flying animation.
   * Also: Entities tick their AI now while falling.
+* Add an item with shopkeeper information to the editor UI. The item's lore includes: The shop id, unique id, name, shop type, object type, location and owner (for player shops).
+  * In the regular villager editor, we show entity information instead (entity id, unique id and location).
+  * Config: Add `shop-information-item` (default: `minecraft:paper`).
 * Fix: Bat shopkeepers are awake now unless they have a solid block above them.
 * Server assumption tests: Extend the tested item data.
 * API: Add `SelectableTypeRegistry#canBeSelected`.
@@ -42,6 +45,11 @@ Date format: (YYYY-MM-DD)
 * Added `button-end-crystal-bottom-slab`.
 * Added `button-end-crystal-bottom-slab-lore`.
 * Added `end-crystal-disabled-in-the-end`.
+* Added `shop-information-header`.
+* Added `shop-information`.
+* Added `player-shop-information`.
+* Added `villager-editor-information-header`.
+* Added `villager-editor-information`.
 
 ## v2.25.0 (2025-12-14)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5

@@ -593,6 +593,17 @@ book-shop.empty-item2-lore:
 - "Der zweite Gegenstand den du kaufen möchtest."
 - "Links-/Rechtsklick zum Ändern der Menge."
 
+shop-information-header: "&6Details"
+shop-information:
+- "Id: &e{shop_id}"
+- "Eindeutige Id: &e{shop_uuid}"
+- "Name: &e{shop_name}"
+- "Typ: &e{shop_type}"
+- "Objekt: &e{shop_object_type}"
+- "Standort: &e{shop_location}"
+player-shop-information:
+- "Besitzer: &e{shop_owner_name} &8({shop_owner_uuid})"
+
 missing-edit-villagers-perm: "&7Dir fehlt die nötige Berechtigung, um Dorfbewohner zu editieren."
 missing-edit-wandering-traders-perm: "&7Dir fehlt die nötige Berechtigung, um wandernde Händler zu editieren."
 must-target-entity: "&7Du musst ein Objekt anvisieren."
@@ -607,6 +618,13 @@ villager-editor-description:
 - 'Untere Reihen: Kosten'
 - 'Bearbeitete Angebote können unendlich oft'
 - 'genutzt werden und haben keine XP Belohnungen'
+
+villager-editor-information-header: "&6Details"
+villager-editor-information:
+- "Id: &e{entity_id}"
+- "Eindeutige Id: &e{entity_uuid}"
+- "Name: &e{entity_name}"
+- "Standort: &e{entity_location}"
 
 button-delete-villager: "&4Entfernen"
 button-delete-villager-lore:

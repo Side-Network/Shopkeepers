@@ -53,6 +53,24 @@ public final class VillagerEditorLayout extends EditorLayout {
 	}
 
 	@Override
+	protected ItemStack createShopInformationIcon() {
+		String itemName = Messages.villagerEditorInformationHeader;
+		List<String> itemLore = StringUtils.replaceArguments(
+				Messages.villagerEditorInformation,
+				"entity_id", villager.getEntityId(),
+				"entity_uuid", villager.getUniqueId(),
+				"entity_name", StringUtils.getOrEmpty(villager.getCustomName()),
+				"entity_location", TextUtils.getLocationString(villager.getLocation())
+		);
+		TextUtils.wrap(itemLore, TextUtils.LORE_MAX_LENGTH);
+		return ItemUtils.setDisplayNameAndLore(
+				Settings.shopInformationItem.createItemStack(),
+				itemName,
+				itemLore
+		);
+	}
+
+	@Override
 	protected ItemStack createTradeSetupIcon() {
 		String villagerName = villager.getName(); // Not null
 		String itemName = StringUtils.replaceArguments(Messages.villagerEditorDescriptionHeader,

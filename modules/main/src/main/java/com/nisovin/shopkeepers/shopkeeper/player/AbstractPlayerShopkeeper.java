@@ -1,5 +1,6 @@
 package com.nisovin.shopkeepers.shopkeeper.player;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -70,6 +71,7 @@ import com.nisovin.shopkeepers.util.inventory.ItemMigration;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 import com.nisovin.shopkeepers.util.java.CyclicCounter;
 import com.nisovin.shopkeepers.util.java.RateLimiter;
+import com.nisovin.shopkeepers.util.java.StringUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
 import com.nisovin.shopkeepers.util.logging.Log;
 
@@ -767,6 +769,16 @@ public abstract class AbstractPlayerShopkeeper
 		Log.debug(() -> "Opening container inventory for player '" + player.getName() + "'.");
 		// Open the container directly for the player (no need for a custom UI):
 		return player.openInventory(containerInventory) != null;
+	}
+
+	// EDITOR
+
+	@Override
+	public List<String> getInformation() {
+		var information = super.getInformation();
+		var messageArguments = this.getMessageArguments("shop_");
+		information.addAll(StringUtils.replaceArguments(Messages.playerShopInformation, messageArguments));
+		return information;
 	}
 
 	// TICKING

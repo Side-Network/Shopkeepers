@@ -300,6 +300,7 @@ public class Settings extends Config {
 	public static ItemData nextPageItem = new ItemData(Material.WRITABLE_BOOK);
 	public static ItemData currentPageItem = new ItemData(Material.WRITABLE_BOOK);
 	public static ItemData tradeSetupItem = new ItemData(Material.PAPER);
+	public static ItemData shopInformationItem = new ItemData(Material.PAPER);
 
 	public static ItemData placeholderItem = new ItemData(Material.PAPER);
 

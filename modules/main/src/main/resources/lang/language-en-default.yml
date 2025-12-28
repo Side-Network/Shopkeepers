@@ -587,6 +587,17 @@ book-shop.empty-item2-lore:
 - "The second item you want to buy."
 - "Left/Right click to adjust the amount."
 
+shop-information-header: "&6Details"
+shop-information:
+- "Id: &e{shop_id}"
+- "Unique id: &e{shop_uuid}"
+- "Name: &e{shop_name}"
+- "Type: &e{shop_type}"
+- "Object: &e{shop_object_type}"
+- "Location: &e{shop_location}"
+player-shop-information:
+- "Owner: &e{shop_owner_name} &8({shop_owner_uuid})"
+
 missing-edit-villagers-perm: "&7You do not have the permission to edit villagers."
 missing-edit-wandering-traders-perm: "&7You do not have the permission to edit wandering traders."
 must-target-entity: "&7You have to target an entity."
@@ -601,6 +612,13 @@ villager-editor-description:
 - 'Bottom rows: Cost items'
 - 'Edited trades have infinite'
 - 'uses and no XP rewards.'
+
+villager-editor-information-header: "&6Details"
+villager-editor-information:
+- "Id: &e{entity_id}"
+- "Unique id: &e{entity_uuid}"
+- "Name: &e{entity_name}"
+- "Location: &e{entity_location}"
 
 button-delete-villager: "&4Delete"
 button-delete-villager-lore:

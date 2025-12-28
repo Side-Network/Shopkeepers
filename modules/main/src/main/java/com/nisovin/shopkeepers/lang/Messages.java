@@ -707,6 +707,19 @@ public class Messages extends Config {
 			"Left/Right click to adjust the amount."
 	));
 
+	public static String shopInformationHeader = c("&6Details");
+	public static List<String> shopInformation = c(Arrays.asList(
+			"Id: &e{shop_id}",
+			"Unique id: &e{shop_uuid}",
+			"Name: &e{shop_name}",
+			"Type: &e{shop_type}",
+			"Object: &e{shop_object_type}",
+			"Location: &e{shop_location}"
+	));
+	public static List<String> playerShopInformation = c(Arrays.asList(
+			"Owner: &e{shop_owner_name} &8({shop_owner_uuid})"
+	));
+
 	public static Text missingEditVillagersPerm = Text.parse("&7You do not have the permission to edit villagers.");
 	public static Text missingEditWanderingTradersPerm = Text.parse("&7You do not have the permission to edit wandering traders.");
 	public static Text mustTargetEntity = Text.parse("&7You have to target an entity.");
@@ -721,6 +734,14 @@ public class Messages extends Config {
 			"Bottom rows: Cost items",
 			"Edited trades have infinite",
 			"uses and no XP rewards."
+	));
+
+	public static String villagerEditorInformationHeader = c("&6Details");
+	public static List<String> villagerEditorInformation = c(Arrays.asList(
+			"Id: &e{entity_id}",
+			"Unique id: &e{entity_uuid}",
+			"Name: &e{entity_name}",
+			"Location: &e{entity_location}"
 	));
 
 	public static String buttonDeleteVillager = c("&4Delete");
