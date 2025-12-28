@@ -1,7 +1,7 @@
 # Changelog
 Date format: (YYYY-MM-DD)  
 
-## v2.25.1 (TBA)
+## v2.26.0 (TBA)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
 
 * Permission: Add `shopkeeper.create` (default: `op`).
