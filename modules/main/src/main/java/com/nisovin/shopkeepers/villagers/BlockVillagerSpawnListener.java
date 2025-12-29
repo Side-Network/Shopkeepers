@@ -29,6 +29,7 @@ public class BlockVillagerSpawnListener implements Listener {
 
 	private boolean isSpawnBlockingBypassed(SpawnReason spawnReason) {
 		switch (spawnReason) {
+		case COMMAND:
 		case CUSTOM: // Plugins
 		case SPAWNER_EGG:
 			// Not obtainable in vanilla Minecraft. Normal usage of the shopkeeper creation item is

@@ -44,6 +44,7 @@ Date format: (YYYY-MM-DD)
   * `disable-wandering-traders-worlds`
   * `block-wandering-trader-spawns-worlds`
   * `hire-wandering-traders-worlds`
+* Even when disabled, allow normal villagers and wandering to still be spawned manually via command, similar to how they can still be spawned via spawn eggs. However, during chunk loading, such villagers are still subsequently removed.
 * Fix: Bat shopkeepers are awake now unless they have a solid block above them.
 * Server assumption tests: Extend the tested item data.
 * API: Add `SelectableTypeRegistry#canBeSelected`.
