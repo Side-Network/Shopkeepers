@@ -2,6 +2,7 @@ package com.nisovin.shopkeepers.villagers;
 
 import java.util.Map;
 
+import org.bukkit.World;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -65,8 +66,8 @@ public class VillagerInteractionListener implements Listener {
 			return;
 		}
 
-		if ((isVillager && Settings.disableOtherVillagers)
-				|| (isWanderingTrader && Settings.disableWanderingTraders)) {
+		if ((isVillager && this.isOtherVillagersDisabled(villager.getWorld()))
+				|| (isWanderingTrader && this.isWanderingTradersDisabled(villager.getWorld()))) {
 			// Prevent trading with non-shopkeeper villagers:
 			event.setCancelled(true);
 			Log.debug("  trading prevented");
@@ -105,6 +106,18 @@ public class VillagerInteractionListener implements Listener {
 		}
 	}
 
+	private boolean isOtherVillagersDisabled(World world) {
+		return Settings.disableOtherVillagers
+				&& (Settings.disableOtherVillagersWorlds.isEmpty()
+						|| Settings.disableOtherVillagersWorlds.contains(world.getName()));
+	}
+
+	private boolean isWanderingTradersDisabled(World world) {
+		return Settings.disableWanderingTraders
+				&& (Settings.disableWanderingTradersWorlds.isEmpty()
+						|| Settings.disableWanderingTradersWorlds.contains(world.getName()));
+	}
+
 	private boolean handleEditRegularVillager(Player player, AbstractVillager villager) {
 		if (!player.isSneaking()) return false;
 		if ((Settings.editRegularVillagers && villager instanceof Villager)
@@ -128,12 +141,34 @@ public class VillagerInteractionListener implements Listener {
 		return false;
 	}
 
-	// Returns false, if the player wasn't able to hire this villager.
-	private boolean handleHireOtherVillager(Player player, AbstractVillager villager) {
-		if (!(Settings.hireOtherVillagers && villager instanceof Villager)
-				&& !(Settings.hireWanderingTraders && villager instanceof WanderingTrader)) {
+	private boolean isHireOtherVillagersEnabled(World world) {
+		return Settings.hireOtherVillagers
+				&& (Settings.hireOtherVillagersWorlds.isEmpty()
+						|| Settings.hireOtherVillagersWorlds.contains(world.getName()));
+	}
+
+	private boolean isHireWanderingTradersEnabled(World world) {
+		return Settings.hireWanderingTraders
+				&& (Settings.hireWanderingTradersWorlds.isEmpty()
+						|| Settings.hireWanderingTradersWorlds.contains(world.getName()));
+	}
+
+	private boolean isHireVillagerEnabled(AbstractVillager villager) {
+		if (villager instanceof Villager) {
+			return this.isHireOtherVillagersEnabled(villager.getWorld());
+		} else if (villager instanceof WanderingTrader) {
+			return this.isHireWanderingTradersEnabled(villager.getWorld());
+		} else {
 			return false;
 		}
+	}
+
+	// Returns false, if the player wasn't able to hire this villager.
+	private boolean handleHireOtherVillager(Player player, AbstractVillager villager) {
+		if (!this.isHireVillagerEnabled(villager)) {
+			return false;
+		}
+
 		Log.debug("  possible hire ..");
 
 		// Check if the player is allowed to remove (attack) the entity (in case the entity is

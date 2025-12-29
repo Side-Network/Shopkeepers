@@ -321,13 +321,20 @@ public class Settings extends Config {
 	 * Non-shopkeeper villagers
 	 */
 	public static boolean disableOtherVillagers = false;
+	public static List<String> disableOtherVillagersWorlds = new ArrayList<>();
 	public static boolean blockVillagerSpawns = false;
+	public static List<String> blockVillagerSpawnsWorlds = new ArrayList<>();
 	public static boolean disableZombieVillagerCuring = false;
+	public static List<String> disableZombieVillagerCuringWorlds = new ArrayList<>();
 	public static boolean hireOtherVillagers = false;
+	public static List<String> hireOtherVillagersWorlds = new ArrayList<>();
 
 	public static boolean disableWanderingTraders = false;
+	public static List<String> disableWanderingTradersWorlds = new ArrayList<>();
 	public static boolean blockWanderingTraderSpawns = false;
+	public static List<String> blockWanderingTraderSpawnsWorlds = new ArrayList<>();
 	public static boolean hireWanderingTraders = false;
+	public static List<String> hireWanderingTradersWorlds = new ArrayList<>();
 
 	public static boolean editRegularVillagers = false;
 	public static boolean editRegularWanderingTraders = false;

@@ -36,6 +36,14 @@ Date format: (YYYY-MM-DD)
   * In the regular villager editor, we show entity information instead (entity id, unique id and location).
   * Config: Add `shop-information-item` (default: `minecraft:paper`).
 * Add an editor option to temporarily close the shop: Players cannot trade with or hire the shop while it is closed.
+* Config: Add settings to disable certain aspects of normal villagers and wandering trades per world:
+  * `disable-other-villagers-worlds`
+  * `block-villager-spawns-worlds`
+  * `disable-zombie-villager-curing-worlds`
+  * `hire-other-villagers-worlds`
+  * `disable-wandering-traders-worlds`
+  * `block-wandering-trader-spawns-worlds`
+  * `hire-wandering-traders-worlds`
 * Fix: Bat shopkeepers are awake now unless they have a solid block above them.
 * Server assumption tests: Extend the tested item data.
 * API: Add `SelectableTypeRegistry#canBeSelected`.

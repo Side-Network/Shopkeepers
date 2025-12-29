@@ -543,23 +543,44 @@ delete-item: 'minecraft:bone'
 
 # Whether to prevent trading with non-shopkeeper villagers.
 disable-other-villagers: false
+# The names of the worlds affected by 'disable-other-villagers', or empty to
+# affect all worlds.
+disable-other-villagers-worlds: []
 # Whether to block regular non-shopkeeper villagers from spawning. Villagers
 # spawned by plugins, spawn eggs, mob spawners or by curing zombie villagers
 # are however not affected by this.
 block-villager-spawns: false
+# The names of the worlds affected by 'block-villager-spawns', or empty to
+# affect all worlds.
+block-villager-spawns-worlds: []
 # Whether to prevent curing of zombie villagers.
 disable-zombie-villager-curing: false
+# The names of the worlds affected by 'disable-zombie-villager-curing', or
+# empty to affect all worlds.
+disable-zombie-villager-curing-worlds: []
 # Whether non-shopkeeper villagers can be hired.
 hire-other-villagers: false
+# The names of the worlds affected by 'hire-other-villagers', or empty to
+# affect all worlds.
+hire-other-villagers-worlds: []
 
 # Whether to prevent trading with non-shopkeeper wandering traders.
 disable-wandering-traders: false
+# The names of the worlds affected by 'disable-wandering-traders', or empty to
+# affect all worlds.
+disable-wandering-traders-worlds: []
 # Whether to block non-shopkeeper wandering traders and trader llamas from
 # spawning. Wandering traders and trader llamas spawned by plugins, spawn eggs
 # or mob spawners are however not affected by this.
 block-wandering-trader-spawns: false
+# The names of the worlds affected by 'block-wandering-trader-spawns', or empty
+# to affect all worlds.
+block-wandering-trader-spawns-worlds: []
 # Whether non-shopkeeper wandering traders can be hired.
 hire-wandering-traders: false
+# The names of the worlds affected by 'hire-wandering-traders', or empty to
+# affect all worlds.
+hire-wandering-traders-worlds: []
 
 # Whether regular villagers can be edited by sneaking and right-clicking.
 edit-regular-villagers: false
