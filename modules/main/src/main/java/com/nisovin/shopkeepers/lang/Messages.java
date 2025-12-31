@@ -446,6 +446,7 @@ public class Messages extends Config {
 	public static Text restrictedArea = Text.parse("&7You cannot place a shopkeeper in this area.");
 	public static Text locationAlreadyInUse = Text.parse("&7This location is already used by another shopkeeper.");
 	public static Text endCrystalDisabledInTheEnd = Text.parse("&7End crystal shops cannot be placed in the end.");
+	public static Text cannotSpawn = Text.parse("&7The shopkeeper cannot spawn here.");
 
 	public static Text containerSelected = Text.parse("&aContainer selected! Right-click a block to place your shopkeeper.");
 	public static Text unsupportedContainer = Text.parse("&7This type of container cannot be used for shops.");

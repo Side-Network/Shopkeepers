@@ -355,6 +355,7 @@ mob-cannot-spawn-on-peaceful-difficulty: "&7The selected mob type cannot spawn h
 restricted-area: "&7You cannot place a shopkeeper in this area."
 location-already-in-use: "&7This location is already used by another shopkeeper."
 end-crystal-disabled-in-the-end: "&7End crystal shops cannot be placed in the end."
+cannot-spawn: "&7The shopkeeper cannot spawn here."
 
 container-selected: "&aContainer selected! Right-click a block to place your shopkeeper."
 unsupported-container: "&7This type of container cannot be used for shops."

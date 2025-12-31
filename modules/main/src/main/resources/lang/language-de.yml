@@ -363,6 +363,7 @@ mob-cannot-spawn-on-peaceful-difficulty: "&7Der gewählte Mob-Typ kann hier bei 
 restricted-area: "&7Du kannst in dieser Gegend keinen Shop platzieren."
 location-already-in-use: "&7An diesem Ort befindet sich bereits ein anderer Shop."
 end-crystal-disabled-in-the-end: "&7Enderkristall-Shops können nicht im Ende platziert werden."
+cannot-spawn: "&7Der Shop kann hier nicht gespawnt werden."
 
 container-selected:  "&aBehälter ausgewählt! Klicke mit rechts auf einen Block, um den Shop zu platzieren."
 unsupported-container: "&7Diese Art von Behälter kann nicht für Shops benutzt werden."

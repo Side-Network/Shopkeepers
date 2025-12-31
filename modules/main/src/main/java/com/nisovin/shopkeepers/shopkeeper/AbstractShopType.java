@@ -256,6 +256,30 @@ public abstract class AbstractShopType<T extends AbstractShopkeeper>
 			// Create and spawn the shopkeeper:
 			T shopkeeper = Unsafe.castNonNull(shopkeeperRegistry.createShopkeeper(shopCreationData));
 
+			// Verify the shopkeeper was spawned successfully (if not virtual):
+			// Since the shopkeeper is created by a player here, we assume that the shopkeeper is
+			// meant to be immediately spawned, even when spawning is not handled by us (e.g.
+			// Citizens NPC shopkeepers), i.e. the chunk is active and no world saving is currently
+			// in progress.
+			// Note: Citizens NPC seem to bypass region protection plugins like WorldGuard, since
+			// they don't call the usual Bukkit entity spawn event.
+			var shopObject = shopkeeper.getShopObject();
+			if (!shopkeeper.isVirtual() && !shopObject.isActive()) {
+				Log.debug(shopkeeper.getLogPrefix() + "New shopkeeper failed to spawn -> Deleting.");
+				// Immediately remove the shopkeeper again:
+				// Note: Once the deletion has been persisted, the storage also tries to reuse the
+				// last used shopkeeper ids.
+				// Intentionally not passing the creator here to not give back the shop creation
+				// item for player shops.
+				shopkeeper.delete(null);
+				// Save if dirty: Usually, the shopkeeper was not persisted yet, so there is no need
+				// to actually save.
+				SKShopkeepersPlugin.getInstance().getShopkeeperStorage().saveIfDirty();
+
+				TextUtils.sendMessage(creator, Messages.cannotSpawn);
+				return null;
+			}
+
 			// Send creation message to creator:
 			TextUtils.sendMessage(creator, this.getCreatedMessage());
 

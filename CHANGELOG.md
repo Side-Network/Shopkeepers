@@ -45,6 +45,11 @@ Date format: (YYYY-MM-DD)
   * `block-wandering-trader-spawns-worlds`
   * `hire-wandering-traders-worlds`
 * Even when disabled, allow normal villagers and wandering to still be spawned manually via command, similar to how they can still be spawned via spawn eggs. However, during chunk loading, such villagers are still subsequently removed.
+* Fix: Immediately delete shopkeepers again if they fail to spawn, e.g. if placed in a protected region and `bypass-spawn-blocking` is disabled.
+  * This only applies to player created shopkeepers (`ShopkeepersPlugin#handleShopkeeperCreation`), not shopkeepers created via the API by other means (`ShopkeeperRegistry#createShopkeeper`).
+  * We only check if the shopkeeper was able to spawn once immediately after creating it. We do not automatically delete shopkeepers that later fail to spawn.
+  * Note: From brief testing, Citizens NPC shopkeepers seem to bypass region protection plugins like WorldGuard currently, since they don't call the usual Bukkit entity spawn events that WorldGuard listens to.
+  * Also: When a shopkeeper is deleted, we now immediately try to reuse the last id again if there is no other shopkeeper with a larger id existing.
 * Fix: Bat shopkeepers are awake now unless they have a solid block above them.
 * Server assumption tests: Extend the tested item data.
 * API: Add `SelectableTypeRegistry#canBeSelected`.
@@ -75,6 +80,7 @@ Date format: (YYYY-MM-DD)
 * Added `button-shop-closed`.
 * Added `button-shop-closed-lore`.
 * Added `shop-currently-closed`.
+* Added `cannot-spawn`.
 
 ## v2.25.0 (2025-12-14)
 ### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
