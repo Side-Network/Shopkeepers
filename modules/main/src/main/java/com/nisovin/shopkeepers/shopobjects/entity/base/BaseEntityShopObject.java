@@ -362,9 +362,6 @@ public abstract class BaseEntityShopObject<E extends Entity>
 			// Reset the entity:
 			this.cleanUpEntity();
 
-			// TODO Config option to delete the shopkeeper on failed spawn attempt? Check for this
-			// during shop creation?
-
 			// Debug entity spawning:
 			if (debug) {
 				// Print chunk's entity counts:
