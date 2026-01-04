@@ -264,6 +264,7 @@ public abstract class BaseEntityShopObject<E extends Entity>
 		// Prepare spawn location:
 		Location spawnLocation = this.getSpawnLocation();
 		if (spawnLocation == null) {
+			this.onSpawnFailed();
 			return false; // World not loaded
 		}
 		World world = Unsafe.assertNonNull(spawnLocation.getWorld());
@@ -337,8 +338,12 @@ public abstract class BaseEntityShopObject<E extends Entity>
 
 			// Inform about the object id change:
 			this.onIdChanged();
+
+			this.onSpawnSucceeded();
 		} else {
 			// Failure:
+			this.onSpawnFailed();
+
 			// Debug, if not already debugging and cooldown is over:
 			boolean debug = (Settings.debug && !debuggingSpawn && entity.isDead()
 					&& (System.currentTimeMillis() - lastSpawnDebugMillis) > SPAWN_DEBUG_THROTTLE_MILLIS
@@ -398,6 +403,7 @@ public abstract class BaseEntityShopObject<E extends Entity>
 				Log.info(".. Done. Successful: " + success);
 			}
 		}
+
 		return success;
 	}
 

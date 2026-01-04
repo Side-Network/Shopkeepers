@@ -112,6 +112,7 @@ public abstract class BaseBlockShopObject extends AbstractBlockShopObject {
 
 		Location spawnLocation = shopkeeper.getLocation();
 		if (spawnLocation == null) {
+			this.onSpawnFailed();
 			return false;
 		}
 
@@ -120,6 +121,7 @@ public abstract class BaseBlockShopObject extends AbstractBlockShopObject {
 		// spawn attempts:
 		if (System.currentTimeMillis() - lastFailedRespawnAttemptMillis < RESPAWN_TIMEOUT_MILLIS) {
 			Log.debug(() -> shopkeeper.getLocatedLogPrefix() + "Spawn cooldown.");
+			this.onSpawnFailed();
 			return false;
 		}
 
@@ -129,6 +131,7 @@ public abstract class BaseBlockShopObject extends AbstractBlockShopObject {
 		BlockData blockData = this.createBlockData();
 		if (blockData == null) {
 			Log.debug(() -> shopkeeper.getLocatedLogPrefix() + "Failed to create block data.");
+			this.onSpawnFailed();
 			return false;
 		}
 
@@ -142,6 +145,7 @@ public abstract class BaseBlockShopObject extends AbstractBlockShopObject {
 		if (!this.isValidBlockType(spawnBlock.getType())) {
 			lastFailedRespawnAttemptMillis = System.currentTimeMillis();
 			this.cleanUpBlock(spawnBlock);
+			this.onSpawnFailed();
 			return false;
 		}
 
@@ -156,6 +160,8 @@ public abstract class BaseBlockShopObject extends AbstractBlockShopObject {
 
 		// Inform about the object id change:
 		this.onIdChanged();
+
+		this.onSpawnSucceeded();
 
 		return true;
 	}

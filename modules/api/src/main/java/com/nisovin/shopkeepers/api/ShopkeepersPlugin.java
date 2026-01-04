@@ -65,6 +65,10 @@ public interface ShopkeepersPlugin extends Plugin {
 	 */
 	public static final String DEBUG_PERMISSION = "shopkeeper.debug";
 	/**
+	 * The <code>shopkeeper.delete-unspawnable-shopkeepers</code> permission.
+	 */
+	public static final String DELETE_UNSPAWNABLE_SHOPKEEPERS = "shopkeeper.delete-unspawnable-shopkeepers";
+	/**
 	 * The <code>shopkeeper.cleanup-citizen-shopkeepers</code> permission.
 	 */
 	public static final String CLEANUP_CITIZEN_SHOPKEEPERS = "shopkeeper.cleanup-citizen-shopkeepers";

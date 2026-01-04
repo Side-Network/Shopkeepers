@@ -597,12 +597,24 @@ public class SKCitizensShopObject extends AbstractEntityShopObject implements Ci
 	@Override
 	public boolean spawn() {
 		NPC npc = this.getNPC();
-		if (npc == null) return false;
+		if (npc == null) {
+			this.onSpawnFailed();
+			return false;
+		}
 
 		Location spawnLocation = this.getSpawnLocation();
-		if (spawnLocation == null) return false;
+		if (spawnLocation == null) {
+			this.onSpawnFailed();
+			return false;
+		}
 
-		return npc.spawn(spawnLocation, SpawnReason.PLUGIN);
+		if (!npc.spawn(spawnLocation, SpawnReason.PLUGIN)) {
+			this.onSpawnFailed();
+			return false;
+		}
+
+		this.onSpawnSucceeded();
+		return true;
 	}
 
 	@Override
@@ -645,6 +657,9 @@ public class SKCitizensShopObject extends AbstractEntityShopObject implements Ci
 		if (entity != null) {
 			NPC npc = Unsafe.assertNonNull(this.getNPC());
 			assert npc.getEntity() == entity;
+
+			this.onSpawnSucceeded();
+
 			// Check if our shopkeeper location is still correct:
 			// If not yet done, this will also activate the shopkeeper's chunk and start ticking the
 			// shopkeeper. While the shopkeeper is ticked, we regularly update its location to match
@@ -656,6 +671,7 @@ public class SKCitizensShopObject extends AbstractEntityShopObject implements Ci
 			// spawned somewhere.
 			this.updateShopkeeperLocation();
 		}
+
 		this.entity = entity;
 		this.onIdChanged();
 	}

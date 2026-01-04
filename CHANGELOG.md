@@ -50,6 +50,13 @@ Date format: (YYYY-MM-DD)
   * We only check if the shopkeeper was able to spawn once immediately after creating it. We do not automatically delete shopkeepers that later fail to spawn.
   * Note: From brief testing, Citizens NPC shopkeepers seem to bypass region protection plugins like WorldGuard currently, since they don't call the usual Bukkit entity spawn events that WorldGuard listens to.
   * Also: When a shopkeeper is deleted, we now immediately try to reuse the last id again if there is no other shopkeeper with a larger id existing.
+* Add detection and cleanup of unspawnable shopkeepers:
+  * Each shop object whose spawning is handled by us (i.e. excluding Citizen shopkeepers) now keeps track of whether its last spawn attempt failed. During plugin startup, we log a warning for each shopkeeper that previously failed to spawn.
+  * Command: Add command `/shopkeeper deleteUnspawnableShopkeepers`.
+    * Permission: `shopkeeper.delete-unpawnable-shopkeepers` (default: `op`)
+    * Checks for shopkeepers that previously failed to spawn and optionally deletes them after confirmation.
+  * Config: Add setting `delete-unspawnable-shopkeepers` (default: `false`) to automatically delete unspawnable shopkeepers during plugin startup.
+    * Since automatically deleting shopkeepers is potentially risky, it is recommended to keep this setting disabled and instead use the newly added command to manually check for and optionally delete unspawnable shopkeepers.
 * Fix: Bat shopkeepers are awake now unless they have a solid block above them.
 * Server assumption tests: Extend the tested item data.
 * API: Add `SelectableTypeRegistry#canBeSelected`.

@@ -15,7 +15,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.SKShopkeepersPlugin;
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
+import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.api.util.ChunkCoords;
+import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.debug.DebugOptions;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopkeeper.activation.ShopkeeperChunkActivator;
@@ -93,6 +95,16 @@ public class ShopkeeperSpawner {
 		spawnQueue.start();
 
 		Bukkit.getPluginManager().registerEvents(listener, plugin);
+
+		Bukkit.getScheduler().runTaskLater(plugin, new CheckUnspawnableShopkeepersTask(), 5L);
+	}
+
+	private class CheckUnspawnableShopkeepersTask implements Runnable {
+		@Override
+		public void run() {
+			// Check for shopkeepers that failed to spawn during their last spawn attempt:
+			checkUnspawnableShopkeepers(Settings.deleteUnspawnableShopkeepers, false);
+		}
 	}
 
 	public void onDisable() {
@@ -776,5 +788,69 @@ public class ShopkeeperSpawner {
 					onDespawned
 			);
 		});
+	}
+
+	// ANALYSIS
+
+	/**
+	 * Checks for and optionally warns about or deletes shopkeepers that failed to spawn the last
+	 * time we tried to spawn them.
+	 * <p>
+	 * This only handles shopkeepers that are spawned by us (see
+	 * {@link AbstractShopObjectType#mustBeSpawned()}.
+	 * 
+	 * @param deleteUnspawnableShopkeepers
+	 *            <code>true</code> to also delete any found shopkeepers that failed to spawn
+	 * @param silent
+	 *            <code>true</code> to not log warnings about any found unspawnable shopkeepers
+	 * @return the found unspawnable shopkeepers
+	 */
+	public List<Shopkeeper> checkUnspawnableShopkeepers(boolean deleteUnspawnableShopkeepers, boolean silent) {
+		SKShopkeeperRegistry shopkeeperRegistry = plugin.getShopkeeperRegistry();
+		List<Shopkeeper> unspawnableShopkeepers = new ArrayList<>();
+		shopkeeperRegistry.getAllShopkeepers().forEach(shopkeeper -> {
+			var shopObject = shopkeeper.getShopObject();
+			// Skip shopkeepers that are not spawned by us:
+			if (!shopObject.getType().mustBeSpawned()) {
+				return;
+			}
+
+			if (!shopObject.isLastSpawnFailed()) {
+				return;
+			}
+
+			unspawnableShopkeepers.add(shopkeeper);
+			if (!silent) {
+				Log.warning(shopkeeper.getLogPrefix() + "The last spawn attempt failed.");
+			}
+		});
+
+		if (!unspawnableShopkeepers.isEmpty()) {
+			if (deleteUnspawnableShopkeepers) {
+				// Delete those shopkeepers:
+				for (Shopkeeper shopkeeper : unspawnableShopkeepers) {
+					shopkeeper.delete();
+				}
+
+				// Save:
+				plugin.getShopkeeperStorage().save();
+
+				if (!silent) {
+					Log.warning("Deleted " + unspawnableShopkeepers.size()
+							+ " shopkeepers that previously failed to spawn!");
+				}
+			} else {
+				// Only log a warning:
+				if (!silent) {
+					Log.warning("Found " + unspawnableShopkeepers.size() + " shopkeepers that "
+							+ "previously failed to spawn! Either enable the setting "
+							+ "'delete-unspawnable-shopkeepers' inside the config, or use the "
+							+ "command '/shopkeepers deleteUnspawnableShopkeepers' to "
+							+ "automatically delete these shopkeepers and get rid of these "
+							+ "warnings.");
+				}
+			}
+		}
+		return unspawnableShopkeepers;
 	}
 }

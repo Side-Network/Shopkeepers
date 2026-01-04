@@ -83,6 +83,21 @@ ignore-failed-server-assumption-tests: false
 # If enabled, Shopkeepers tries to bypass other plugins that deny entity
 # spawning (e.g. land protection plugins).
 bypass-spawn-blocking: true
+# Whether to automatically delete all shopkeepers during plugin startup that
+# failed to spawn during their last spawn attempt.
+# This is disabled by default, because automatically deleting shopkeepers is
+# potentially risky: There might be ways for players to abuse this by somehow
+# causing shopkeepers of other players to fail to spawn. Or there might be a
+# bug in the plugin or server that occassionally prevents a shopkeeper from
+# spawning, or sporadic non-criticial reasons for why a shopkeeper failed to
+# spawned (e.g. some other plugin interfering, or the world not being loaded
+# currently).
+# It is therefore recommended to keep this disabled and instead periodically
+# check the server log for warnings about shopkeepers that failed to spawn: You
+# can then investigate these cases individually, or use the
+# '/shopkeepers deleteUnspawnableShopkeepers' command to manually delete these
+# shopkeepers.
+delete-unspawnable-shopkeepers: false
 # If enabled, Shopkeepers takes into account whether other plugins deny
 # interaction with the shopkeepers.
 check-shop-interaction-result: false

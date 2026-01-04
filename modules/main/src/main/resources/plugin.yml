@@ -26,6 +26,9 @@ permissions:
     shopkeeper.debug:
         description: Toggle debug mode and access debugging commands
         default: op
+    shopkeeper.delete-unspawnable-shopkeepers:
+        description: Delete unspawnable shopkeepers via command
+        default: op
     shopkeeper.cleanup-citizen-shopkeepers:
         description: Delete invalid Citizen shopkeepers via command
         default: op
@@ -204,6 +207,7 @@ permissions:
             shopkeeper.help: true
             shopkeeper.reload: true
             shopkeeper.debug: true
+            shopkeeper.delete-unspawnable-shopkeepers: true
             shopkeeper.cleanup-citizen-shopkeepers: true
             shopkeeper.list.own: true
             shopkeeper.list.others: true

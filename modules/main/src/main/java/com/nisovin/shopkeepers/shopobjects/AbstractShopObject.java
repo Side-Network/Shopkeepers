@@ -33,9 +33,11 @@ import com.nisovin.shopkeepers.util.bukkit.LocationUtils;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
 import com.nisovin.shopkeepers.util.data.property.Property;
 import com.nisovin.shopkeepers.util.data.property.validation.java.StringValidators;
+import com.nisovin.shopkeepers.util.data.property.value.PropertyValue;
 import com.nisovin.shopkeepers.util.data.property.value.PropertyValuesHolder;
 import com.nisovin.shopkeepers.util.data.serialization.DataSerializer;
 import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
+import com.nisovin.shopkeepers.util.data.serialization.java.BooleanSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.StringSerializers;
 import com.nisovin.shopkeepers.util.java.Validate;
 
@@ -103,8 +105,19 @@ public abstract class AbstractShopObject implements ShopObject {
 			})
 			.build();
 
+	/**
+	 * Whether the last spawn attempt failed.
+	 */
+	public static final Property<Boolean> SPAWN_FAILED = new BasicProperty<Boolean>()
+			.dataKeyAccessor("spawn-failed", BooleanSerializers.STRICT)
+			.defaultValue(false)
+			.omitIfDefault()
+			.build();
+
 	protected final AbstractShopkeeper shopkeeper; // Not null
 	protected final PropertyValuesHolder properties; // Not null
+
+	private final PropertyValue<Boolean> lastSpawnFailedProperty;
 
 	private @Nullable Object lastId = null;
 	private boolean tickActivity = false;
@@ -117,6 +130,7 @@ public abstract class AbstractShopObject implements ShopObject {
 		assert shopkeeper != null;
 		this.shopkeeper = shopkeeper;
 		this.properties = new ShopkeeperPropertyValuesHolder(shopkeeper);
+		this.lastSpawnFailedProperty = new PropertyValue<>(SPAWN_FAILED).build(properties);
 	}
 
 	@Override
@@ -160,6 +174,8 @@ public abstract class AbstractShopObject implements ShopObject {
 							+ shopObjectType.getIdentifier() + ")!"
 			);
 		}
+
+		lastSpawnFailedProperty.load(shopObjectData);
 	}
 
 	/**
@@ -184,7 +200,8 @@ public abstract class AbstractShopObject implements ShopObject {
 	 */
 	public void save(ShopObjectData shopObjectData, boolean saveAll) {
 		Validate.notNull(shopObjectData, "shopObjectData is null");
-		shopObjectData.set("type", this.getType().getIdentifier());
+		shopObjectData.set(SHOP_OBJECT_TYPE, this.getType());
+		lastSpawnFailedProperty.save(shopObjectData);
 	}
 
 	/**
@@ -362,12 +379,40 @@ public abstract class AbstractShopObject implements ShopObject {
 	 * This may have no effect if the shop object has already been spawned. To respawn this shop
 	 * object if it is currently already spawned, one can use {@link #respawn()}.
 	 * <p>
-	 * This needs to call {@link #onIdChanged()} if the shop object was successfully spawned.
+	 * This needs to call {@link #onSpawnSucceeded()} and {@link #onIdChanged()} if the shop object
+	 * was successfully spawned, and {@link #onSpawnFailed()} if the spawning failed.
 	 * 
 	 * @return <code>false</code> if the spawning failed, or <code>true</code> if the shop object
 	 *         either is already spawned or has successfully been spawned
 	 */
 	public abstract boolean spawn();
+
+	/**
+	 * Whether the last attempt of spawning this shop object failed.
+	 * <p>
+	 * This is for example used to inform admins about potential spawning issues or automatically
+	 * cleanup shopkeepers that are no longer spawnable.
+	 * 
+	 * @return <code>true</code> if the shop object failed to spawn the last time {@link #spawn()}
+	 *         was invoked
+	 */
+	public boolean isLastSpawnFailed() {
+		return lastSpawnFailedProperty.getValue();
+	}
+
+	/**
+	 * Invoke this during {@link #spawn()} if the spawning failed.
+	 */
+	protected final void onSpawnFailed() {
+		lastSpawnFailedProperty.setValue(true);
+	}
+
+	/**
+	 * Invoke this during {@link #spawn()} if the spawning succeeded.
+	 */
+	protected final void onSpawnSucceeded() {
+		lastSpawnFailedProperty.setValue(false);
+	}
 
 	/**
 	 * Removes this shop object from the world.

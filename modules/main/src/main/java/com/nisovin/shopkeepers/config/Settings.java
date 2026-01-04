@@ -83,6 +83,7 @@ public class Settings extends Config {
 	public static boolean ignoreFailedServerAssumptionTests = false;
 
 	public static boolean bypassSpawnBlocking = true;
+	public static boolean deleteUnspawnableShopkeepers = false;
 	public static boolean checkShopInteractionResult = false;
 
 	public static boolean enableWorldGuardRestrictions = false;
