@@ -1,7 +1,262 @@
 # Changelog
 Date format: (YYYY-MM-DD)  
 
-## v2.23.7 (TBA)
+## v2.26.0 (TBA)
+### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
+
+* Permission: Add `shopkeeper.create` (default: `op`).
+  * Only players with this permission can create shopkeepers via command (both admin and player shops).
+  * Config: This permission replaces the previous `create-player-shop-with-command` setting. The setting is automatically removed during config migration 10.
+  * Compared to the previous setting, this permission offers additional flexibility: It is now possible to only allow admins to create player shops via command while still requiring normal players to use the shop creation item.
+  * The "no-permission" message for the shopkeeper creation command includes a note now about using the shop creation item to create player shops.
+  * Manual migration: If you previously allowed your players to create player shops via command, you will have to assign them this new permission now.
+* Add shop creation items that create shopkeepers with a pre-defined shop and/or object type.
+  * Command: The `/shopkeeper give` command optionally accepts a `shop-type` and `object-type` argument now. When specified, the created shop creation item only spawns shopkeepers of the respective type.
+  * Only player shop types are supported in combination with the shop creation item.
+  * When a player tries to use the shop creation item with a pre-defined shop or object type, we still perform the usual shop and object type disabled and permission checks. I.e. shop creation items can become useless if the respective shop or object type gets disabled or the player misses or loses their permission to use it.
+  * The shop creation message was slightly adapted to omit the non-relevant instructions for switching the selected shop or object type.
+  * Internally, the shop type and shop object type ids are stored in the item's `custom_data` in `PublicBukkitValues` with the keys `shopkeepers:shop_type` and `shopkeepers:object_type`. In combination with the `shopkeepers:shop_creation_item` tag, you can use third-party item editing plugins to create custom shop creation items that spawn specific shopkeeper types.
+  * Debug: Extend the output of the `checkItem` command to include whether the held items specify a pre-defined shop or object type.
+* Add end crystal shop object.
+  * Permission: `shopkeeper.entity.end_crystal` (default: `false`, but included in `shopkeeper.entity.*`).
+  * Config: Add `enable-end-crystal-shops` (default: `true`).
+  * Config: Add `allow-end-crystal-shops-in-the-end` (default: `false`).
+  * Placing end crystal shops in the end is disabled by default, because they can for example affect dragon fights.
+* Config: Rename some settings, since they might also affect non-mob entities.
+  * Rename `silence-living-shop-entities` to `silence-shop-entities`.
+  * Rename `mobe-behavior-tick-period` to `entity-behavior-tick-period`.
+  * The config is automatically migrated (version `10`).
+* Disable the gravity for flying mobs.
+  * Certain mobs can now be placed in the air without dropping to the ground due to gravity: Allay, bat, bee, chicken, blaze, ender dragon, ghast, happy ghast, parrot, phantom, vex, wither.
+  * When spawned, we still adjust their spawn location within their spawn location block, but we no longer automatically place them on the block below that, like we do for other mobs, allowing them to hover one block above the ground.
+  * We periodically check if the mob is still in the air and update their onGround state accordingly for some of these mobs to play their flying animation.
+  * Also: Entities tick their AI now while falling.
+* Prevent placing mobs in midair that are neither flying nor shulker.
+* Add an item with shopkeeper information to the editor UI. The item's lore includes: The shop id, unique id, name, shop type, object type, location and owner (for player shops).
+  * In the regular villager editor, we show entity information instead (entity id, unique id and location).
+  * Config: Add `shop-information-item` (default: `minecraft:paper`).
+* Add an editor option to temporarily close the shop: Players cannot trade with or hire the shop while it is closed.
+* Config: Add settings to disable certain aspects of normal villagers and wandering trades per world:
+  * `disable-other-villagers-worlds`
+  * `block-villager-spawns-worlds`
+  * `disable-zombie-villager-curing-worlds`
+  * `hire-other-villagers-worlds`
+  * `disable-wandering-traders-worlds`
+  * `block-wandering-trader-spawns-worlds`
+  * `hire-wandering-traders-worlds`
+* Even when disabled, allow normal villagers and wandering to still be spawned manually via command, similar to how they can still be spawned via spawn eggs. However, during chunk loading, such villagers are still subsequently removed.
+* Fix: Immediately delete shopkeepers again if they fail to spawn, e.g. if placed in a protected region and `bypass-spawn-blocking` is disabled.
+  * This only applies to player created shopkeepers (`ShopkeepersPlugin#handleShopkeeperCreation`), not shopkeepers created via the API by other means (`ShopkeeperRegistry#createShopkeeper`).
+  * We only check if the shopkeeper was able to spawn once immediately after creating it. We do not automatically delete shopkeepers that later fail to spawn.
+  * Note: From brief testing, Citizens NPC shopkeepers seem to bypass region protection plugins like WorldGuard currently, since they don't call the usual Bukkit entity spawn events that WorldGuard listens to.
+  * Also: When a shopkeeper is deleted, we now immediately try to reuse the last id again if there is no other shopkeeper with a larger id existing.
+* Add detection and cleanup of unspawnable shopkeepers:
+  * Each shop object whose spawning is handled by us (i.e. excluding Citizen shopkeepers) now keeps track of whether its last spawn attempt failed. During plugin startup, we log a warning for each shopkeeper that previously failed to spawn.
+  * Command: Add command `/shopkeeper deleteUnspawnableShopkeepers`.
+    * Permission: `shopkeeper.delete-unpawnable-shopkeepers` (default: `op`)
+    * Checks for shopkeepers that previously failed to spawn and optionally deletes them after confirmation.
+  * Config: Add setting `delete-unspawnable-shopkeepers` (default: `false`) to automatically delete unspawnable shopkeepers during plugin startup.
+    * Since automatically deleting shopkeepers is potentially risky, it is recommended to keep this setting disabled and instead use the newly added command to manually check for and optionally delete unspawnable shopkeepers.
+* Fix: Bat shopkeepers are awake now unless they have a solid block above them.
+* Server assumption tests: Extend the tested item data.
+* API: Add `SelectableTypeRegistry#canBeSelected`.
+* Internal: Update code to make use of the new 1.21.5 Bukkit base version.
+* Internal: Refactors to simplify adding entity-based shopkeepers for non-living entity types.
+* Build: Add additional compilation step targeting the Paper API to verify that only Paper-compatible parts of the Bukkit API are used in the plugin's API and main modules.
+
+**Message changes:**  
+* Changed `creation-item-selected`.
+* Added `creation-item-shop-type-selection`.
+* Added `creation-item-object-type-selection`.
+* Added `command-shop-type-argument-no-admin-shop`.
+* Added `command-shop-type-argument-no-player-shop`.
+* Renamed `shop-object-type-living` to `shop-object-type-entity`.
+* Added `button-end-crystal-bottom-slab`.
+* Added `button-end-crystal-bottom-slab-lore`.
+* Added `end-crystal-disabled-in-the-end`.
+* Added `shop-information-header`.
+* Added `shop-information`.
+* Added `player-shop-information`.
+* Added `villager-editor-information-header`.
+* Added `villager-editor-information`.
+* Removed `no-player-shops-via-command`.
+* Added `command-create-no-permission`.
+* Added `cannot-spawn-midair`.
+* Added `button-shop-open`.
+* Added `button-shop-open-lore`.
+* Added `button-shop-closed`.
+* Added `button-shop-closed-lore`.
+* Added `shop-currently-closed`.
+* Added `cannot-spawn`.
+
+## v2.25.0 (2025-12-14)
+### Supported MC versions: 1.21.11, 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5
+
+* Update for Minecraft 1.21.11.
+  * Add support for new mob types:
+    * Camel husk: Similar editor options as camel.
+    * Nautilus: Supports baby variant, saddle and armor.
+    * Zombie nautilus: Supports saddle, coral variant and armor.
+    * Parched: Similar editor options as other skeleton types.
+  * Horse shopkeepers: Add support for netherite horse armor.
+* Drop support for Minecraft versions below 1.21.5. This has the following benefits:
+  * Modernize the plugin by building against a more modern Bukkit version.
+  * Reduce the plugin size by bundling fewer compatibility modules.
+  * Simplify updating the plugin for new Paper versions: For versions before 1.21.5, the Spigot and Paper versions shared the same compatibility code, which required building all Paper modules against the Spigot mappings. But since Paper usually releases their Spigot mapping support after some delay, updating the plugin to support the latest Minecraft version on Paper was also delayed.
+* Command: Add command `/shopkeeper history [player|'all'|'self'] [shop=...|owner=...|'own'|'player'|'admin'|'all'] [page]`.
+  * Permission: `shopkeeper.history.own` (default: `true`): Allows viewing the own trading history.
+  * Permission: `shopkeeper.history.admin` (default: `op`): Allows viewing the trading history of others and admin shops.
+  * Example: `/shopkeeper blablubbabc shop=Test` shows the trading history of player "blablubbabc" with the shopkeeper named "Test" (assuming there is only a single shopkeeper with this name). You can also target a specific shopkeeper via their id, unique id, or by looking at them in-game.
+  * The player and owner argument also support the look-up of offline players, taking into account the currently existing shop owners, and existing online mode players. However, the plugin does not check the trading history to find offline players by name.
+  * Only the currently existing shopkeepers can be specified by name or id. To look up the trading history of a no longer existing shop, use their unique id.
+  * If the owner of a shop has changed, a player without the `shopkeeper.history.admin` permission can only view the trading history of the shopkeeper from when they still owned the shop.
+  * Config: This command is currently only supported when using `trade-log-storage: 'SQLITE'`.
+  * Config: Item metadata (e.g. item display names) can only be retrieved when the trade was logged while using `log-item-metadata: true`.
+  * Debug: If we fail to load the stored item metadata (can for example be the case when there have been backwards incompatible changes across server updates), we log the error in debug mode but otherwise silently ignore it and display the item without the metadata in the history.
+  * Trade log: Depending on the trade log merging configuration and the hard-coded IO buffering delay, it can take a few seconds for trades to show up in the trading history. In order for trades to show up in the trading history more quickly, the IO buffering delay (the delay before logs are persisted to the database) is reduced from 30 seconds to 10 seconds. With this change and the default trade log merging configuration, it now takes 10-25 seconds for trades to show up in the trading history, versus the 30-45 seconds from before.
+  * In the command output, players have their uuid as hover text and shops have their shopkeeper uuid as hover text.
+* Command: The `/shopkeeper teleport` command shows the shopkeeper uuid as hover text in the success message now.
+* Fix: Consider copper chests valid shop containers.
+* Fix: Automatically create missing parent directories for the SQLite trade log.
+* Fix: Repeat the setup of the SQLite trade log database if an error occurred during a previous save attempt.
+* Fix: Baby zombies would occasionally spawn or mount nearby chickens. Disable spawn data randomization.
+  * We also cancel any entity mounting events for shopkeeper mobs now, in case there are ever any cases in the future in which mobs might try to mount other mobs, outside of spawning.
+* Fix: UnsupportedOperationException during config loading when the missing default value for `shop-creation-item` is inserted.
+* Command: Abort early as soon as the first command argument rejects a parsed argument value. This results in more relevant error messages for the user in cases in which pending fallbacks might succeed but result in a less ideal argument binding or subsequent command failure.
+* Command: NamedArgument no longer supports nested fallbacks. Instead, if the named argument prefix is successfully parsed but the inner argument ends up failing to parse, we use an ArgumentRejectedException now to immediately abort the command argument parsing without evaluating earlier command argument fallbacks that might end up parsing the input and resulting in a less relevant binding or parsing error.
+* Debug: In debug mode, log the exception details when the loading of some config setting fails. Note that since the debug flag is itself loaded from the config, this might only have an effect during subsequent config reloads.
+* Build: Fix clean build: Spigot 1.21.7 was replaced by 1.21.8 and can no longer be built. However, the server should be identical to 1.21.7, so we can just reference 1.21.8 instead.
+* Build: Update Gradle 8.14 -> 9.2.1.
+* Build: Update SonarQube.
+* Build: Use Mojang mappings for the Paper modules: Earlier supported after Minecraft updates and avoids redundant remapping at runtime.
+
+**Message changes:**  
+* Added `button-nautilus-armor`.
+* Added `button-nautilus-armor-lore`.
+* Added `button-zombie-nautilus-variant`.
+* Added `button-zombie-nautilus-variant-lore`.
+* Added `history-header`.
+* Added `history-header-all-players`.
+* Added `history-header-specific-player`.
+* Added `history-header-all-shops`.
+* Added `history-header-admin-shops`.
+* Added `history-header-player-shops`.
+* Added `history-header-all-owned-shops`.
+* Added `history-header-specific-shop`.
+* Added `history-header-specific-owned-shop`.
+* Added `history-disabled`.
+* Added `history-no-trades-found`.
+* Added `history-entry-one-item`.
+* Added `history-entry-two-items`.
+* Added `history-entry-player-shop`.
+* Added `history-entry-admin-shop`.
+* Added `history-entry-trade-count`.
+* Added `command-description-history`.
+
+## v2.24.0 (2025-10-16)
+### Supported MC versions: 1.21.10, 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
+
+* Update for Minecraft 1.21.10.
+  * Note: 1.21.9 is not supported and has been superseded by 1.21.10.
+  * Update the fallback compatibility module.
+  * Add copper golem to the by default enabled mob types.
+    * It supports the hand, offhand, head and saddle equipment slots.
+    * Its oxidation level is fixed and can be changed via the editor.
+  * Add mannequin to the by default enabled mob types.
+    * It does not rotate towards nearby players.
+    * Equipment is supported but only works with the latest Spigot versions (see SPIGOT-8087).
+    * The main hand and pose can be toggled via the editor. Note: Some of the poses have a very small hitbox.
+    * We hide the default "NPC" description from the nametag. There is no editor option to customize the description yet.
+    * The skin can be specified via the editor by entering the name or uuid of an existing player in chat.
+      * On Spigot, the profile lookup by name uses a blocking player id lookup as a workaround for some issue currently (see SPIGOT-8088).
+      * There are no editor options yet to customize the profile in other ways or hide individual skin layers.
+* Add armor stand to the by default enabled mob types.
+  * The editor supports toggling the base plate, arms, and size, as well as equipping items.
+* Config: Changes to the item data format inside the config.
+  * The new format aligns more closely with how Minecraft represents item data and how we represent item data inside the save file.
+  * We now use Minecraft's item type ids instead of Bukkit's material names.
+  * Additional [item data components](https://minecraft.wiki/w/Data_component_format) are represented in [SNBT](https://minecraft.wiki/w/NBT_format#SNBT_format).
+  * Example:  
+    Old:  
+    ```yaml
+    shop-creation-item:
+      type: VILLAGER_SPAWN_EGG
+      display-name: '{"text":"Shopkeeper","italic":false,"color":"green"}'
+    ```
+    New (1.20.5+):  
+    ```yaml
+    shop-creation-item:
+      id: 'minecraft:villager_spawn_egg'
+      components:
+        minecraft:custom_name: '''{"color":"green","italic":false,"text":"Shopkeeper"}'''
+    ```
+    New (1.21.5+): SNBT instead of JSON for text data.  
+    ```yaml
+    shop-creation-item:
+      id: 'minecraft:villager_spawn_egg'
+      components:
+        minecraft:custom_name: '{color:"green",italic:0b,text:"Shopkeeper"}'
+    ```
+  * Your existing config is automatically migrated to the new format.
+  * Add new setting `data-version`: This setting is automatically updated whenever you migrate to a new server version and used to automatically migrate your item data inside the config.
+  * We no longer convert between legacy and alternative color codes. For recent Minecraft versions, the use of Minecraft's JSON / SNBT text representation is recommended.
+  * Internal: Remove unused plain text serialization implementation.
+* Config: Changes to how we compare the data of config items such as the shop creation item.
+  * Previously, we tried to emulate Minecraft's [NBT data matching](https://minecraft.wiki/w/NBT_format#Testing_NBT_tags) based on Bukkit's item serialization output. This approach was not ideal: Bukkit's item serialization comes with overhead and its output does not perfectly match Minecraft's item NBT structure. And on recent versions of the Paper server, the Bukkit item serialization has been deprecated and might no longer receive updates.
+  * The item matching implementation was updated to directly use Minecraft's underlying NBT comparison logic.
+  * However, this also means that this logic is now part of the plugin's Minecraft version specific code that must be updated for every new version of Minecraft. A reflection based fallback implementation is available for Spigot servers, but is likely to break across server updates as well.
+  * To more closely align with Minecraft's NBT matching logic used in commands and by the `custom_data` predicate, we also match partial lists now. Previously, we would not match partial lists to more closely align with how items are compared in villager trades. But in newer versions, the item comparison in villager trades has become more strict. And for the matching of config items, we prefer a more lenient partial matching of item data.
+* Data: Remove the item conversion feature.
+  * This feature was used as a workaround in the past to help server owners deal with changes to the internal item data representation across server versions. Since then, there have been changes in Spigot to better preserve text data during serialization. And with the introduction of item data components in MC 1.20.5 and the changes to how Minecraft itself normalizes and compares item data now, this feature should no longer be required. Also, especially on Paper servers, this feature might break items since it relies on Bukkit's serialization and deserialization of ItemMeta, which is deprecated on Paper servers.
+  * Command: Remove command `convertItems` and related permissions `shopkeeper.convertitems.own` and `shopkeeper.convertitems.others`.
+  * Debug: Remove debug option `item-conversions`.
+  * Config: Remove settings `convert-player-items`, `convert-all-player-items` and `convert-player-items-exceptions`.
+* Data: Use default salmon variant if missing.
+* Fix: Shopkeeper mobs no longer equip items from dispensers.
+  * These equipment items are not persisted and permanently lost once the shopkeeper is respawned. Instead, use the shopkeeper editor to add equipment to shopkeeper mobs.
+
+**Message changes:**  
+* Added `button-copper-golem-weather-state`.
+* Added `button-copper-golem-weather-state-lore`.
+* Added `button-armor-stand-base-plate`.
+* Added `button-armor-stand-base-plate-lore`.
+* Added `button-armor-stand-show-arms`.
+* Added `button-armor-stand-show-arms-lore`.
+* Added `button-armor-stand-small`.
+* Added `button-armor-stand-small-lore`.
+* Added `button-mannequin-main-hand`.
+* Added `button-mannequin-main-hand-lore`.
+* Added `button-mannequin-pose`.
+* Added `button-mannequin-pose-lore`.
+* Added `button-mannequin-profile`.
+* Added `button-mannequin-profile-lore`.
+* Added `mannequin-enter-profile`.
+* Added `mannequin-enter-profile-canceled`.
+* Added `mannequin-profile-set`.
+* Added `mannequin-profile-cleared`.
+* Added `mannequin-profile-invalid`.
+* Removed `items-converted`.
+* Removed `command-description-convert-items`.
+
+## v2.23.10 (2025-07-27)
+### Supported MC versions: 1.21.8, 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
+
+* Add support for Paper 1.21.8. Internally, this reuses the same compatibility implementation as for 1.21.7.
+* Build: Move tests into a new 'test' module in order to be able to use compat functionality in tests in the future.
+
+## v2.23.9 (2025-07-09)
+### Supported MC versions: 1.21.7, 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
+
+* Update for MC 1.21.7.
+* Data: Consistently throw an exception if the item deserialization fails. On some server versions, we would previously silently load an empty item instead.
+* Data: Support 'minecraft:air' in the the new item deserialization. We already handle unexpected empty items via property validators. This allows us to also use our new item serialization format in places in which air / empty item stacks are considered valid.
+
+## v2.23.8 (2025-06-21)
+### Supported MC versions: 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
+
+* Fix support for Paper versions before 1.21.6.
+
+## v2.23.7 (2025-06-21)
 ### Supported MC versions: 1.21.6, 1.21.5, 1.21.4, 1.21.3, 1.21.1, 1.21, 1.20.6
 
 * Update for MC 1.21.6.

@@ -4,7 +4,6 @@ import java.util.Objects;
 
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.World;
@@ -12,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
+import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.util.data.container.DataContainer;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
 import com.nisovin.shopkeepers.util.data.property.Property;
@@ -92,7 +92,8 @@ public final class SoundEffect {
 			Float volume = value.getVolume();
 
 			// Sound and sound name are both serialized as String:
-			String serializedSound = (sound != null) ? sound.getKey().toString() : soundName;
+			String serializedSound = (sound != null) ? RegistryUtils.getKeyOrThrow(sound).toString()
+					: soundName;
 
 			// Use a compact representation if only the sound / sound name is specified:
 			if (category == null && pitch == null && volume == null) {
@@ -127,8 +128,9 @@ public final class SoundEffect {
 			}
 
 			// Check if the sound name matches a known Sound:
+			var soundRegistry = Compat.getProvider().getRegistry(Sound.class);
 			NamespacedKey soundKey = NamespacedKeyUtils.parse(soundName);
-			Sound sound = soundKey != null ? Registry.SOUNDS.get(soundKey) : null;
+			Sound sound = soundKey != null ? soundRegistry.get(soundKey) : null;
 			if (sound != null) {
 				// We use the Sound instead of the sound name.
 				soundName = null;

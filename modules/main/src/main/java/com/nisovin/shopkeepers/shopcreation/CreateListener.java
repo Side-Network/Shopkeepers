@@ -110,7 +110,9 @@ class CreateListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	void onItemHeld(PlayerItemHeldEvent event) {
 		// If the shop creation item selection message is disabled, we can skip all of this:
-		if (!shopCreationItemSelectedMessageEnabled) return;
+		if (!shopCreationItemSelectedMessageEnabled) {
+			return;
+		}
 
 		Player player = event.getPlayer();
 		ItemStack newItemInHand = player.getInventory().getItem(event.getNewSlot());
@@ -156,7 +158,8 @@ class CreateListener implements Listener {
 
 		// Make sure that the used item is the shop creation item:
 		ItemStack itemInHand = event.getItem();
-		if (!ShopCreationItem.isShopCreationItem(itemInHand)) {
+		var shopCreationItem = new ShopCreationItem(itemInHand);
+		if (!shopCreationItem.isShopCreationItem()) {
 			return;
 		}
 
@@ -226,31 +229,84 @@ class CreateListener implements Listener {
 
 		// Get shop type:
 		ShopType<?> shopType = plugin.getShopTypeRegistry().getSelection(player);
+		boolean isShopTypeFixed = false;
 		// Get shop object type:
-		ShopObjectType<?> shopObjType = plugin.getShopObjectTypeRegistry().getSelection(player);
+		ShopObjectType<?> shopObjectType = plugin.getShopObjectTypeRegistry().getSelection(player);
+		boolean isShopObjectTypeFixed = false;
 
-		if (shopType == null || shopObjType == null) {
+		if (shopType == null || shopObjectType == null) {
 			// The player cannot create any shops at all:
 			TextUtils.sendMessage(player, Messages.noPermission);
 			return;
+		}
+
+		// Check if the item specifies a fixed shop and/or object type:
+		var itemShopTypeId = shopCreationItem.getShopTypeId();
+		if (itemShopTypeId != null) {
+			var itemShopType = plugin.getShopTypeRegistry().get(itemShopTypeId);
+			if (itemShopType == null) {
+				TextUtils.sendMessage(player, Messages.commandShopTypeArgumentInvalid,
+						"argument", itemShopTypeId
+				);
+				return;
+			}
+
+			// Only player shops can currently be created with the shop creation item:
+			if (!(itemShopType instanceof PlayerShopType)) {
+				TextUtils.sendMessage(player, Messages.commandShopTypeArgumentNoPlayerShop,
+						"argument", itemShopTypeId
+				);
+				return;
+			}
+
+			// Note: Disabled types and permission checks are handled during subsequent shop
+			// creation.
+
+			shopType = itemShopType;
+			isShopTypeFixed = true;
+		}
+
+		var itemShopObjectTypeId = shopCreationItem.getObjectTypeId();
+		if (itemShopObjectTypeId != null) {
+			var itemShopObjectType = plugin.getShopObjectTypeRegistry().get(itemShopObjectTypeId);
+			if (itemShopObjectType == null) {
+				TextUtils.sendMessage(player, Messages.commandShopObjectTypeArgumentInvalid,
+						"argument", itemShopObjectTypeId
+				);
+				return;
+			}
+
+			// Note: Disabled types and permission checks are handled during subsequent shop
+			// creation.
+
+			shopObjectType = itemShopObjectType;
+			isShopObjectTypeFixed = true;
 		}
 
 		// Check what the player is doing with the shop creation item in hand:
 		if (action == Action.RIGHT_CLICK_AIR) {
 			if (player.isSneaking() ^ Settings.invertShopTypeAndObjectTypeSelection) {
 				// Cycle shop objects:
-				plugin.getShopObjectTypeRegistry().selectNext(player);
+				if (!isShopObjectTypeFixed) {
+					plugin.getShopObjectTypeRegistry().selectNext(player);
+				}
 			} else {
 				// Cycle shopkeeper types:
-				plugin.getShopTypeRegistry().selectNext(player);
+				if (!isShopTypeFixed) {
+					plugin.getShopTypeRegistry().selectNext(player);
+				}
 			}
 		} else if (action == Action.LEFT_CLICK_AIR) {
 			if (player.isSneaking() ^ Settings.invertShopTypeAndObjectTypeSelection) {
 				// Cycle shop objects backwards:
-				plugin.getShopObjectTypeRegistry().selectPrevious(player);
+				if (!isShopObjectTypeFixed) {
+					plugin.getShopObjectTypeRegistry().selectPrevious(player);
+				}
 			} else {
 				// Cycle shopkeeper types backwards:
-				plugin.getShopTypeRegistry().selectPrevious(player);
+				if (!isShopTypeFixed) {
+					plugin.getShopTypeRegistry().selectPrevious(player);
+				}
 			}
 		} else if (action == Action.RIGHT_CLICK_BLOCK) {
 			Block clickedBlock = Unsafe.assertNonNull(event.getClickedBlock());
@@ -306,7 +362,7 @@ class CreateListener implements Listener {
 				ShopCreationData creationData = PlayerShopCreationData.create(
 						player,
 						(PlayerShopType<?>) shopType,
-						shopObjType,
+						shopObjectType,
 						spawnLocation,
 						clickedBlockFace,
 						selectedContainer
@@ -352,12 +408,20 @@ class CreateListener implements Listener {
 	}
 
 	private void handleEntityInteraction(PlayerInteractEntityEvent event) {
-		if (!Settings.preventShopCreationItemRegularUsage) return;
+		if (!Settings.preventShopCreationItemRegularUsage) {
+			return;
+		}
+
 		Player player = event.getPlayer();
 		// We check the permission first since this check is fast:
-		if (PermissionUtils.hasPermission(player, ShopkeepersPlugin.BYPASS_PERMISSION)) return;
+		if (PermissionUtils.hasPermission(player, ShopkeepersPlugin.BYPASS_PERMISSION)) {
+			return;
+		}
+
 		ItemStack itemInHand = player.getInventory().getItem(event.getHand());
-		if (!ShopCreationItem.isShopCreationItem(itemInHand)) return;
+		if (!ShopCreationItem.isShopCreationItem(itemInHand)) {
+			return;
+		}
 
 		// Prevent the entity interaction:
 		// TODO Only prevent the entity interaction if the item actually has a special entity
@@ -413,6 +477,7 @@ class CreateListener implements Listener {
 						+ " (debug output is throttled)");
 			}
 		}
+
 		event.setResult(null);
 		InventoryUtils.updateInventoryLater(anvilInventory);
 		// TODO Inform the player? (This would require some per-player throttling)

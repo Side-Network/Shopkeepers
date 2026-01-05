@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
@@ -20,9 +19,11 @@ import org.bukkit.potion.PotionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
+import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.util.annotations.ReadWrite;
 import com.nisovin.shopkeepers.util.bukkit.MinecraftEnumUtils;
 import com.nisovin.shopkeepers.util.bukkit.NamespacedKeyUtils;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.java.CollectionUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
 
@@ -37,8 +38,6 @@ public final class PotionUtils {
 	// Visible for testing:
 	public static Map<? extends String, ? extends PotionType> POTION_TYPE_ALIASES_VIEW = Collections.unmodifiableMap(POTION_TYPE_ALIASES);
 	static {
-		// Removed in Bukkit 1.20.5:
-		// POTION_TYPE_ALIASES.put("empty", PotionType.UNCRAFTABLE);
 		// Renamed in Bukkit 1.20.5, but the old names are still recognized by us:
 		POTION_TYPE_ALIASES.put("jump", PotionType.LEAPING);
 		POTION_TYPE_ALIASES.put("speed", PotionType.SWIFTNESS);
@@ -212,19 +211,21 @@ public final class PotionUtils {
 	}
 
 	public static @Nullable PotionType getLongPotionType(PotionType potionType) {
-		var key = potionType.getKey();
+		var key = RegistryUtils.getKeyOrThrow(potionType);
 		if (key.getKey().startsWith("long_")) return potionType;
 		if (!potionType.isExtendable()) return null;
 
-		return Registry.POTION.get(NamespacedKeyUtils.create(key.getNamespace(), "long_" + key.getKey()));
+		var potionRegistry = Compat.getProvider().getRegistry(PotionType.class);
+		return potionRegistry.get(NamespacedKeyUtils.create(key.getNamespace(), "long_" + key.getKey()));
 	}
 
 	public static @Nullable PotionType getStrongPotionType(PotionType potionType) {
-		var key = potionType.getKey();
+		var key = RegistryUtils.getKeyOrThrow(potionType);
 		if (key.getKey().startsWith("strong_")) return potionType;
 		if (!potionType.isUpgradeable()) return null;
 
-		return Registry.POTION.get(NamespacedKeyUtils.create(key.getNamespace(), "strong_" + key.getKey()));
+		var potionRegistry = Compat.getProvider().getRegistry(PotionType.class);
+		return potionRegistry.get(NamespacedKeyUtils.create(key.getNamespace(), "strong_" + key.getKey()));
 	}
 
 	/**

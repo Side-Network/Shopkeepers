@@ -13,11 +13,11 @@ import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
-import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectCreationContext;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectType;
 import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObject;
-import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
 import com.nisovin.shopkeepers.ui.editor.Button;
-import com.nisovin.shopkeepers.ui.editor.EditorSession;
+import com.nisovin.shopkeepers.ui.editor.EditorView;
 import com.nisovin.shopkeepers.ui.editor.ShopkeeperActionButton;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
 import com.nisovin.shopkeepers.util.data.property.Property;
@@ -38,12 +38,12 @@ public class SnowmanShop extends SKLivingShopObject<Snowman> {
 			.build(properties);
 
 	public SnowmanShop(
-			LivingShops livingShops,
-			SKLivingShopObjectType<SnowmanShop> livingObjectType,
+			BaseEntityShopObjectCreationContext context,
+			BaseEntityShopObjectType<SnowmanShop> shopObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
-		super(livingShops, livingObjectType, shopkeeper, creationData);
+		super(context, shopObjectType, shopkeeper, creationData);
 	}
 
 	@Override
@@ -105,15 +105,12 @@ public class SnowmanShop extends SKLivingShopObject<Snowman> {
 	private Button getPumpkinHeadEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
-			public @Nullable ItemStack getIcon(EditorSession editorSession) {
+			public @Nullable ItemStack getIcon(EditorView editorView) {
 				return getPumpkinHeadEditorItem();
 			}
 
 			@Override
-			protected boolean runAction(
-					EditorSession editorSession,
-					InventoryClickEvent clickEvent
-			) {
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				cyclePumpkinHead();
 				return true;
 			}

@@ -141,7 +141,6 @@ public class FirstOfArgument
 		}
 
 		boolean nullParsed = false;
-		ArgumentRejectedException rejectedException = null;
 		ArgumentParseException firstParseException = null;
 		for (@NonNull I input : inputs) {
 			try {
@@ -159,15 +158,17 @@ public class FirstOfArgument
 					// Assert: fallbacks is modifiable.
 					fallbacks.add(e);
 				} else {
-					Validate.State.error("Argument '" + e.getArgument().getName()
+					throw Validate.State.error("Argument '" + e.getArgument().getName()
 							+ "' threw another FallbackArgumentException while parsing fallback: "
 							+ e);
 				}
 			} catch (ArgumentRejectedException e) {
-				// Ignore, but keep track of the first argument-rejected exception:
-				if (rejectedException == null) {
-					rejectedException = e;
-				}
+				// Abort with this exception right way: The command argument was able to parse
+				// something but rejected the result, e.g. due to some filter or because the input
+				// was ambiguous. Even if subsequent command arguments are able to parse the input
+				// as well, aborting the parsing with this error is preferred because earlier
+				// command arguments take precedence over later command arguments.
+				throw e;
 			} catch (ArgumentParseException e) {
 				// Ignore, but keep track of the first exception:
 				if (firstParseException == null) {
@@ -193,13 +194,6 @@ public class FirstOfArgument
 			// If one argument did return null as parsing result, and did not throw an exception
 			// (like optional arguments tend to do), we do not throw an exception here either:
 			return null;
-		}
-
-		if (rejectedException != null) {
-			// Some argument was able to parse something but rejected the result, e.g. due to some
-			// filter or because the input was ambiguous. Prefer this more specific exception since
-			// it is likely to be more relevant to the user.
-			throw rejectedException;
 		}
 
 		// Invalid argument for all of them:

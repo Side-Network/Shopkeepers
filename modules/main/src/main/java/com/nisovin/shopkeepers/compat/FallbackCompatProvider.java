@@ -4,16 +4,23 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.function.BiConsumer;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Keyed;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
+import org.bukkit.Registry;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.view.builder.InventoryViewBuilder;
+import org.bukkit.potion.PotionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
@@ -21,6 +28,7 @@ import com.nisovin.shopkeepers.util.annotations.ReadOnly;
 import com.nisovin.shopkeepers.util.bukkit.ServerUtils;
 import com.nisovin.shopkeepers.util.data.container.DataContainer;
 import com.nisovin.shopkeepers.util.inventory.ItemStackComponentsData;
+import com.nisovin.shopkeepers.util.inventory.ItemStackMetaTag;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
 import com.nisovin.shopkeepers.util.logging.Log;
@@ -35,8 +43,10 @@ public final class FallbackCompatProvider implements CompatProvider {
 	private final Class<?> nmsEntityClass;
 	private final Method nmsEntitySetOnGroundMethod;
 	private final Object nmsMinecraftRegistry;
+	private final Class<?> nmsTagClass;
 	private final Class<?> nmsCompoundTagClass;
 	private final Method nmsCompoundTagGetMethod;
+	private final Method nmsCompoundTagGetStringOrMethod;
 	private final Method nmsCompoundTagPutStringMethod;
 	private final Method nmsCompoundTagPutIntMethod;
 	private final Method nmsCompoundTagPutMethod;
@@ -55,6 +65,7 @@ public final class FallbackCompatProvider implements CompatProvider {
 	private final Object nmsDataFixerTypeItemStack;
 	private final Constructor<?> nmsDynamicConstructor;
 	private final Method nmsDynamicGetValueMethod;
+	private final Method nmsNbtUtilsCompareNbtMethod;
 
 	// CraftBukkit
 	private final Class<?> obcCraftItemStackClass;
@@ -66,10 +77,7 @@ public final class FallbackCompatProvider implements CompatProvider {
 	private final Method obcGetHandleMethod;
 
 	// Bukkit
-
-	// null if not supported yet (e.g. pre 1.21):
-	private @Nullable Method b_EntityExplodeEvent_GetExplosionResultMethod = null;
-	private @Nullable Method b_BlockExplodeEvent_GetExplosionResultMethod = null;
+	private final @Nullable Method inventoryViewBuilderTitleMethod;
 
 	public FallbackCompatProvider() throws Exception {
 		String cbPackage = ServerUtils.getCraftBukkitPackage();
@@ -86,9 +94,11 @@ public final class FallbackCompatProvider implements CompatProvider {
 		var obcGetMinecraftRegistryMethod = obcCraftRegistryClass.getMethod("getMinecraftRegistry");
 		nmsMinecraftRegistry = Unsafe.assertNonNull(obcGetMinecraftRegistryMethod.invoke(null));
 
-		var nmsTagClass = Class.forName("net.minecraft.nbt.NBTBase"); // Tag
+		nmsTagClass = Class.forName("net.minecraft.nbt.NBTBase"); // Tag
 		nmsCompoundTagClass = Class.forName("net.minecraft.nbt.NBTTagCompound"); // CompoundTag
 		nmsCompoundTagGetMethod = nmsCompoundTagClass.getDeclaredMethod("a", String.class); // get
+		// getStringOr
+		nmsCompoundTagGetStringOrMethod = nmsCompoundTagClass.getDeclaredMethod("b", String.class, String.class);
 		// putString
 		nmsCompoundTagPutStringMethod = nmsCompoundTagClass.getDeclaredMethod("a", String.class, String.class);
 		// putInt
@@ -142,7 +152,6 @@ public final class FallbackCompatProvider implements CompatProvider {
 		var nmsDataFixerGetDataFixerMethod = nmsDataFixersClass.getDeclaredMethod("a");
 		nmsDataFixer = Unsafe.assertNonNull(nmsDataFixerGetDataFixerMethod.invoke(null));
 		var nmsDataFixerTypeReferenceClass = Class.forName("com.mojang.datafixers.DSL$TypeReference");
-		var nmsDataFixerTypeReferenceTypeNameMethod = nmsDataFixerTypeReferenceClass.getDeclaredMethod("typeName");
 		var nmsDataFixerClass = Class.forName("com.mojang.datafixers.DataFixer");
 		nmsDataFixerUpdateMethod = nmsDataFixerClass.getDeclaredMethod(
 				"update",
@@ -153,15 +162,23 @@ public final class FallbackCompatProvider implements CompatProvider {
 		);
 
 		// References
-		var nmsDataFixerReferencesClass = Class.forName("net.minecraft.util.datafix.fixes.DataConverterTypes");
 		// ITEM_STACK
-		nmsDataFixerTypeItemStack = Unsafe.assertNonNull(nmsDataFixerReferencesClass.getField("u").get(null));
-		if (!"item_stack".equals(nmsDataFixerTypeReferenceTypeNameMethod.invoke(nmsDataFixerTypeItemStack))) {
+		var nmsDataFixerTypeItemStackResult = findDataFixerConverterType("item_stack");
+		if (nmsDataFixerTypeItemStackResult == null) {
 			throw new IllegalStateException("Failed to retrieve the item stack datafixer type reference!");
 		}
+		nmsDataFixerTypeItemStack = nmsDataFixerTypeItemStackResult;
 
 		nmsDynamicConstructor = nmsDynamicClass.getConstructor(dynamicOpsClass, Object.class);
 		nmsDynamicGetValueMethod = nmsDynamicClass.getDeclaredMethod("getValue");
+
+		var nmsNbtUtilsClass = Class.forName("net.minecraft.nbt.GameProfileSerializer"); // NbtUtils
+		nmsNbtUtilsCompareNbtMethod = nmsNbtUtilsClass.getDeclaredMethod(
+				"a",
+				nmsTagClass,
+				nmsTagClass,
+				boolean.class
+		); // compareNbt
 
 		// CraftBukkit
 
@@ -182,12 +199,39 @@ public final class FallbackCompatProvider implements CompatProvider {
 
 		// Bukkit
 
+		// Only supported on Spigot:
+		// Note: We use reflection here instead of calling the Spigot API directly, since this would
+		// break our Paper-API compilation check.
+		@Nullable Method localInventoryViewBuilderTitleMethod = null;
 		try {
-			b_EntityExplodeEvent_GetExplosionResultMethod = EntityExplodeEvent.class.getMethod("getExplosionResult");
-			b_BlockExplodeEvent_GetExplosionResultMethod = BlockExplodeEvent.class.getMethod("getExplosionResult");
+			localInventoryViewBuilderTitleMethod = InventoryViewBuilder.class.getMethod("title", String.class);
 		} catch (NoSuchMethodException e) {
-			// Not found, e.g. pre 1.21.
 		}
+		inventoryViewBuilderTitleMethod = localInventoryViewBuilderTitleMethod;
+	}
+
+	private static @Nullable Object findDataFixerConverterType(String typeName) throws Exception {
+		var nmsDataFixerReferencesClass = Class.forName("net.minecraft.util.datafix.fixes.DataConverterTypes");
+		var nmsDataFixerTypeReferenceClass = Class.forName("com.mojang.datafixers.DSL$TypeReference");
+		var nmsDataFixerTypeReferenceTypeNameMethod = nmsDataFixerTypeReferenceClass.getDeclaredMethod("typeName");
+		for (Field field : nmsDataFixerReferencesClass.getDeclaredFields()) {
+			if (!Modifier.isStatic(field.getModifiers())) {
+				continue;
+			}
+
+			var value = field.get(null);
+			if (value == null) {
+				continue;
+			}
+
+			// Find by typeName:
+			var typeNameResult = nmsDataFixerTypeReferenceTypeNameMethod.invoke(value);
+			if (typeName.equals(typeNameResult)) {
+				return value;
+			}
+		}
+
+		return null;
 	}
 
 	@Override
@@ -263,6 +307,21 @@ public final class FallbackCompatProvider implements CompatProvider {
 	}
 
 	@Override
+	public void setInventoryViewTitle(InventoryViewBuilder<?> builder, String title) {
+		// Only supported on Spigot:
+		if (inventoryViewBuilderTitleMethod == null) {
+			return;
+		}
+		assert inventoryViewBuilderTitleMethod != null;
+
+		try {
+			inventoryViewBuilderTitleMethod.invoke(builder, title);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			// Unexpected, but silently ignored.
+		}
+	}
+
+	@Override
 	public void updateTrades(Player player) {
 		// Not supported.
 	}
@@ -282,8 +341,39 @@ public final class FallbackCompatProvider implements CompatProvider {
 	}
 
 	@Override
-	public @Nullable String getItemSNBT(ItemStack itemStack) {
-		return null; // Not supported.
+	public ItemStackMetaTag getItemStackMetaTag(@ReadOnly @Nullable ItemStack itemStack) {
+		if (ItemUtils.isEmpty(itemStack)) {
+			return new ItemStackMetaTag(null);
+		}
+		assert itemStack != null;
+
+		try {
+			var nmsItem = this.asNMSItemStack(itemStack);
+			var itemTag = this.getItemStackTag(nmsItem);
+			var componentsTag = nmsCompoundTagGetMethod.invoke(itemTag, "components");
+			return new ItemStackMetaTag(componentsTag);
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to get item stack meta tag!", e);
+		}
+	}
+
+	@Override
+	public boolean matches(ItemStackMetaTag provided, ItemStackMetaTag required, boolean matchPartialLists) {
+		Validate.notNull(provided, "provided is null");
+		Validate.notNull(required, "required is null");
+		var providedTag = provided.getNmsTag();
+		var requiredTag = required.getNmsTag();
+		try {
+			// Partially match list data:
+			return Unsafe.castNonNull(nmsNbtUtilsCompareNbtMethod.invoke(
+					null,
+					requiredTag,
+					providedTag,
+					matchPartialLists
+			));
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to match item stack meta tags!", e);
+		}
 	}
 
 	@Override
@@ -318,7 +408,7 @@ public final class FallbackCompatProvider implements CompatProvider {
 	}
 
 	@Override
-	public @Nullable ItemStack deserializeItemStack(
+	public ItemStack deserializeItemStack(
 			int dataVersion,
 			NamespacedKey id,
 			int count,
@@ -358,7 +448,7 @@ public final class FallbackCompatProvider implements CompatProvider {
 				nmsCompoundTagPutMethod.invoke(itemTag, "components", componentsTag);
 			}
 
-			var currentDataVersion = Bukkit.getUnsafe().getDataVersion();
+			var currentDataVersion = ServerUtils.getDataVersion();
 			var convertedItemTagDynamic = nmsDataFixerUpdateMethod.invoke(
 					nmsDataFixer,
 					nmsDataFixerTypeItemStack,
@@ -367,6 +457,17 @@ public final class FallbackCompatProvider implements CompatProvider {
 					currentDataVersion
 			);
 			var convertedItemTag = nmsDynamicGetValueMethod.invoke(convertedItemTagDynamic);
+
+			var idString = (String) nmsCompoundTagGetStringOrMethod.invoke(
+					convertedItemTag,
+					"id",
+					"minecraft:air"
+			);
+			assert idString != null;
+			if (idString.equals("minecraft:air")) {
+				return new ItemStack(Material.AIR);
+			}
+
 			var serializationContext = nmsHolderLookupProviderCreateSerializationContextMethod.invoke(
 					nmsMinecraftRegistry,
 					nmsNbtOps
@@ -377,49 +478,29 @@ public final class FallbackCompatProvider implements CompatProvider {
 					convertedItemTag
 			);
 			var nmsItem = nmsDataResultGetOrThrowMethod.invoke(nmsItemResult);
-			return (ItemStack) obcCraftItemStackAsCraftMirrorMethod.invoke(null, nmsItem);
+			return Unsafe.assertNonNull(
+					(ItemStack) obcCraftItemStackAsCraftMirrorMethod.invoke(null, nmsItem)
+			);
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to deserialize item stack!", e);
 		}
 	}
 
-	// MC 1.21+ TODO Can be removed once we only support Bukkit 1.21+
-
+	// Might not work in future Paper versions.
 	@Override
-	public boolean isDestroyingBlocks(EntityExplodeEvent event) {
-		if (b_EntityExplodeEvent_GetExplosionResultMethod == null) return true;
-
-		try {
-			assert b_EntityExplodeEvent_GetExplosionResultMethod != null;
-			var explosionResult = b_EntityExplodeEvent_GetExplosionResultMethod.invoke(event);
-			assert explosionResult != null;
-			return isDestroyingBlocks(explosionResult);
-		} catch (Exception e) {
-			// Something unexpected went wrong. Assume pre 1.21 behavior. Wind charges may break
-			// player shops when container protection is disabled (#921).
-			return true;
+	public <T extends Keyed> Registry<T> getRegistry(Class<T> clazz) {
+		// Some API-only registries might not be supported by Bukkit.getRegistry(Class):
+		if (clazz == EntityType.class) {
+			return Unsafe.castNonNull(Registry.ENTITY_TYPE);
+		} else if (clazz == Particle.class) {
+			return Unsafe.castNonNull(Registry.PARTICLE_TYPE);
+		} else if (clazz == PotionType.class) {
+			return Unsafe.castNonNull(Registry.POTION);
+		} else if (clazz == MemoryKey.class) {
+			return Unsafe.castNonNull(Registry.MEMORY_MODULE_TYPE);
+		} else {
+			// Non-null: Expected to only be used with known registry types.
+			return Unsafe.assertNonNull(Bukkit.getRegistry(clazz));
 		}
-	}
-
-	@Override
-	public boolean isDestroyingBlocks(BlockExplodeEvent event) {
-		if (b_BlockExplodeEvent_GetExplosionResultMethod == null) return true;
-
-		try {
-			assert b_BlockExplodeEvent_GetExplosionResultMethod != null;
-			var explosionResult = b_BlockExplodeEvent_GetExplosionResultMethod.invoke(event);
-			assert explosionResult != null;
-			return isDestroyingBlocks(explosionResult);
-		} catch (Exception e) {
-			// Something unexpected went wrong. Assume pre 1.21 behavior. Wind charges may break
-			// player shops when container protection is disabled (#921).
-			return true;
-		}
-	}
-
-	private static boolean isDestroyingBlocks(Object explosionResult) {
-		var explosionResultString = explosionResult.toString();
-		return explosionResultString.equals("DESTROY")
-				|| explosionResultString.equals("DESTROY_WITH_DECAY");
 	}
 }

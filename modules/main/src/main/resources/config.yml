@@ -5,7 +5,9 @@
 # *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
 
 # Determines the required config migrations. Do not edit manually!
-config-version: 9
+config-version: 10
+# Determines the required config item data migrations. Do not edit manually!
+data-version: 4325
 # The initial debugging state of the plugin.
 debug: false
 # Additional debugging options.
@@ -27,9 +29,6 @@ debug: false
 # - 'item-migrations': Logs whenever a shopkeeper performs item migrations
 #    (e.g. for trade offers).
 # - 'item-updates': Logs whenever items are updated via the UpdateItemEvent.
-# - 'item-conversions': Logs whenever we explicitly convert items to Spigot's
-#    data format. Note that this does not log when items get implicitly
-#    converted, which may happen under various circumstances.
 # - 'empty-trades': Logs detailed item information for the selected trade and
 #    the items in the input slots whenever a player clicks an empty trading
 #    result slot.
@@ -62,38 +61,6 @@ language: en-default
 # might be a good idea to disable this for performance reasons.
 save-instantly: true
 
-# Enables the automatic conversion of items inside the inventories of players
-# and shop containers whenever a player opens a shopkeeper UI (e.g. trading,
-# editor, hiring, etc.) The items are converted to conform to Spigot's internal
-# data format.
-# This setting helps with issues related to items that have been created on
-# previous Spigot versions or via some Minecraft mechanism (e.g. give command,
-# loot tables, etc.) no longer getting accepted when trading with shopkeepers.
-# In order for the items to get reliably accepted during trades, their data has
-# to match the internal format that Spigot uses when a plugin would create the
-# same items via the Spigot API. Spigot occasionally makes changes to this
-# internal data format. Any previously created items, or newly created items
-# that don't conform to this new format, may cause trading and item stacking
-# issues then.
-# This setting is intended to help with the portion of the issue affecting
-# shopkeeper trades. This setting will not reliably help you prevent item
-# stacking related issues!
-# Enabling this setting comes with a performance impact! Try to avoid using
-# this option and search for alternative solutions instead (e.g. stick to
-# Spigot's data format when creating items via Minecraft mechanisms). Try to
-# only keep this setting enabled for as long as required (e.g. until you assume
-# that most of your players' legacy items got converted by now).
-convert-player-items: false
-# If 'convert-player-items' is enabled, this setting toggles whether the
-# 'convert-player-items-exceptions' setting acts as black- or whitelist.
-# If enabled, all items inside the checked inventories will be converted except
-# those that match the items specified by 'convert-player-items-exceptions'.
-# If disabled, only items that match the items specified by
-# 'convert-player-items-exceptions' get converted.
-convert-all-player-items: true
-# Black- or whitelist of items affected by the 'convert-player-items' setting.
-convert-player-items-exceptions: []
-
 # *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
 # Plugin Compatibility
 # *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
@@ -113,9 +80,24 @@ convert-player-items-exceptions: []
 # setting is enabled, or has been enabled in the past.
 ignore-failed-server-assumption-tests: false
 
-# If enabled, Shopkeepers tries to bypass other plugins that deny mob spawning
-# (e.g. land protection plugins).
+# If enabled, Shopkeepers tries to bypass other plugins that deny entity
+# spawning (e.g. land protection plugins).
 bypass-spawn-blocking: true
+# Whether to automatically delete all shopkeepers during plugin startup that
+# failed to spawn during their last spawn attempt.
+# This is disabled by default, because automatically deleting shopkeepers is
+# potentially risky: There might be ways for players to abuse this by somehow
+# causing shopkeepers of other players to fail to spawn. Or there might be a
+# bug in the plugin or server that occassionally prevents a shopkeeper from
+# spawning, or sporadic non-criticial reasons for why a shopkeeper failed to
+# spawned (e.g. some other plugin interfering, or the world not being loaded
+# currently).
+# It is therefore recommended to keep this disabled and instead periodically
+# check the server log for warnings about shopkeepers that failed to spawn: You
+# can then investigate these cases individually, or use the
+# '/shopkeepers deleteUnspawnableShopkeepers' command to manually delete these
+# shopkeepers.
+delete-unspawnable-shopkeepers: false
 # If enabled, Shopkeepers takes into account whether other plugins deny
 # interaction with the shopkeepers.
 check-shop-interaction-result: false
@@ -168,8 +150,9 @@ disable-inventory-verification: false
 # The item that is used to create player shops.
 # Use the '/shopkeeper give' command to give yourself this item in-game.
 shop-creation-item:
-  type: VILLAGER_SPAWN_EGG
-  display-name: '{"text":"Shopkeeper","italic":false,"color":"green"}'
+  id: 'minecraft:villager_spawn_egg'
+  components:
+    minecraft:custom_name: '{color:"green",italic:0b,text:"Shopkeeper"}'
 
 # Whether to add a custom NBT tag to newly created shop creation items, e.g.
 # when created via the '/shopkeeper give' command.
@@ -204,9 +187,6 @@ invert-shop-type-and-object-type-selection: false
 # Whether deleting (or destroying) a player shopkeeper returns (drops) the
 # shop creation item.
 deleting-player-shop-returns-creation-item: false
-
-# Whether to allow creating player shops with the /shopkeeper command.
-create-player-shop-with-command: false
 
 # Whether the selected container must have been recently placed by the player
 # who is attempting to create the shopkeeper.
@@ -256,16 +236,19 @@ enabled-living-shops:
 - VILLAGER
 - ALLAY
 - ARMADILLO
+- ARMOR_STAND
 - AXOLOTL
 - BEE
 - BLAZE
 - BOGGED
 - BREEZE
 - CAMEL
+- CAMEL_HUSK
 - CAT
 - CAVE_SPIDER
 - CHICKEN
 - COD
+- COPPER_GOLEM
 - COW
 - CREAKING
 - CREEPER
@@ -288,10 +271,13 @@ enabled-living-shops:
 - IRON_GOLEM
 - LLAMA
 - MAGMA_CUBE
+- MANNEQUIN
 - MOOSHROOM
 - MULE
+- NAUTILUS
 - OCELOT
 - PANDA
+- PARCHED
 - PARROT
 - PHANTOM
 - PIG
@@ -329,33 +315,44 @@ enabled-living-shops:
 - ZOGLIN
 - ZOMBIE
 - ZOMBIE_HORSE
+- ZOMBIE_NAUTILUS
 - ZOMBIE_VILLAGER
 - ZOMBIFIED_PIGLIN
 
-# Whether shopkeeper mobs shall not be affected by gravity.
+# Whether to allow the creation of end crystal shops.
+enable-end-crystal-shops: true
+# Whether to allow placing end crystal shops in the end.
+# Disabled by default, because end crystal shops might have unexpected effects in the end, such as
+# affecting dragon fights (they, for example, heal nearby ender dragons).
+# Changes to this setting do no affect already existing shops.
+allow-end-crystal-shops-in-the-end: false
+
+# Whether shopkeeper entities shall not be affected by gravity.
 disable-gravity: false
-# The range in chunks around players in which shopkeeper mobs will be affected
-# by gravity. Setting this too high may have a negative impact on performance.
-# And setting it below the server's entity tracking range will result in
-# players being able to see mobs floating in mid-air until they get close
-# enough. A value of 0 will limit the gravity to mobs within chunks that
-# contain a player. This has no effect if gravity is disabled.
+# The range in chunks around players in which shopkeeper entities will be
+# affected by gravity. This has no effect if gravity is disabled.
+# Setting this too high may have a negative impact on performance. And setting
+# it below the server's entity tracking range will result in players being able
+# to see entities floating in mid-air until they get close enough.
+# A value of 0 will limit the gravity to entities within chunks that contain a
+# player.
 gravity-chunk-range: 4
 
-# The number of Minecraft ticks between behavior updates of shopkeeper mobs.
+# The number of Minecraft ticks between behavior updates of shopkeeper
+# entities.
 # This controls the rate at which we update the gravity and AI of shopkeeper
-# mobs. Values above 1 indicate a reduced tick rate and result in a less
+# entities. Values above 1 indicate a reduced tick rate and result in a less
 # smooth, less reactive, and possibly slower behavior in comparison to the
 # behavior of mobs in vanilla Minecraft.
 # In order to compensate for a reduced tick rate some activities may be scaled
 # accordingly. This ensures, for example, that mobs still rotate their head at
-# the same speed towards nearby players, or that mobs still fall at the same
-# speed when being affected by gravity.
+# the same speed towards nearby players, or that entities still fall at the
+# same speed when being affected by gravity.
 # Consequently, a reduced tick rate is less performance-intensive in total, but
 # may on the other hand be slightly more performance-intensive per individual
 # behavior update.
 # Values above 3 are clearly noticeable and offer little additional benefit.
-mob-behavior-tick-period: 3
+entity-behavior-tick-period: 3
 
 # Whether shulker shopkeepers shall peek when a player is nearby.
 shulker-peek-if-player-nearby: true
@@ -368,10 +365,10 @@ slime-max-size: 5
 # The maximum size of magma cube shopkeepers. Must be a value in the range of 1 to 10.
 magma-cube-max-size: 5
 
-# Whether mob shopkeepers make sounds.
-silence-living-shop-entities: true
+# Whether shopkeeper entities make sounds.
+silence-shop-entities: true
 
-# Whether to show nameplates of mob shopkeepers.
+# Whether to show nameplates of entity shopkeepers.
 show-nameplates: true
 # Whether to always show nameplates. If disabled, nameplates will only be shown
 # when looking directly at the shopkeeper.
@@ -478,30 +475,30 @@ allow-renaming-of-player-npc-shops: false
 # file.
 # In combination with their display name and lore, these items must not match
 # any items that players are able to set up trades with.
-selling-empty-trade-result-item: GRAY_STAINED_GLASS_PANE
-selling-empty-trade-item1: GRAY_STAINED_GLASS_PANE
-selling-empty-trade-item2: GRAY_STAINED_GLASS_PANE
-selling-empty-item1: BARRIER
-selling-empty-item2: BARRIER
+selling-empty-trade-result-item: 'minecraft:gray_stained_glass_pane'
+selling-empty-trade-item1: 'minecraft:gray_stained_glass_pane'
+selling-empty-trade-item2: 'minecraft:gray_stained_glass_pane'
+selling-empty-item1: 'minecraft:barrier'
+selling-empty-item2: 'minecraft:barrier'
 
-buying-empty-trade-result-item: GRAY_STAINED_GLASS_PANE
-buying-empty-trade-item1: GRAY_STAINED_GLASS_PANE
-buying-empty-trade-item2: AIR
-buying-empty-result-item: BARRIER
-buying-empty-item2: AIR
+buying-empty-trade-result-item: 'minecraft:gray_stained_glass_pane'
+buying-empty-trade-item1: 'minecraft:gray_stained_glass_pane'
+buying-empty-trade-item2: 'minecraft:air'
+buying-empty-result-item: 'minecraft:barrier'
+buying-empty-item2: 'minecraft:air'
 
-trading-empty-trade-result-item: GRAY_STAINED_GLASS_PANE
-trading-empty-trade-item1: GRAY_STAINED_GLASS_PANE
-trading-empty-trade-item2: GRAY_STAINED_GLASS_PANE
-trading-empty-result-item: BARRIER
-trading-empty-item1: BARRIER
-trading-empty-item2: BARRIER
+trading-empty-trade-result-item: 'minecraft:gray_stained_glass_pane'
+trading-empty-trade-item1: 'minecraft:gray_stained_glass_pane'
+trading-empty-trade-item2: 'minecraft:gray_stained_glass_pane'
+trading-empty-result-item: 'minecraft:barrier'
+trading-empty-item1: 'minecraft:barrier'
+trading-empty-item2: 'minecraft:barrier'
 
-book-empty-trade-result-item: GRAY_STAINED_GLASS_PANE
-book-empty-trade-item1: GRAY_STAINED_GLASS_PANE
-book-empty-trade-item2: GRAY_STAINED_GLASS_PANE
-book-empty-item1: BARRIER
-book-empty-item2: BARRIER
+book-empty-trade-result-item: 'minecraft:gray_stained_glass_pane'
+book-empty-trade-item1: 'minecraft:gray_stained_glass_pane'
+book-empty-trade-item2: 'minecraft:gray_stained_glass_pane'
+book-empty-item1: 'minecraft:barrier'
+book-empty-item2: 'minecraft:barrier'
 
 # The number of pages that can be filled with trades. The maximum is 10.
 max-trades-pages: 5
@@ -509,18 +506,23 @@ max-trades-pages: 5
 # The items used for the buttons and icons in the trades page row.
 # The display name and lore of these items get set via the corresponding
 # messages and can therefore not be defined here.
-previous-page-item: WRITABLE_BOOK
-next-page-item: WRITABLE_BOOK
-current-page-item: WRITABLE_BOOK
-trade-setup-item: PAPER
+previous-page-item: 'minecraft:writable_book'
+next-page-item: 'minecraft:writable_book'
+current-page-item: 'minecraft:writable_book'
+trade-setup-item: 'minecraft:paper'
+shop-information-item: 'minecraft:paper'
 
 # The item that players can rename and then use as a substitute for items they
 # don't have yet when they set up their trade offers or mob equipment.
 # Set this to AIR to disable the use of placeholder items.
-placeholder-item: PAPER
+placeholder-item: 'minecraft:paper'
+
+# The editor items to represent the shop's open and closed states.
+shop-open-item: 'minecraft:green_banner'
+shop-closed-item: 'minecraft:red_banner'
 
 # The item used for the set-name button, and the naming item (if enabled).
-name-item: NAME_TAG
+name-item: 'minecraft:name_tag'
 
 # Whether to enable the equipment editor for all mobs and all equipment slots.
 # By default, the equipment can only be edited for mobs and slots that are known, at least for
@@ -536,19 +538,19 @@ enable-all-equipment-editor-slots: false
 # Whether to allow shop owners to move their shops.
 enable-moving-of-player-shops: true
 # The item used for the move button.
-move-item: ENDER_PEARL
+move-item: 'minecraft:ender_pearl'
 
 # Whether the editor menu of player shops contains an option to open the shop's
 # container.
 enable-container-option-on-player-shop: true
 # The item used for the 'open container' editor button.
-container-item: CHEST
+container-item: 'minecraft:chest'
 
 # The item used for the trade notifications editor button in player shops.
-trade-notifications-item: BELL
+trade-notifications-item: 'minecraft:bell'
 
 # The item used for the delete button.
-delete-item: BONE
+delete-item: 'minecraft:bone'
 
 # *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
 # Non-Shopkeeper Villagers
@@ -556,23 +558,44 @@ delete-item: BONE
 
 # Whether to prevent trading with non-shopkeeper villagers.
 disable-other-villagers: false
+# The names of the worlds affected by 'disable-other-villagers', or empty to
+# affect all worlds.
+disable-other-villagers-worlds: []
 # Whether to block regular non-shopkeeper villagers from spawning. Villagers
 # spawned by plugins, spawn eggs, mob spawners or by curing zombie villagers
 # are however not affected by this.
 block-villager-spawns: false
+# The names of the worlds affected by 'block-villager-spawns', or empty to
+# affect all worlds.
+block-villager-spawns-worlds: []
 # Whether to prevent curing of zombie villagers.
 disable-zombie-villager-curing: false
+# The names of the worlds affected by 'disable-zombie-villager-curing', or
+# empty to affect all worlds.
+disable-zombie-villager-curing-worlds: []
 # Whether non-shopkeeper villagers can be hired.
 hire-other-villagers: false
+# The names of the worlds affected by 'hire-other-villagers', or empty to
+# affect all worlds.
+hire-other-villagers-worlds: []
 
 # Whether to prevent trading with non-shopkeeper wandering traders.
 disable-wandering-traders: false
+# The names of the worlds affected by 'disable-wandering-traders', or empty to
+# affect all worlds.
+disable-wandering-traders-worlds: []
 # Whether to block non-shopkeeper wandering traders and trader llamas from
 # spawning. Wandering traders and trader llamas spawned by plugins, spawn eggs
 # or mob spawners are however not affected by this.
 block-wandering-trader-spawns: false
+# The names of the worlds affected by 'block-wandering-trader-spawns', or empty
+# to affect all worlds.
+block-wandering-trader-spawns-worlds: []
 # Whether non-shopkeeper wandering traders can be hired.
 hire-wandering-traders: false
+# The names of the worlds affected by 'hire-wandering-traders', or empty to
+# affect all worlds.
+hire-wandering-traders-worlds: []
 
 # Whether regular villagers can be edited by sneaking and right-clicking.
 edit-regular-villagers: false
@@ -586,7 +609,7 @@ edit-regular-wandering-traders: false
 
 # The item to use for the hire button in player shopkeepers that are for sale,
 # and for the hire-cost when hiring non-shopkeeper villagers.
-hire-item: EMERALD
+hire-item: 'minecraft:emerald'
 # The amount of hire-cost items it costs to hire a non-shopkeeper villager.
 hire-other-villagers-costs: 1
 # Whether hiring a player shopkeeper also requires the permission to create
@@ -687,6 +710,8 @@ shop-owner-trade-notification-sound:
 # - 'DISABLED': Disables the logging of trades.
 # - 'SQLITE': Logs all trades to an SQLite database inside the plugin folder.
 # - 'CSV': Logs all trades to daily CSV files inside the plugin folder.
+# Note: The "/shopkeeper history" command is current only supported for the
+# storage type 'SQLITE'.
 trade-log-storage: 'DISABLED'
 
 # Players can trigger many equal trades in quick succession. For example, when
@@ -728,11 +753,11 @@ log-item-metadata: false
 # *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*
 
 # The currency item that is used in player shops.
-currency-item: EMERALD
+currency-item: 'minecraft:emerald'
 
 # A second, higher-value currency item that is used in the second trading slot
 # of player shops. Set this to 'AIR' to disable the second currency.
-high-currency-item: EMERALD_BLOCK
+high-currency-item: 'minecraft:emerald_block'
 
 # The value of the second currency, based on the first currency.
 high-currency-value: 9

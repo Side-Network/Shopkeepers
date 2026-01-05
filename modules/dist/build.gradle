@@ -8,7 +8,13 @@ def nmsModules = [
 	':shopkeepers-v1_21_R5',
 	':shopkeepers-v1_21_R5_paper',
 	':shopkeepers-v1_21_R6',
-	':shopkeepers-v1_21_R6_paper'
+	':shopkeepers-v1_21_R6_paper',
+	':shopkeepers-v1_21_R7',
+	':shopkeepers-v1_21_R7_paper',
+	':shopkeepers-v1_21_R8',
+	':shopkeepers-v1_21_R8_paper',
+	':shopkeepers-v1_21_R9',
+	':shopkeepers-v1_21_R9_paper'
 ]
 
 configurations {
@@ -43,13 +49,11 @@ shadowJar {
 		include(project(':shopkeepers-api'))
 		include(project(':shopkeepers-main'))
 		nmsModules.each { module ->
-			include(project(module))
+			include(project(path: module, configuration: 'remapped'))
 		}
 	}
 	manifest {
-		// TODO Change this to 'mojang' once we use Mojang mappings for the Paper modules and no
-		// longer share modules across Paper and Spigot.
-		attributes["paperweight-mappings-namespace"] = "spigot"
+		attributes["paperweight-mappings-namespace"] = "mojang"
 	}
 }
 

@@ -1,6 +1,6 @@
 package com.nisovin.shopkeepers.ui.villager.equipmentEditor;
 
-import com.nisovin.shopkeepers.ui.AbstractUIType;
+import com.nisovin.shopkeepers.ui.lib.AbstractUIType;
 
 public final class VillagerEquipmentEditorUIType extends AbstractUIType {
 

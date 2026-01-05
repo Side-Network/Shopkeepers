@@ -1,10 +1,10 @@
 package com.nisovin.shopkeepers.shopobjects.living.types;
 
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Chicken;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -12,41 +12,40 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
-import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
-import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
-import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectCreationContext;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectType;
 import com.nisovin.shopkeepers.ui.editor.Button;
-import com.nisovin.shopkeepers.ui.editor.EditorSession;
+import com.nisovin.shopkeepers.ui.editor.EditorView;
 import com.nisovin.shopkeepers.ui.editor.ShopkeeperActionButton;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
 import com.nisovin.shopkeepers.util.data.property.Property;
 import com.nisovin.shopkeepers.util.data.property.value.PropertyValue;
 import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
-import com.nisovin.shopkeepers.util.data.serialization.bukkit.NamespacedKeySerializers;
+import com.nisovin.shopkeepers.util.data.serialization.bukkit.KeyedSerializers;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 
 public class ChickenShop extends BabyableShop<Chicken> {
 
-	// TODO Replace with the actual type once we only support MC 1.21.5+
-	public static final Property<NamespacedKey> VARIANT = new BasicProperty<NamespacedKey>()
-			.dataKeyAccessor("variant", NamespacedKeySerializers.DEFAULT)
-			.defaultValue(NamespacedKey.minecraft("temperate"))
+	public static final Property<Chicken.Variant> VARIANT = new BasicProperty<Chicken.Variant>()
+			.dataKeyAccessor("variant", KeyedSerializers.forRegistry(Chicken.Variant.class))
+			.defaultValue(Chicken.Variant.TEMPERATE)
 			.build();
 
-	private final PropertyValue<NamespacedKey> variantProperty = new PropertyValue<>(VARIANT)
+	private final PropertyValue<Chicken.Variant> variantProperty = new PropertyValue<>(VARIANT)
 			.onValueChanged(Unsafe.initialized(this)::applyVariant)
 			.build(properties);
 
 	public ChickenShop(
-			LivingShops livingShops,
-			SKLivingShopObjectType<ChickenShop> livingObjectType,
+			BaseEntityShopObjectCreationContext context,
+			BaseEntityShopObjectType<ChickenShop> shopObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
-		super(livingShops, livingObjectType, shopkeeper, creationData);
+		super(context, shopObjectType, shopkeeper, creationData);
 	}
 
 	@Override
@@ -76,39 +75,39 @@ public class ChickenShop extends BabyableShop<Chicken> {
 
 	// VARIANT
 
-	public NamespacedKey getVariant() {
+	public Chicken.Variant getVariant() {
 		return variantProperty.getValue();
 	}
 
-	public void setVariant(NamespacedKey variant) {
+	public void setVariant(Chicken.Variant variant) {
 		variantProperty.setValue(variant);
 	}
 
 	public void cycleVariant(boolean backwards) {
-		this.setVariant(Compat.getProvider().cycleChickenVariant(this.getVariant(), backwards));
+		this.setVariant(RegistryUtils.cycleKeyed(
+				Chicken.Variant.class,
+				this.getVariant(),
+				backwards
+		));
 	}
 
 	private void applyVariant() {
 		Chicken entity = this.getEntity();
 		if (entity == null) return; // Not spawned
 
-		Compat.getProvider().setChickenVariant(entity, this.getVariant());
+		entity.setVariant(this.getVariant());
 	}
+
+	private static final Map<Chicken.Variant, Color> VARIANT_EDITOR_ITEM_COLORS = Map.ofEntries(
+			Map.entry(Chicken.Variant.TEMPERATE, Color.WHITE),
+			Map.entry(Chicken.Variant.WARM, Color.fromRGB(230, 178, 100)),
+			Map.entry(Chicken.Variant.COLD, Color.fromRGB(116, 106, 125))
+	);
 
 	private ItemStack getVariantEditorItem() {
 		ItemStack iconItem = new ItemStack(Material.LEATHER_CHESTPLATE);
-		switch (this.getVariant().getKey()) {
-		case "warm":
-			ItemUtils.setLeatherColor(iconItem, Color.fromRGB(230, 178, 100));
-			break;
-		case "cold":
-			ItemUtils.setLeatherColor(iconItem, Color.fromRGB(116, 106, 125));
-			break;
-		case "temperate":
-		default:
-			ItemUtils.setLeatherColor(iconItem, Color.WHITE);
-			break;
-		}
+		var color = VARIANT_EDITOR_ITEM_COLORS.getOrDefault(this.getVariant(), Color.WHITE);
+		ItemUtils.setLeatherColor(iconItem, color);
 		ItemUtils.setDisplayNameAndLore(iconItem,
 				Messages.buttonChickenVariant,
 				Messages.buttonChickenVariantLore
@@ -119,15 +118,12 @@ public class ChickenShop extends BabyableShop<Chicken> {
 	private Button getVariantEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
-			public @Nullable ItemStack getIcon(EditorSession editorSession) {
+			public @Nullable ItemStack getIcon(EditorView editorView) {
 				return getVariantEditorItem();
 			}
 
 			@Override
-			protected boolean runAction(
-					EditorSession editorSession,
-					InventoryClickEvent clickEvent
-			) {
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				boolean backwards = clickEvent.isRightClick();
 				cycleVariant(backwards);
 				return true;

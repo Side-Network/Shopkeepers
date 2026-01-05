@@ -23,7 +23,8 @@ public class ConfigMigrations {
 			new ConfigMigration6(),
 			new ConfigMigration7(),
 			new ConfigMigration8(),
-			new ConfigMigration9()
+			new ConfigMigration9(),
+			new ConfigMigration10()
 	);
 
 	public static int getLatestVersion() {

@@ -21,6 +21,7 @@ import com.nisovin.shopkeepers.commands.lib.argument.ArgumentsReader;
 import com.nisovin.shopkeepers.commands.lib.argument.CommandArgument;
 import com.nisovin.shopkeepers.commands.lib.argument.fallback.FallbackArgument;
 import com.nisovin.shopkeepers.commands.lib.argument.fallback.FallbackArgumentException;
+import com.nisovin.shopkeepers.commands.lib.argument.filter.ArgumentRejectedException;
 import com.nisovin.shopkeepers.commands.lib.context.BufferedCommandContext;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContext;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContextView;
@@ -675,6 +676,14 @@ public abstract class Command {
 			return pendingFallback;
 		}
 
+		public @Nullable Fallback getLastPendingFallback() {
+			var fallback = pendingFallback;
+			while (fallback != null && fallback.getNextFallback() != null) {
+				fallback = fallback.getNextFallback();
+			}
+			return fallback;
+		}
+
 		public boolean hasUnparsedCommandArguments() {
 			return (currentArgumentIndex < (argumentsCount - 1));
 		}
@@ -705,6 +714,22 @@ public abstract class Command {
 				assert pendingFallback != null;
 				pendingFallback.appendFallback(fallback);
 			}
+		}
+
+		public @Nullable ArgumentRejectedException getCurrentArgumentRejectedException() {
+			if (currentParseException instanceof ArgumentRejectedException argumentRejectedException) {
+				return argumentRejectedException;
+			}
+
+			var lastPendingFallback = this.getLastPendingFallback();
+			if (lastPendingFallback != null) {
+				var fallbackRootException = lastPendingFallback.getException().getRootException();
+				if (fallbackRootException instanceof ArgumentRejectedException argumentRejectedException) {
+					return argumentRejectedException;
+				}
+			}
+
+			return null;
 		}
 	}
 
@@ -823,6 +848,17 @@ public abstract class Command {
 
 			// Parse argument:
 			this.parseArgument(argument, parsingContext);
+
+			// If the parsing failed with an ArgumentRejectedException (e.g. ambiguous), abort the
+			// command argument parsing right away without evaluating pending fallbacks (see
+			// ArgumentRejectedException):
+			var argumentRejectedException = parsingContext.getCurrentArgumentRejectedException();
+			if (argumentRejectedException != null) {
+				Log.debug(DebugOptions.commands,
+						() -> "Argument rejected  '" + argument.getName() + "': "
+								+ argumentRejectedException.getMessage());
+				throw argumentRejectedException;
+			}
 
 			// Handle fallback(s) (if any):
 			this.handleFallbacks(parsingContext);
@@ -969,7 +1005,7 @@ public abstract class Command {
 			);
 		} catch (FallbackArgumentException e) {
 			// Fallback is not allowed to throw another fallback exception here.
-			Validate.State.error("Argument '" + fallbackArgument.getName()
+			throw Validate.State.error("Argument '" + fallbackArgument.getName()
 					+ "' threw another FallbackArgumentException while parsing fallback: " + e);
 		} catch (ArgumentParseException e) { // Fallback failed
 			argsReader.setState(argsReaderState); // Restore previous args reader state

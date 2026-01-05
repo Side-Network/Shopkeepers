@@ -68,7 +68,7 @@ public class FeaturesChart extends Metrics.DrilldownPie {
 			addFeatureEntry(
 					allFeatures,
 					"mob-behavior-tick-period",
-					Settings.mobBehaviorTickPeriod
+					Settings.entityBehaviorTickPeriod
 			);
 
 			// Others:

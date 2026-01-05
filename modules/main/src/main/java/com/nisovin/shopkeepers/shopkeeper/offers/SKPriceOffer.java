@@ -218,6 +218,8 @@ public class SKPriceOffer implements PriceOffer {
 		return LIST_SERIALIZER.deserialize(offerListData);
 	}
 
+	// TODO Can be removed once all servers are expected to have updated to our new item stack
+	// serialization format.
 	// Returns true if the data has changed due to migrations.
 	public static boolean migrateOffers(DataValue dataValue, String logPrefix)
 			throws InvalidDataException {

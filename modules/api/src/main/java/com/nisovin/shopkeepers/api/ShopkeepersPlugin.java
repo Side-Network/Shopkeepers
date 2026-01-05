@@ -53,6 +53,10 @@ public interface ShopkeepersPlugin extends Plugin {
 	 */
 	public static final String TRADE_PERMISSION = "shopkeeper.trade";
 	/**
+	 * The <code>shopkeeper.create</code> permission.
+	 */
+	public static final String CREATE_PERMISSION = "shopkeeper.create";
+	/**
 	 * The <code>shopkeeper.reload</code> permission.
 	 */
 	public static final String RELOAD_PERMISSION = "shopkeeper.reload";
@@ -60,6 +64,10 @@ public interface ShopkeepersPlugin extends Plugin {
 	 * The <code>shopkeeper.debug</code> permission.
 	 */
 	public static final String DEBUG_PERMISSION = "shopkeeper.debug";
+	/**
+	 * The <code>shopkeeper.delete-unspawnable-shopkeepers</code> permission.
+	 */
+	public static final String DELETE_UNSPAWNABLE_SHOPKEEPERS = "shopkeeper.delete-unspawnable-shopkeepers";
 	/**
 	 * The <code>shopkeeper.cleanup-citizen-shopkeepers</code> permission.
 	 */
@@ -77,6 +85,15 @@ public interface ShopkeepersPlugin extends Plugin {
 	 * The <code>shopkeeper.list.admin</code> permission.
 	 */
 	public static final String LIST_ADMIN_PERMISSION = "shopkeeper.list.admin";
+
+	/**
+	 * The <code>shopkeeper.history.own</code> permission.
+	 */
+	public static final String HISTORY_OWN_PERMISSION = "shopkeeper.history.own";
+	/**
+	 * The <code>shopkeeper.history.admin</code> permission.
+	 */
+	public static final String HISTORY_ADMIN_PERMISSION = "shopkeeper.history.admin";
 
 	/**
 	 * The <code>shopkeeper.remove.own</code> permission.
@@ -124,14 +141,6 @@ public interface ShopkeepersPlugin extends Plugin {
 	 * The <code>shopkeeper.setcurrency</code> permission.
 	 */
 	public static final String SET_CURRENCY_PERMISSION = "shopkeeper.setcurrency";
-	/**
-	 * The <code>shopkeeper.convertitems.own</code> permission.
-	 */
-	public static final String CONVERT_ITEMS_OWN_PERMISSION = "shopkeeper.convertitems.own";
-	/**
-	 * The <code>shopkeeper.convertitems.others</code> permission.
-	 */
-	public static final String CONVERT_ITEMS_OTHERS_PERMISSION = "shopkeeper.convertitems.others";
 	/**
 	 * The <code>shopkeeper.updateitems</code> permission.
 	 */

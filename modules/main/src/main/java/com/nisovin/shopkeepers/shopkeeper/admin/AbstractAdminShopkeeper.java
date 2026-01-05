@@ -11,7 +11,7 @@ import com.nisovin.shopkeepers.api.ui.DefaultUITypes;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopkeeper.ShopkeeperData;
-import com.nisovin.shopkeepers.ui.trading.TradingHandler;
+import com.nisovin.shopkeepers.ui.trading.TradingViewProvider;
 import com.nisovin.shopkeepers.util.bukkit.PermissionUtils;
 import com.nisovin.shopkeepers.util.bukkit.TextUtils;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
@@ -25,9 +25,9 @@ import com.nisovin.shopkeepers.util.java.StringUtils;
 public abstract class AbstractAdminShopkeeper
 		extends AbstractShopkeeper implements AdminShopkeeper {
 
-	public static class AdminShopTradingHandler extends TradingHandler {
+	public static class AdminShopTradingViewProvider extends TradingViewProvider {
 
-		protected AdminShopTradingHandler(AbstractAdminShopkeeper shopkeeper) {
+		protected AdminShopTradingViewProvider(AbstractAdminShopkeeper shopkeeper) {
 			super(shopkeeper);
 		}
 
@@ -77,8 +77,8 @@ public abstract class AbstractAdminShopkeeper
 
 	@Override
 	protected void setup() {
-		this.registerUIHandlerIfMissing(DefaultUITypes.TRADING(), () -> {
-			return new AdminShopTradingHandler(this);
+		this.registerViewProviderIfMissing(DefaultUITypes.TRADING(), () -> {
+			return new AdminShopTradingViewProvider(this);
 		});
 		super.setup();
 	}

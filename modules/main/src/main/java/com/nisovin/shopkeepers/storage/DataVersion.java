@@ -2,12 +2,12 @@ package com.nisovin.shopkeepers.storage;
 
 import java.util.regex.Pattern;
 
-import org.bukkit.Bukkit;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.storage.ShopkeeperStorage;
+import com.nisovin.shopkeepers.util.bukkit.ServerUtils;
 import com.nisovin.shopkeepers.util.java.ConversionUtils;
 import com.nisovin.shopkeepers.util.java.StringUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
@@ -55,7 +55,7 @@ public final class DataVersion {
 	 * <p>
 	 * Changes to this version trigger a full save of all shopkeepers.
 	 */
-	private static final int SHOPKEEPER_STORAGE_VERSION = 3;
+	private static final int SHOPKEEPER_STORAGE_VERSION = 4;
 	/**
 	 * The current shopkeeper data version.
 	 * <p>
@@ -94,7 +94,7 @@ public final class DataVersion {
 
 	private static int getCurrentMinecraftDataVersion() {
 		try {
-			return Bukkit.getUnsafe().getDataVersion();
+			return ServerUtils.getDataVersion();
 		} catch (Exception e) {
 			// This case can for example be reached when the plugin runs on an unsupported type of
 			// server, or when this is called in an unsupported context, such as for example during

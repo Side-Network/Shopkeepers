@@ -38,10 +38,10 @@ public class EquipmentUtils {
 		return Mob.class.isAssignableFrom(entityClass);
 	}
 
-	// TODO Added in Bukkit 1.20.5
+	// Added in Bukkit 1.20.5
 	public static final Optional<EquipmentSlot> EQUIPMENT_SLOT_BODY;
 
-	// TODO Added in Bukkit 1.21.5
+	// Added in Bukkit 1.21.5
 	public static final Optional<EquipmentSlot> EQUIPMENT_SLOT_SADDLE;
 
 	// Common supported equipment slot combinations:
@@ -50,6 +50,7 @@ public class EquipmentUtils {
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS;
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_HANDS_AND_ARMOR;
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_HANDS_AND_HEAD;
+	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_HANDS_HEAD_SADDLE;
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_MAINHAND_AND_HEAD;
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_HANDS;
 	public static final List<? extends EquipmentSlot> EQUIPMENT_SLOTS_MAINHAND;
@@ -81,6 +82,13 @@ public class EquipmentUtils {
 				EquipmentSlot.OFF_HAND,
 				EquipmentSlot.HEAD
 		));
+
+		EQUIPMENT_SLOTS_HANDS_HEAD_SADDLE = Collections.unmodifiableList(Unsafe.cast(Arrays.asList(
+				EquipmentSlot.HAND,
+				EquipmentSlot.OFF_HAND,
+				EquipmentSlot.HEAD,
+				saddleSlot
+		).stream().filter(x -> x != null).toList()));
 
 		EQUIPMENT_SLOTS_MAINHAND_AND_HEAD = Collections.unmodifiableList(Arrays.asList(
 				EquipmentSlot.HAND,
@@ -127,14 +135,18 @@ public class EquipmentUtils {
 		case "MULE":
 		case "DONKEY":
 		case "CAMEL":
+		case "CAMEL_HUSK":
 			// MC 1.21.5: Saddle is now an equipment slot.
 			return EQUIPMENT_SLOTS_SADDLE;
 		// MC 1.21.5: Saddle is now an equipment slot.
-		// Body: Horse armor (EquipmentSlot added in Bukkit 1.20.5)
+		// Body: Horse armor, Nautilus armor (EquipmentSlot added in Bukkit 1.20.5)
 		case "HORSE":
+		case "NAUTILUS":
+		case "ZOMBIE_NAUTILUS":
 			return EQUIPMENT_SLOTS_BODY_AND_SADDLE;
 		case "PLAYER":
 		case "ARMOR_STAND":
+		case "MANNEQUIN":
 		case "ZOMBIE":
 		case "ZOMBIE_VILLAGER":
 		case "DROWNED":
@@ -143,6 +155,7 @@ public class EquipmentUtils {
 		case "SKELETON":
 		case "WITHER_SKELETON":
 		case "STRAY":
+		case "PARCHED":
 		case "BOGGED":
 		case "PIGLIN":
 		case "PIGLIN_BRUTE":
@@ -173,6 +186,11 @@ public class EquipmentUtils {
 			return EQUIPMENT_SLOTS_BODY;
 		case "HAPPY_GHAST": // Body: Colored harness MC 1.21.6
 			return EQUIPMENT_SLOTS_BODY;
+		case "COPPER_GOLEM": // MC 1.21.10
+			// Main and off hand: Overlaps, or only one is rendered.
+			// Head: Some items are rendered with a weird offset.
+			// Saddle: Only certain items are rendered.
+			return EQUIPMENT_SLOTS_HANDS_HEAD_SADDLE;
 		default:
 			return Collections.emptyList();
 		}
@@ -193,20 +211,23 @@ public class EquipmentUtils {
 	 * @return <code>true</code> if the entity type supports a saddle
 	 */
 	public static boolean supportsSaddle(EntityType entityType) {
-		switch (entityType) {
-		case PIG:
-		case STRIDER:
+		switch (entityType.name()) {
+		case "PIG":
+		case "STRIDER":
+		case "NAUTILUS":
+		case "ZOMBIE_NAUTILUS":
 			// AbstractHorse:
-		case HORSE:
-		case SKELETON_HORSE:
-		case ZOMBIE_HORSE:
-		case MULE:
-		case DONKEY:
-		case CAMEL:
+		case "HORSE":
+		case "SKELETON_HORSE":
+		case "ZOMBIE_HORSE":
+		case "MULE":
+		case "DONKEY":
+		case "CAMEL":
+		case "CAMEL_HUSK":
 			return true;
 		// Llama extends AbstractHorse, but the saddle is not displayed:
-		case LLAMA:
-		case TRADER_LLAMA:
+		case "LLAMA":
+		case "TRADER_LLAMA":
 		default:
 			return false;
 		}

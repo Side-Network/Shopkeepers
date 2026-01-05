@@ -31,7 +31,7 @@ import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.shopkeeper.activation.ShopkeeperChunkActivator;
 import com.nisovin.shopkeepers.shopkeeper.registry.SKShopkeeperRegistry;
 import com.nisovin.shopkeepers.shopkeeper.spawning.ShopkeeperSpawner;
-import com.nisovin.shopkeepers.shopobjects.living.LivingEntityAI;
+import com.nisovin.shopkeepers.shopobjects.entity.base.EntityAI;
 import com.nisovin.shopkeepers.text.Text;
 import com.nisovin.shopkeepers.util.bukkit.TextUtils;
 import com.nisovin.shopkeepers.util.taskqueue.TaskQueueStatistics;
@@ -78,7 +78,7 @@ class CommandCheck extends Command {
 		boolean listChunks = context.has(ARGUMENT_CHUNKS);
 		boolean listActive = context.has(ARGUMENT_ACTIVE);
 
-		LivingEntityAI livingEntityAI = plugin.getLivingShops().getLivingEntityAI();
+		EntityAI entityAI = plugin.getEntityShops().getEntityAI();
 
 		int totalChunksWithShopkeepers = shopkeeperRegistry.getWorldsWithShopkeepers().stream()
 				.map(worldName -> shopkeeperRegistry.getShopkeepersByChunks(worldName))
@@ -93,12 +93,12 @@ class CommandCheck extends Command {
 				+ " | " + plugin.getShopkeeperStorage().getUnsavedDeletedShopkeepersCount()
 				+ " | " + plugin.getShopkeeperStorage().isDirty());
 		sender.sendMessage("  Chunks with shopkeepers: " + totalChunksWithShopkeepers);
-		sender.sendMessage("    With active AI: " + livingEntityAI.getActiveAIChunksCount());
-		sender.sendMessage("    With active gravity: " + livingEntityAI.getActiveGravityChunksCount());
+		sender.sendMessage("    With active AI: " + entityAI.getActiveAIChunksCount());
+		sender.sendMessage("    With active gravity: " + entityAI.getActiveGravityChunksCount());
 		sender.sendMessage("  Active shopkeepers: " + shopkeeperRegistry.getActiveShopkeepers().size());
-		sender.sendMessage("    With AI: " + livingEntityAI.getEntityCount());
-		sender.sendMessage("    With active AI: " + livingEntityAI.getActiveAIEntityCount());
-		sender.sendMessage("    With active gravity: " + livingEntityAI.getActiveGravityEntityCount());
+		sender.sendMessage("    With AI: " + entityAI.getEntityCount());
+		sender.sendMessage("    With active AI: " + entityAI.getActiveAIEntityCount());
+		sender.sendMessage("    With active gravity: " + entityAI.getActiveGravityEntityCount());
 
 		TaskQueueStatistics spawnQueueStatistics = shopkeeperSpawner.getSpawnQueueStatistics();
 		sender.sendMessage("  Pending shopkeeper spawns | max: " + spawnQueueStatistics.getPendingCount()
@@ -112,31 +112,31 @@ class CommandCheck extends Command {
 				+ " | " + TextUtils.format(maxChunkActivationTimings) + " ms"
 				+ " | " + chunkActivationTimings.getCounter());
 
-		double avgTotalAITimings = livingEntityAI.getTotalTimings().getAverageTimeMillis();
-		double maxTotalAITiming = livingEntityAI.getTotalTimings().getMaxTimeMillis();
-		sender.sendMessage("  Total AI timings (per " + Settings.mobBehaviorTickPeriod
+		double avgTotalAITimings = entityAI.getTotalTimings().getAverageTimeMillis();
+		double maxTotalAITiming = entityAI.getTotalTimings().getMaxTimeMillis();
+		sender.sendMessage("  Total AI timings (per " + Settings.entityBehaviorTickPeriod
 				+ " ticks) (avg | max): "
 				+ TextUtils.format(avgTotalAITimings) + " ms"
 				+ " | " + TextUtils.format(maxTotalAITiming) + " ms");
 
 		// Note: These are per activation, which happens only every 20 ticks (not per tick).
-		double avgAIActivationTimings = livingEntityAI.getActivationTimings().getAverageTimeMillis();
-		double maxAIActivationTiming = livingEntityAI.getActivationTimings().getMaxTimeMillis();
+		double avgAIActivationTimings = entityAI.getActivationTimings().getAverageTimeMillis();
+		double maxAIActivationTiming = entityAI.getActivationTimings().getMaxTimeMillis();
 		sender.sendMessage("    AI activation timings (per "
-				+ LivingEntityAI.AI_ACTIVATION_TICK_RATE + " ticks) (avg | max): "
+				+ EntityAI.AI_ACTIVATION_TICK_RATE + " ticks) (avg | max): "
 				+ TextUtils.format(avgAIActivationTimings) + " ms"
 				+ " | " + TextUtils.format(maxAIActivationTiming) + " ms");
 
-		double avgGravityTimings = livingEntityAI.getGravityTimings().getAverageTimeMillis();
-		double maxGravityTiming = livingEntityAI.getGravityTimings().getMaxTimeMillis();
-		sender.sendMessage("    Gravity timings (per " + Settings.mobBehaviorTickPeriod
+		double avgGravityTimings = entityAI.getGravityTimings().getAverageTimeMillis();
+		double maxGravityTiming = entityAI.getGravityTimings().getMaxTimeMillis();
+		sender.sendMessage("    Gravity timings (per " + Settings.entityBehaviorTickPeriod
 				+ " ticks) (avg | max): "
 				+ TextUtils.format(avgGravityTimings) + " ms"
 				+ " | " + TextUtils.format(maxGravityTiming) + " ms");
 
-		double avgAITimings = livingEntityAI.getAITimings().getAverageTimeMillis();
-		double maxAITiming = livingEntityAI.getAITimings().getMaxTimeMillis();
-		sender.sendMessage("    AI timings (per " + Settings.mobBehaviorTickPeriod
+		double avgAITimings = entityAI.getAITimings().getAverageTimeMillis();
+		double maxAITiming = entityAI.getAITimings().getMaxTimeMillis();
+		sender.sendMessage("    AI timings (per " + Settings.entityBehaviorTickPeriod
 				+ " ticks) (avg | max): "
 				+ TextUtils.format(avgAITimings) + " ms"
 				+ " | " + TextUtils.format(maxAITiming) + " ms");

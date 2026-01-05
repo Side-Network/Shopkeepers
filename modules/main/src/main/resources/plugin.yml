@@ -26,6 +26,9 @@ permissions:
     shopkeeper.debug:
         description: Toggle debug mode and access debugging commands
         default: op
+    shopkeeper.delete-unspawnable-shopkeepers:
+        description: Delete unspawnable shopkeepers via command
+        default: op
     shopkeeper.cleanup-citizen-shopkeepers:
         description: Delete invalid Citizen shopkeepers via command
         default: op
@@ -38,6 +41,13 @@ permissions:
         default: op
     shopkeeper.list.admin:
         description: List the admin shops
+        default: op
+
+    shopkeeper.history.own:
+        description: View your own trading history
+        default: true
+    shopkeeper.history.admin:
+        description: View the trading history of others and admin shops
         default: op
 
     shopkeeper.remove.own:
@@ -74,12 +84,6 @@ permissions:
         default: op
     shopkeeper.setcurrency:
         description: Set the currency items via command
-        default: op
-    shopkeeper.convertitems.own:
-        description: Convert your own items via command
-        default: op
-    shopkeeper.convertitems.others:
-        description: Convert items of other players via command
         default: op
     shopkeeper.updateitems:
         description: Update third-party items
@@ -128,6 +132,9 @@ permissions:
     shopkeeper.hire:
         description: Allows hiring of shopkeepers
         default: true
+    shopkeeper.create:
+        description: Allows the creation of shopkeepers via command
+        default: op
     shopkeeper.bypass:
         description: Bypass player shop restrictions (access player shops of others)
         default: op
@@ -182,7 +189,7 @@ permissions:
     # https://hub.spigotmc.org/javadocs/spigot/org/bukkit/entity/EntityType.html
     # The permissions use the lower case entity type name.
     # shopkeeper.entity.<mob-type>:
-    #   description: Create shopkeepers of the specific mob type
+    #   description: Create shopkeepers of the specific entity type
     #   default: false
 
     shopkeeper.trade-notifications.admin:
@@ -200,10 +207,13 @@ permissions:
             shopkeeper.help: true
             shopkeeper.reload: true
             shopkeeper.debug: true
+            shopkeeper.delete-unspawnable-shopkeepers: true
             shopkeeper.cleanup-citizen-shopkeepers: true
             shopkeeper.list.own: true
             shopkeeper.list.others: true
             shopkeeper.list.admin: true
+            shopkeeper.history.own: true
+            shopkeeper.history.admin: true
             shopkeeper.remove.own: true
             shopkeeper.remove.others: true
             shopkeeper.remove.admin: true
@@ -213,8 +223,6 @@ permissions:
             shopkeeper.remove-all.admin: true
             shopkeeper.give: true
             shopkeeper.givecurrency: true
-            shopkeeper.convertitems.own: true
-            shopkeeper.convertitems.others: true
             shopkeeper.updateitems: true
             shopkeeper.remote: true
             shopkeeper.remote.otherplayers: true

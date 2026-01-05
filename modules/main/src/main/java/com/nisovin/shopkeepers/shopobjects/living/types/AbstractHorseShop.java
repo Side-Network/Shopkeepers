@@ -5,6 +5,7 @@ import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -13,10 +14,10 @@ import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
-import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
-import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectCreationContext;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectType;
 import com.nisovin.shopkeepers.ui.editor.Button;
-import com.nisovin.shopkeepers.ui.editor.EditorSession;
+import com.nisovin.shopkeepers.ui.editor.EditorView;
 import com.nisovin.shopkeepers.ui.editor.ShopkeeperActionButton;
 import com.nisovin.shopkeepers.util.bukkit.EquipmentUtils;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
@@ -47,12 +48,12 @@ public class AbstractHorseShop<E extends AbstractHorse> extends BabyableShop<E> 
 			.build(properties);
 
 	public AbstractHorseShop(
-			LivingShops livingShops,
-			SKLivingShopObjectType<? extends AbstractHorseShop<E>> livingObjectType,
+			BaseEntityShopObjectCreationContext context,
+			BaseEntityShopObjectType<? extends AbstractHorseShop<E>> shopObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
-		super(livingShops, livingObjectType, shopkeeper, creationData);
+		super(context, shopObjectType, shopkeeper, creationData);
 	}
 
 	@Override
@@ -104,7 +105,10 @@ public class AbstractHorseShop<E extends AbstractHorse> extends BabyableShop<E> 
 		AbstractHorse entity = this.getEntity();
 		if (entity == null) return; // Not spawned
 
-		entity.getInventory().setSaddle(this.hasSaddle() ? new ItemStack(Material.SADDLE) : null);
+		var saddleItem = this.hasSaddle() ? new ItemStack(Material.SADDLE) : null;
+		var equipment = entity.getEquipment();
+		assert equipment != null;
+		equipment.setItem(EquipmentSlot.SADDLE, saddleItem);
 	}
 
 	private ItemStack getSaddleEditorItem() {
@@ -119,15 +123,12 @@ public class AbstractHorseShop<E extends AbstractHorse> extends BabyableShop<E> 
 	private Button getSaddleEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
-			public @Nullable ItemStack getIcon(EditorSession editorSession) {
+			public @Nullable ItemStack getIcon(EditorView editorView) {
 				return getSaddleEditorItem();
 			}
 
 			@Override
-			protected boolean runAction(
-					EditorSession editorSession,
-					InventoryClickEvent clickEvent
-			) {
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				cycleSaddle();
 				return true;
 			}

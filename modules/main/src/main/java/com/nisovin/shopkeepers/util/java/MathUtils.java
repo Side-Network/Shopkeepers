@@ -177,6 +177,20 @@ public final class MathUtils {
 	}
 
 	/**
+	 * Calculates the value in the middle of the specified range, rounded to the nearest integer
+	 * towards zero.
+	 * 
+	 * @param start
+	 *            the range start value, inclusive
+	 * @param end
+	 *            the range end value, exclusive
+	 * @return the value in the middle of the specified range
+	 */
+	public static int middle(int start, int end) {
+		return start + (end - 1 - start) / 2;
+	}
+
+	/**
 	 * Calculates the average of the given values.
 	 * <p>
 	 * The average is calculated by forming the sum of all values and then dividing by the number of

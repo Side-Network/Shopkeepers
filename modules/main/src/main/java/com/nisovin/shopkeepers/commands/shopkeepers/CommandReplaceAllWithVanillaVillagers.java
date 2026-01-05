@@ -196,7 +196,7 @@ class CommandReplaceAllWithVanillaVillagers extends Command {
 				prepareEntity((Villager) entity, shopkeeper);
 
 				// Try to bypass entity-spawn blocking plugins:
-				plugin.getForcingCreatureSpawner().forceCreatureSpawn(spawnLocation, EntityType.VILLAGER);
+				plugin.getForcingEntitySpawner().forceEntitySpawn(spawnLocation, EntityType.VILLAGER);
 			});
 		} catch (Exception e) {
 			String message = shopkeeper.getLogPrefix()
@@ -235,7 +235,7 @@ class CommandReplaceAllWithVanillaVillagers extends Command {
 		entity.setBreed(false);
 		entity.setAgeLock(true);
 		entity.setAI(false);
-		if (Settings.silenceLivingShopEntities) {
+		if (Settings.silenceShopEntities) {
 			entity.setSilent(true);
 		}
 		if (Settings.disableGravity) {

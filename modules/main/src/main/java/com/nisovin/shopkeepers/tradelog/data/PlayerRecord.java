@@ -6,6 +6,8 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
+import com.nisovin.shopkeepers.api.user.User;
+import com.nisovin.shopkeepers.user.SKUser;
 import com.nisovin.shopkeepers.util.java.Validate;
 
 /**
@@ -57,7 +59,6 @@ public class PlayerRecord {
 		Validate.notEmpty(playerName, "playerName is null or empty");
 		this.uniqueId = playerUniqueId;
 		this.name = playerName;
-
 	}
 
 	/**
@@ -76,6 +77,15 @@ public class PlayerRecord {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * Converts this {@link PlayerRecord} to a corresponding {@link User}.
+	 * 
+	 * @return the corresponding {@link User}
+	 */
+	public User toUser() {
+		return SKUser.of(uniqueId, name);
 	}
 
 	@Override

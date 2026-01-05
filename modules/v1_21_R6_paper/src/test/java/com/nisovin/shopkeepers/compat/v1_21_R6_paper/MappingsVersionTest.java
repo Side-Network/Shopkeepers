@@ -20,7 +20,7 @@ public class MappingsVersionTest {
 	public void testMappingsVersion() throws Exception {
 		CompatProviderImpl compatProvider = new CompatProviderImpl();
 		CompatVersion compatVersion = compatProvider.getCompatVersion();
-		String expectedMappingsVersion = compatVersion.getMappingsVersion();
+		String expectedMappingsVersion = compatVersion.getFirstMappingsVersion();
 		var actualMappingsVersion = getMinecraftVersion();
 		assertEquals("Unexpected mappings version!",
 				expectedMappingsVersion,

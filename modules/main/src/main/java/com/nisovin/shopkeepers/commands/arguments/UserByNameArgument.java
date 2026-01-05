@@ -22,7 +22,7 @@ import com.nisovin.shopkeepers.text.Text;
 /**
  * Determines a (potentially offline) user by the given name input.
  * <p>
- * Note: This account for potentially offline current shop owners, but this does not check for
+ * Note: This accounts for potentially offline current shop owners, but this does not check for
  * matching {@link OfflinePlayer}s since during command completion this would then perform a lot of
  * slow remote name lookups (for each input character), lagging the server. If needed, consider
  * using a {@link UserNameArgument} instead and doing the offline player lookup manually inside the

@@ -4,7 +4,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Player;
 
-import com.nisovin.shopkeepers.SKShopkeepersPlugin;
 import com.nisovin.shopkeepers.api.ShopkeepersPlugin;
 import com.nisovin.shopkeepers.commands.arguments.EntityFilter;
 import com.nisovin.shopkeepers.commands.lib.CommandException;
@@ -14,7 +13,8 @@ import com.nisovin.shopkeepers.commands.lib.arguments.TargetEntityFallback;
 import com.nisovin.shopkeepers.commands.lib.commands.PlayerCommand;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContextView;
 import com.nisovin.shopkeepers.lang.Messages;
-import com.nisovin.shopkeepers.ui.villager.editor.VillagerEditorHandler;
+import com.nisovin.shopkeepers.ui.lib.UISessionManager;
+import com.nisovin.shopkeepers.ui.villager.editor.VillagerEditorViewProvider;
 import com.nisovin.shopkeepers.util.bukkit.PermissionUtils;
 
 /**
@@ -54,7 +54,7 @@ class CommandEditVillager extends PlayerCommand {
 		AbstractVillager villager = context.get(ARGUMENT_VILLAGER);
 
 		// Open the villager editor:
-		VillagerEditorHandler villagerEditor = new VillagerEditorHandler(villager);
-		SKShopkeepersPlugin.getInstance().getUIRegistry().requestUI(villagerEditor, player);
+		var viewProvider = new VillagerEditorViewProvider(villager);
+		UISessionManager.getInstance().requestUI(viewProvider, player);
 	}
 }

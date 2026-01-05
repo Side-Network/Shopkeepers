@@ -1,10 +1,12 @@
 package com.nisovin.shopkeepers.compat.v1_21_R5_paper;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ExplosionResult;
+import org.bukkit.Keyed;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.craftbukkit.CraftRegistry;
@@ -18,44 +20,41 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.inventory.CraftMerchant;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.AbstractVillager;
-import org.bukkit.entity.Chicken;
-import org.bukkit.entity.Cow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
-import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Salmon;
 import org.bukkit.entity.Villager;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.Merchant;
 import org.bukkit.inventory.MerchantInventory;
+import org.bukkit.inventory.view.builder.InventoryViewBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Dynamic;
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.compat.CompatProvider;
-import com.nisovin.shopkeepers.shopobjects.living.LivingEntityAI;
+import com.nisovin.shopkeepers.shopobjects.entity.base.EntityAI;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
-import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
+import com.nisovin.shopkeepers.util.bukkit.ServerUtils;
 import com.nisovin.shopkeepers.util.data.container.DataContainer;
 import com.nisovin.shopkeepers.util.inventory.ItemStackComponentsData;
+import com.nisovin.shopkeepers.util.inventory.ItemStackMetaTag;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
-import com.nisovin.shopkeepers.util.java.EnumUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
 import com.nisovin.shopkeepers.util.logging.Log;
 
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.core.component.DataComponentExactPredicate;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.server.level.ServerPlayer;
@@ -67,20 +66,43 @@ import net.minecraft.world.item.trading.MerchantOffers;
 
 public final class CompatProviderImpl implements CompatProvider {
 
+	private static final Map<Class<?>, RegistryKey<?>> CLASS_TO_REGISTRY_KEY = new HashMap<>();
+
+	static {
+		try {
+			for (var field : RegistryKey.class.getFields()) {
+				if (field.getType() != RegistryKey.class) {
+					continue;
+				}
+
+				// Get the type from the RegistryKey generic parameter on the field:
+				var fieldType = (ParameterizedType) field.getGenericType();
+				var typeArgument = fieldType.getActualTypeArguments()[0];
+				Class<?> registryClass;
+				if (typeArgument instanceof Class<?> typeArgumentClass) {
+					registryClass = typeArgumentClass;
+				} else if (typeArgument instanceof ParameterizedType typeArgumentParameterized) {
+					registryClass = Unsafe.castNonNull(typeArgumentParameterized.getRawType());
+				} else {
+					throw new RuntimeException("Unexpected RegistryKey type parameter for field: "
+							+ field.getName());
+				}
+
+				RegistryKey<?> registryKey = Unsafe.castNonNull(field.get(null));
+				CLASS_TO_REGISTRY_KEY.put(registryClass, registryKey);
+			}
+		} catch (ReflectiveOperationException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+
 	private final TagParser<Tag> tagParser = Unsafe.castNonNull(TagParser.create(NbtOps.INSTANCE));
 
 	private final Field craftItemStackHandleField;
-	private final Method cowSetVariantMethod;
 
 	public CompatProviderImpl() throws Exception {
 		craftItemStackHandleField = CraftItemStack.class.getDeclaredField("handle");
 		craftItemStackHandleField.setAccessible(true);
-
-		// TODO Spigot 1.21.5 remaps "Cow" to "AbstractCow" unless api-version <= "1.21.5". So we
-		// use reflection here to support the new cow variants anyway while still supporting older
-		// api versions.
-		var cowClass = Class.forName("org.bukkit.entity.Cow");
-		cowSetVariantMethod = cowClass.getMethod("setVariant", Cow.Variant.class);
 	}
 
 	@Override
@@ -112,7 +134,7 @@ public final class CompatProviderImpl implements CompatProvider {
 					new LookAtPlayerGoal(
 							mcMob,
 							net.minecraft.world.entity.player.Player.class,
-							LivingEntityAI.LOOK_RANGE,
+							EntityAI.LOOK_RANGE,
 							1.0F
 					)
 			);
@@ -195,6 +217,12 @@ public final class CompatProviderImpl implements CompatProvider {
 		return Unsafe.assertNonNull(CraftItemStack.asNMSCopy(itemStack));
 	}
 
+	private CompoundTag getItemStackTag(net.minecraft.world.item.ItemStack nmsItem) {
+		var itemTag = (CompoundTag) nmsItem.save(CraftRegistry.getMinecraftRegistry());
+		assert itemTag != null;
+		return itemTag;
+	}
+
 	@Override
 	public boolean matches(@Nullable ItemStack provided, @Nullable ItemStack required) {
 		if (provided == required) return true;
@@ -203,14 +231,20 @@ public final class CompatProviderImpl implements CompatProvider {
 		else if (ItemUtils.isEmpty(provided)) return false;
 		assert required != null && provided != null;
 		if (provided.getType() != required.getType()) return false;
-		net.minecraft.world.item.ItemStack nmsProvided = asNMSItemStack(provided);
-		net.minecraft.world.item.ItemStack nmsRequired = asNMSItemStack(required);
+		net.minecraft.world.item.ItemStack nmsProvided = this.asNMSItemStack(provided);
+		net.minecraft.world.item.ItemStack nmsRequired = this.asNMSItemStack(required);
 		DataComponentMap requiredComponents = PatchedDataComponentMap.fromPatch(
 				DataComponentMap.EMPTY,
 				nmsRequired.getComponentsPatch()
 		);
 		// Compare the components according to Minecraft's matching rules (imprecise):
 		return DataComponentExactPredicate.allOf(requiredComponents).test(nmsProvided);
+	}
+
+	@Override
+	public void setInventoryViewTitle(InventoryViewBuilder<?> builder, String title) {
+		var titleComponent = LegacyComponentSerializer.legacySection().deserialize(title);
+		builder.title(titleComponent);
 	}
 
 	@Override
@@ -266,16 +300,25 @@ public final class CompatProviderImpl implements CompatProvider {
 	}
 
 	@Override
-	public @Nullable String getItemSNBT(@Nullable ItemStack itemStack) {
-		Validate.notNull(itemStack, "itemStack is null");
-		assert itemStack != null;
+	public ItemStackMetaTag getItemStackMetaTag(@ReadOnly @Nullable ItemStack itemStack) {
 		if (ItemUtils.isEmpty(itemStack)) {
-			return null;
+			return new ItemStackMetaTag(null);
 		}
+		assert itemStack != null;
 
-		net.minecraft.world.item.ItemStack nmsItem = asNMSItemStack(itemStack);
-		Tag itemNBT = nmsItem.save(CraftRegistry.getMinecraftRegistry());
-		return itemNBT.toString();
+		var nmsItem = this.asNMSItemStack(itemStack);
+		var itemTag = this.getItemStackTag(nmsItem);
+		var componentsTag = (CompoundTag) itemTag.get("components");
+		return new ItemStackMetaTag(componentsTag);
+	}
+
+	@Override
+	public boolean matches(ItemStackMetaTag provided, ItemStackMetaTag required, boolean matchPartialLists) {
+		Validate.notNull(provided, "provided is null");
+		Validate.notNull(required, "required is null");
+		var providedTag = (Tag) provided.getNmsTag();
+		var requiredTag = (Tag) required.getNmsTag();
+		return NbtUtils.compareNbt(requiredTag, providedTag, matchPartialLists);
 	}
 
 	// Note: Paper 1.21.5+ also already serializes ItemStacks in a similar format. However, for
@@ -290,7 +333,8 @@ public final class CompatProviderImpl implements CompatProvider {
 		}
 
 		var nmsItem = this.asNMSItemStack(itemStack);
-		var itemTag = (CompoundTag) nmsItem.save(CraftRegistry.getMinecraftRegistry());
+		var itemTag = this.getItemStackTag(nmsItem);
+
 		var componentsTag = (CompoundTag) itemTag.get("components");
 		if (componentsTag == null) {
 			return null;
@@ -306,7 +350,7 @@ public final class CompatProviderImpl implements CompatProvider {
 	}
 
 	@Override
-	public @Nullable ItemStack deserializeItemStack(
+	public ItemStack deserializeItemStack(
 			int dataVersion,
 			NamespacedKey id,
 			int count,
@@ -339,132 +383,29 @@ public final class CompatProviderImpl implements CompatProvider {
 			itemTag.put("components", componentsTag);
 		}
 
-		var currentDataVersion = Bukkit.getUnsafe().getDataVersion();
+		var currentDataVersion = ServerUtils.getDataVersion();
 		var convertedItemTag = (CompoundTag) DataFixers.getDataFixer().update(
 				References.ITEM_STACK,
 				new Dynamic<>(Unsafe.castNonNull(NbtOps.INSTANCE), itemTag),
 				dataVersion,
 				currentDataVersion
 		).getValue();
+
+		if (convertedItemTag.getStringOr("id", "minecraft:air").equals("minecraft:air")) {
+			return new ItemStack(Material.AIR);
+		}
+
 		var nmsItem = net.minecraft.world.item.ItemStack.parse(
 				CraftRegistry.getMinecraftRegistry(),
 				convertedItemTag
 		).orElseThrow();
-		return CraftItemStack.asCraftMirror(nmsItem);
-	}
-
-	// MC 1.21+ TODO Can be removed once we only support Bukkit 1.21+
-
-	@Override
-	public boolean isDestroyingBlocks(EntityExplodeEvent event) {
-		return isDestroyingBlocks(event.getExplosionResult());
+		return Unsafe.assertNonNull(CraftItemStack.asCraftMirror(nmsItem));
 	}
 
 	@Override
-	public boolean isDestroyingBlocks(BlockExplodeEvent event) {
-		return isDestroyingBlocks(event.getExplosionResult());
-	}
-
-	private static boolean isDestroyingBlocks(ExplosionResult explosionResult) {
-		return explosionResult == ExplosionResult.DESTROY
-				|| explosionResult == ExplosionResult.DESTROY_WITH_DECAY;
-	}
-
-	// MC 1.21.3+ TODO Can be removed once we only support Bukkit 1.21.3+
-
-	@Override
-	public void setSalmonVariant(Salmon salmon, String variant) {
-		Salmon.Variant variantValue = EnumUtils.valueOf(Salmon.Variant.class, variant);
-		if (variantValue == null) {
-			variantValue = Salmon.Variant.MEDIUM; // Default
-		}
-		salmon.setVariant(variantValue);
-	}
-
-	// MC 1.21.5+ TODO Can be removed once we only support Bukkit 1.21.5+
-	// Actually, Paper differs in how registries are accessed.
-
-	// Paper-specific
-	@Override
-	public void setCowVariant(Cow cow, NamespacedKey variant) {
-		var registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.COW_VARIANT);
-		Cow.Variant variantValue = registry.get(variant);
-		if (variantValue == null) {
-			variantValue = Cow.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-
-		try {
-			cowSetVariantMethod.invoke(cow, variantValue);
-		} catch (Exception e) {
-			// Unexpected:
-			Log.severe("Failed to set cow variant!", e);
-		}
-	}
-
-	// Paper-specific
-	@Override
-	public NamespacedKey cycleCowVariant(NamespacedKey variant, boolean backwards) {
-		var registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.COW_VARIANT);
-		Cow.Variant variantValue = registry.get(variant);
-		if (variantValue == null) {
-			variantValue = Cow.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-
-		Registry<Cow.Variant> registryNonNull = Unsafe.castNonNull(registry);
-		return RegistryUtils.cycleKeyed(registryNonNull, variantValue, backwards).getKey();
-	}
-
-	// Paper-specific
-	@Override
-	public void setPigVariant(Pig pig, NamespacedKey variant) {
-		var registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.PIG_VARIANT);
-		Pig.Variant variantValue = registry.get(variant);
-		if (variantValue == null) {
-			variantValue = Pig.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-		pig.setVariant(variantValue);
-	}
-
-	// Paper-specific
-	@Override
-	public NamespacedKey cyclePigVariant(NamespacedKey variant, boolean backwards) {
-		var registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.PIG_VARIANT);
-		Pig.Variant variantValue = registry.get(variant);
-		if (variantValue == null) {
-			variantValue = Pig.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-
-		Registry<Pig.Variant> registryNonNull = Unsafe.castNonNull(registry);
-		return RegistryUtils.cycleKeyed(registryNonNull, variantValue, backwards).getKey();
-	}
-
-	// Paper-specific
-	@Override
-	public void setChickenVariant(Chicken chicken, NamespacedKey variant) {
-		var registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.CHICKEN_VARIANT);
-		Chicken.Variant variantValue = registry.get(variant);
-		if (variantValue == null) {
-			variantValue = Chicken.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-		chicken.setVariant(variantValue);
-	}
-
-	// Paper-specific
-	@Override
-	public NamespacedKey cycleChickenVariant(NamespacedKey variant, boolean backwards) {
-		var registry = RegistryAccess.registryAccess().getRegistry(RegistryKey.CHICKEN_VARIANT);
-		Chicken.Variant variantValue = registry.get(variant);
-		if (variantValue == null) {
-			variantValue = Chicken.Variant.TEMPERATE; // Default
-		}
-		assert variantValue != null;
-
-		Registry<Chicken.Variant> registryNonNull = Unsafe.castNonNull(registry);
-		return RegistryUtils.cycleKeyed(registryNonNull, variantValue, backwards).getKey();
+	public <T extends Keyed> Registry<T> getRegistry(Class<T> clazz) {
+		// Non-null: Expected to only be used with known registry types.
+		RegistryKey<T> registryKey = Unsafe.castNonNull(CLASS_TO_REGISTRY_KEY.get(clazz));
+		return Unsafe.castNonNull(RegistryAccess.registryAccess().getRegistry(registryKey));
 	}
 }

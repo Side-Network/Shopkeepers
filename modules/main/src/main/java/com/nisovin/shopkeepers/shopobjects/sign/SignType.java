@@ -5,7 +5,6 @@ import java.util.function.Predicate;
 import org.bukkit.Material;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import com.nisovin.shopkeepers.compat.MC_1_21_4;
 import com.nisovin.shopkeepers.util.java.Validate;
 
 public enum SignType {
@@ -79,10 +78,10 @@ public enum SignType {
 			Material.CHERRY_WALL_HANGING_SIGN//
 	),
 	PALE(
-			MC_1_21_4.PALE_OAK_SIGN,
-			MC_1_21_4.PALE_OAK_WALL_SIGN,
-			MC_1_21_4.PALE_OAK_HANGING_SIGN,
-			MC_1_21_4.PALE_OAK_WALL_HANGING_SIGN//
+			Material.PALE_OAK_SIGN,
+			Material.PALE_OAK_WALL_SIGN,
+			Material.PALE_OAK_HANGING_SIGN,
+			Material.PALE_OAK_WALL_HANGING_SIGN//
 	);
 
 	public static final Predicate<SignType> IS_SUPPORTED = SignType::isSupported;

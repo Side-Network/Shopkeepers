@@ -5,7 +5,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import com.nisovin.shopkeepers.api.events.ShopkeeperEditedEvent;
-import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.util.java.Validate;
 
@@ -25,24 +24,24 @@ public abstract class ShopkeeperActionButton extends ActionButton {
 	}
 
 	@Override
-	protected boolean isApplicable(AbstractEditorHandler editorHandler) {
-		return super.isApplicable(editorHandler) && (editorHandler instanceof EditorHandler);
+	protected boolean isApplicable(EditorLayout editorLayout) {
+		return super.isApplicable(editorLayout)
+				&& editorLayout instanceof ShopkeeperEditorLayout;
 	}
 
 	protected Shopkeeper getShopkeeper() {
-		AbstractEditorHandler editorHandler = this.getEditorHandler();
-		Validate.State.notNull(editorHandler,
-				"This button has not yet been added to any editor handler!");
-		assert editorHandler instanceof EditorHandler;
-		return Unsafe.<EditorHandler>castNonNull(editorHandler).getShopkeeper();
+		var layout = this.getEditorLayout();
+		Validate.State.notNull(layout, "Button was not yet added to any editor layout!");
+		assert layout instanceof ShopkeeperEditorLayout; // Checked by isApplicable
+		return ((ShopkeeperEditorLayout) layout).getShopkeeper();
 	}
 
 	@Override
-	protected void onActionSuccess(EditorSession editorSession, InventoryClickEvent clickEvent) {
+	protected void onActionSuccess(EditorView editorView, InventoryClickEvent clickEvent) {
 		Shopkeeper shopkeeper = this.getShopkeeper();
 
 		// Call shopkeeper edited event:
-		Player player = editorSession.getPlayer();
+		Player player = editorView.getPlayer();
 		Bukkit.getPluginManager().callEvent(new ShopkeeperEditedEvent(shopkeeper, player));
 
 		// Save:

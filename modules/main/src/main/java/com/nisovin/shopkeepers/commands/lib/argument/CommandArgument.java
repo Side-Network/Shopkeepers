@@ -13,6 +13,7 @@ import com.nisovin.shopkeepers.commands.lib.Command;
 import com.nisovin.shopkeepers.commands.lib.CommandInput;
 import com.nisovin.shopkeepers.commands.lib.arguments.DefaultValueFallback;
 import com.nisovin.shopkeepers.commands.lib.arguments.OptionalArgument;
+import com.nisovin.shopkeepers.commands.lib.arguments.TransformedArgument;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContext;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContextView;
 import com.nisovin.shopkeepers.lang.Messages;
@@ -463,5 +464,9 @@ public abstract class CommandArgument<T> {
 
 	public final CommandArgument<T> orDefaultValue(T defaultValue) {
 		return new DefaultValueFallback<>(Unsafe.initialized(this), defaultValue);
+	}
+
+	public final <R> CommandArgument<R> transformed(TransformedArgument.ArgumentTransformer<T, R> transformer) {
+		return new TransformedArgument<>(Unsafe.initialized(this), transformer);
 	}
 }

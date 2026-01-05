@@ -77,7 +77,9 @@ To support the latest mappings version:
 		* Entries in 'scripts/installSpigotDependencies.sh' script.
 	* Update the minimal Bukkit/Spigot/CraftBukkit dependency versions inside the 'gradle/libs.versions.toml' file.
 	* Update the 'api-version' inside the 'plugin.yml' file.
-	* Update the Minecraft version specific test code inside the 'main' module. The test cases and the default config might need to be updated (e.g. if there have been changes to Bukkit's item serialization).
+	* Default config file and Settings class: Update the 'data-version' setting and all item data settings to match the new lowest supported Minecraft server version.
+	* Update the compat module dependency in the 'test' module to the new lowest compat module version.
+	* Update the Minecraft version specific test code inside the 'main' module. The test cases and the default config might need to be updated (e.g. if there have been changes to Minecraft's or Bukkit's item serialization).
 	* Update the code base (optional):
 		* Check for legacy data migrations that could be removed now.
 		* Check if there are new Bukkit features that can replace portions of the existing compat specific code.

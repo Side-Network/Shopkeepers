@@ -27,13 +27,14 @@ public final class DebugOptions {
 	public static final String commands = add("commands");
 	// Logs information when updating stored shop owner names.
 	public static final String ownerNameUpdates = add("owner-name-updates");
+	// TODO Remove this once all servers are expected to have updated to our new item stack
+	// serialization. Logging item migrations during item stack serialization would be quite spammy,
+	// occur frequently during server updates, and not provide context information about the
+	// involved shopkeeper or trade.
 	// Logs whenever a shopkeeper performs item migrations (e.g. for trading offers).
 	public static final String itemMigrations = add("item-migrations");
 	// Logs whenever items are updated via the UpdateItemEvent.
 	public static final String itemUpdates = add("item-updates");
-	// Logs whenever we explicitly convert items to Spigot's data format. Note that this does not
-	// log when items get implicitly converted, which may happen under various circumstances.
-	public static final String itemConversions = add("item-conversions");
 	// Logs detailed item information for the selected trade and the items in the input slots
 	// whenever a player clicks an empty trading result slot.
 	public static final String emptyTrades = add("empty-trades");

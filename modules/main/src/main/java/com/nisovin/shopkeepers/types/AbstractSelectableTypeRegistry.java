@@ -62,7 +62,8 @@ public abstract class AbstractSelectableTypeRegistry<T extends AbstractSelectabl
 		return (link.prev == null) ? last : link.prev;
 	}
 
-	protected boolean canBeSelected(Player player, @NonNull T type) {
+	@Override
+	public boolean canBeSelected(Player player, @NonNull T type) {
 		assert player != null && type != null;
 		return type.isEnabled() && type.hasPermission(player);
 	}

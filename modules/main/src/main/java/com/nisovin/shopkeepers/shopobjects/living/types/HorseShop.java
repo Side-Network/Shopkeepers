@@ -17,13 +17,14 @@ import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
 import com.nisovin.shopkeepers.api.shopobjects.living.LivingShopEquipment;
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
+import com.nisovin.shopkeepers.compat.MC_1_21_11;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
-import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
-import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectCreationContext;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectType;
 import com.nisovin.shopkeepers.ui.editor.Button;
-import com.nisovin.shopkeepers.ui.editor.EditorSession;
+import com.nisovin.shopkeepers.ui.editor.EditorView;
 import com.nisovin.shopkeepers.ui.editor.ShopkeeperActionButton;
 import com.nisovin.shopkeepers.util.bukkit.EquipmentUtils;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
@@ -41,17 +42,21 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 		LEATHER(Material.LEATHER_HORSE_ARMOR),
 		IRON(Material.IRON_HORSE_ARMOR),
 		GOLD(Material.GOLDEN_HORSE_ARMOR),
-		DIAMOND(Material.DIAMOND_HORSE_ARMOR);
+		DIAMOND(Material.DIAMOND_HORSE_ARMOR),
+		NETHERITE(MC_1_21_11.NETHERITE_HORSE_ARMOR);
 
-		private final Material material;
+		private final @Nullable Material material;
 
-		private HorseArmor(Material material) {
-			assert material != null;
+		private HorseArmor(@Nullable Material material) {
 			this.material = material;
 		}
 
-		public Material getMaterial() {
+		public @Nullable Material getMaterial() {
 			return material;
+		}
+
+		public boolean isEnabled() {
+			return material != null;
 		}
 	}
 
@@ -82,12 +87,12 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 			.build(properties);
 
 	public HorseShop(
-			LivingShops livingShops,
-			SKLivingShopObjectType<HorseShop> livingObjectType,
+			BaseEntityShopObjectCreationContext context,
+			BaseEntityShopObjectType<HorseShop> shopObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
-		super(livingShops, livingObjectType, shopkeeper, creationData);
+		super(context, shopObjectType, shopkeeper, creationData);
 	}
 
 	@Override
@@ -190,15 +195,12 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 	private Button getColorEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
-			public @Nullable ItemStack getIcon(EditorSession editorSession) {
+			public @Nullable ItemStack getIcon(EditorView editorView) {
 				return getColorEditorItem();
 			}
 
 			@Override
-			protected boolean runAction(
-					EditorSession editorSession,
-					InventoryClickEvent clickEvent
-			) {
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				boolean backwards = clickEvent.isRightClick();
 				cycleColor(backwards);
 				return true;
@@ -244,15 +246,12 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 	private Button getStyleEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
-			public @Nullable ItemStack getIcon(EditorSession editorSession) {
+			public @Nullable ItemStack getIcon(EditorView editorView) {
 				return getStyleEditorItem();
 			}
 
 			@Override
-			protected boolean runAction(
-					EditorSession editorSession,
-					InventoryClickEvent clickEvent
-			) {
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				boolean backwards = clickEvent.isRightClick();
 				cycleStyle(backwards);
 				return true;
@@ -272,7 +271,12 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 
 	public void cycleArmor(boolean backwards) {
 		this.setArmor(
-				EnumUtils.cycleEnumConstantNullable(HorseArmor.class, this.getArmor(), backwards)
+				EnumUtils.cycleEnumConstantNullable(
+						HorseArmor.class,
+						this.getArmor(),
+						backwards,
+						horseArmor -> horseArmor == null || horseArmor.isEnabled()
+				)
 		);
 	}
 
@@ -291,12 +295,16 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 		}
 
 		HorseArmor armor = this.getArmor();
-		entity.getInventory().setArmor(armor == null ? null : new ItemStack(armor.getMaterial()));
+		var armorItem = (armor == null || !armor.isEnabled()) ? null
+				: new ItemStack(Unsafe.assertNonNull(armor.getMaterial()));
+		entity.getInventory().setArmor(armorItem);
 	}
 
 	private ItemStack getArmorEditorItem() {
 		HorseArmor armor = this.getArmor();
-		ItemStack iconItem = new ItemStack(armor == null ? Material.BARRIER : armor.getMaterial());
+		var iconType = armor == null || !armor.isEnabled() ? Material.BARRIER
+				: Unsafe.assertNonNull(armor.getMaterial());
+		ItemStack iconItem = new ItemStack(iconType);
 		ItemUtils.setDisplayNameAndLore(iconItem,
 				Messages.buttonHorseArmor,
 				Messages.buttonHorseArmorLore
@@ -307,15 +315,12 @@ public class HorseShop extends AbstractHorseShop<Horse> {
 	private Button getArmorEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
-			public @Nullable ItemStack getIcon(EditorSession editorSession) {
+			public @Nullable ItemStack getIcon(EditorView editorView) {
 				return getArmorEditorItem();
 			}
 
 			@Override
-			protected boolean runAction(
-					EditorSession editorSession,
-					InventoryClickEvent clickEvent
-			) {
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				boolean backwards = clickEvent.isRightClick();
 				cycleArmor(backwards);
 				return true;

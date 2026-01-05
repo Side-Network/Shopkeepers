@@ -46,7 +46,6 @@ import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
 import com.nisovin.shopkeepers.util.java.ConversionUtils;
 import com.nisovin.shopkeepers.util.java.FileUtils;
 import com.nisovin.shopkeepers.util.java.Retry;
-import com.nisovin.shopkeepers.util.java.StringUtils;
 import com.nisovin.shopkeepers.util.java.ThrowableUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
 import com.nisovin.shopkeepers.util.java.VoidCallable;
@@ -274,6 +273,7 @@ public class SKShopkeeperStorage implements ShopkeeperStorage {
 		if (unsavedDeletedShopkeepers.contains(id)) {
 			return false;
 		}
+
 		// Checking the shopkeepersToDelete is not necessarily required: If they have been saved
 		// before, the saveData should still contain their entry, so the above check already finds
 		// them. And if they have never been saved before, it might seem safe to reuse their ids.
@@ -323,6 +323,36 @@ public class SKShopkeeperStorage implements ShopkeeperStorage {
 		}
 		if (id >= nextShopkeeperId) {
 			nextShopkeeperId = id + 1;
+		}
+	}
+
+	/**
+	 * Tries to revert the {@link #nextShopkeeperId} and {@link #maxUsedShopkeeperId} to a smaller
+	 * unused id.
+	 * <p>
+	 * For example invoked after the deletion of some shopkeeper(s) was persisted.
+	 * <p>
+	 * There are cases in which shopkeepers are temporarily created and then immediately deleted
+	 * again because they fail to spawn. In these cases, we want to avoid unnecessarily consuming
+	 * shopkeeper ids.
+	 * <p>
+	 * Note: Since there can be some delay between creating the shopkeeper and then persisting its
+	 * immediate deletion, it is possible for another shopkeeper to be created before we are able to
+	 * rollback the used id. In those cases, we are not able to reuse the id, since we currently try
+	 * to avoid reusing ids that are smaller than other used ids (at least until we run out of
+	 * available ids).
+	 */
+	private void rollbackNextShopkeeperId() {
+		int maxUsedId = maxUsedShopkeeperId;
+		assert maxUsedId >= 0 && maxUsedId <= Integer.MAX_VALUE;
+
+		while (maxUsedId > 0 && this.isUnusedId(maxUsedId)) {
+			maxUsedId -= 1;
+		}
+
+		if (maxUsedId != maxUsedShopkeeperId) {
+			maxUsedShopkeeperId = maxUsedId;
+			nextShopkeeperId = maxUsedId + 1;
 		}
 	}
 
@@ -615,7 +645,7 @@ public class SKShopkeeperStorage implements ShopkeeperStorage {
 			shopkeeper = shopkeeperRegistry.loadShopkeeper(shopkeeperData);
 			assert shopkeeper != null && shopkeeper.isValid();
 		} catch (InvalidDataException e) {
-			this.failedToLoadShopkeeper(key, StringUtils.getOrEmpty(e.getMessage()));
+			this.failedToLoadShopkeeper(key, "Shopkeeper data could not be loaded!", e);
 			return;
 		} catch (Exception e) {
 			this.failedToLoadShopkeeper(key, "Unexpected error!", e);
@@ -714,6 +744,11 @@ public class SKShopkeeperStorage implements ShopkeeperStorage {
 			// save it anymore):
 			dirtyShopkeepers.remove(shopkeeper);
 			unsavedShopkeepers.remove(shopkeeperId);
+
+			if (!shopkeeperDataExists) {
+				// We can immediately try to rollback the used id:
+				this.rollbackNextShopkeeperId();
+			}
 		}
 	}
 
@@ -1075,9 +1110,16 @@ public class SKShopkeeperStorage implements ShopkeeperStorage {
 			if (savingSucceeded) {
 				// Saving succeeded:
 
+				boolean shopkeepersDeleted = unsavedDeletedShopkeepers.size() > 0;
+
 				// Cleanup the unsavedShopkeepers and unsavedDeletedShopkeepers:
 				unsavedShopkeepers.clear();
 				unsavedDeletedShopkeepers.clear();
+
+				// Check if we can reuse the last deleted shopkeeper id(s):
+				if (shopkeepersDeleted) {
+					rollbackNextShopkeeperId();
+				}
 			} else {
 				// Saving failed:
 

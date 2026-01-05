@@ -45,6 +45,7 @@ import com.nisovin.shopkeepers.shopobjects.living.types.SlimeShop;
 import com.nisovin.shopkeepers.tradelog.TradeLogStorageType;
 import com.nisovin.shopkeepers.util.bukkit.ConfigUtils;
 import com.nisovin.shopkeepers.util.bukkit.EntityUtils;
+import com.nisovin.shopkeepers.util.bukkit.ServerUtils;
 import com.nisovin.shopkeepers.util.bukkit.SoundEffect;
 import com.nisovin.shopkeepers.util.inventory.ItemData;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
@@ -58,7 +59,9 @@ public class Settings extends Config {
 	/*
 	 * General Settings
 	 */
-	public static int configVersion = 9;
+	public static int configVersion = 10;
+	// Initial value: Lowest supported Minecraft data version: MC 1.21.5
+	public static int dataVersion = 4325;
 	public static boolean debug = false;
 	// See DebugOptions for all available options.
 	public static List<String> debugOptions = new ArrayList<>(0);
@@ -74,16 +77,13 @@ public class Settings extends Config {
 	 */
 	public static boolean saveInstantly = true;
 
-	public static boolean convertPlayerItems = false;
-	public static boolean convertAllPlayerItems = true;
-	public static List<ItemData> convertPlayerItemsExceptions = new ArrayList<>();
-
 	/*
 	 * Plugin Compatibility
 	 */
 	public static boolean ignoreFailedServerAssumptionTests = false;
 
 	public static boolean bypassSpawnBlocking = true;
+	public static boolean deleteUnspawnableShopkeepers = false;
 	public static boolean checkShopInteractionResult = false;
 
 	public static boolean enableWorldGuardRestrictions = false;
@@ -112,8 +112,6 @@ public class Settings extends Config {
 	public static boolean invertShopTypeAndObjectTypeSelection = false;
 	public static boolean deletingPlayerShopReturnsCreationItem = false;
 
-	public static boolean createPlayerShopWithCommand = false;
-
 	public static boolean requireContainerRecentlyPlaced = true;
 	public static int maxContainerDistance = 15;
 	public static int maxShopsPerPlayer = -1;
@@ -135,14 +133,14 @@ public class Settings extends Config {
 			new ArrayList<>(Arrays.asList(EntityType.VILLAGER.name())),
 			CollectionUtils.sort(Arrays.asList(
 					EntityType.COW.name(),
-					"MOOSHROOM", // MC 1.20.5: Renamed "MUSHROOM_COW" to "MOOSHROOM"
+					EntityType.MOOSHROOM.name(),
 					EntityType.SHEEP.name(),
 					EntityType.PIG.name(),
 					EntityType.CHICKEN.name(),
 					EntityType.OCELOT.name(),
 					EntityType.RABBIT.name(),
 					EntityType.WOLF.name(),
-					"SNOW_GOLEM", // MC 1.20.5: Renamed "SNOWMAN" to "SNOW_GOLEM"
+					EntityType.SNOW_GOLEM.name(),
 					EntityType.IRON_GOLEM.name(),
 					EntityType.BLAZE.name(),
 					EntityType.SILVERFISH.name(),
@@ -169,6 +167,7 @@ public class Settings extends Config {
 					EntityType.SKELETON_HORSE.name(),
 					EntityType.ZOMBIE_HORSE.name(),
 					EntityType.SHULKER.name(),
+					EntityType.ARMOR_STAND.name(),
 					EntityType.EVOKER.name(), // MC 1.11
 					EntityType.VEX.name(), // MC 1.11
 					EntityType.VINDICATOR.name(), // MC 1.11
@@ -197,22 +196,31 @@ public class Settings extends Config {
 					EntityType.ZOGLIN.name(), // MC 1.16
 					EntityType.STRIDER.name(), // MC 1.16
 					EntityType.PIGLIN_BRUTE.name(), // MC 1.16.2
-					"AXOLOTL", // MC 1.17
-					"GOAT", // MC 1.17
-					"GLOW_SQUID", // MC 1.17
-					"ALLAY", // MC 1.19
-					"FROG", // MC 1.19
-					"TADPOLE", // MC 1.19
-					"WARDEN", // MC 1.19
-					"CAMEL", // MC 1.20
-					"SNIFFER", // MC 1.20
-					"ARMADILLO", // MC 1.20.5
-					"BOGGED", // MC 1.21
-					"BREEZE", // MC 1.21
-					"CREAKING", // MC 1.21.4
-					"HAPPY_GHAST" // MC 1.21.6
+					EntityType.AXOLOTL.name(), // MC 1.17
+					EntityType.GOAT.name(), // MC 1.17
+					EntityType.GLOW_SQUID.name(), // MC 1.17
+					EntityType.ALLAY.name(), // MC 1.19
+					EntityType.FROG.name(), // MC 1.19
+					EntityType.TADPOLE.name(), // MC 1.19
+					EntityType.WARDEN.name(), // MC 1.19
+					EntityType.CAMEL.name(), // MC 1.20
+					EntityType.SNIFFER.name(), // MC 1.20
+					EntityType.ARMADILLO.name(), // MC 1.20.5
+					EntityType.BOGGED.name(), // MC 1.21
+					EntityType.BREEZE.name(), // MC 1.21
+					EntityType.CREAKING.name(), // MC 1.21.4
+					"HAPPY_GHAST", // MC 1.21.6
+					"COPPER_GOLEM", // MC 1.21.9
+					"MANNEQUIN", // MC 1.21.9
+					"CAMEL_HUSK", // MC 1.21.11
+					"NAUTILUS", // MC 1.21.11
+					"PARCHED", // MC 1.21.11
+					"ZOMBIE_NAUTILUS" // MC 1.21.11
 			), String::compareTo)
 	);
+
+	public static boolean enableEndCrystalShops = true;
+	public static boolean allowEndCrystalShopsInTheEnd = false;
 
 	public static boolean disableGravity = false;
 	public static int gravityChunkRange = 4;
@@ -223,7 +231,7 @@ public class Settings extends Config {
 	// instead result in higher performance impacts per individual behavior update.
 	// The gravity updates at a tick period of 2 actually appear less smooth in my testing than at a
 	// period of 3 (maybe due to some interpolation artifact by the client).
-	public static int mobBehaviorTickPeriod = 3;
+	public static int entityBehaviorTickPeriod = 3;
 
 	public static boolean shulkerPeekIfPlayerNearby = true;
 	public static float shulkerPeekHeight = 0.3F;
@@ -231,7 +239,7 @@ public class Settings extends Config {
 	public static int slimeMaxSize = 5;
 	public static int magmaCubeMaxSize = 5;
 
-	public static boolean silenceLivingShopEntities = true;
+	public static boolean silenceShopEntities = true;
 
 	public static boolean showNameplates = true;
 	public static boolean alwaysShowNameplates = false;
@@ -291,9 +299,12 @@ public class Settings extends Config {
 	public static ItemData nextPageItem = new ItemData(Material.WRITABLE_BOOK);
 	public static ItemData currentPageItem = new ItemData(Material.WRITABLE_BOOK);
 	public static ItemData tradeSetupItem = new ItemData(Material.PAPER);
+	public static ItemData shopInformationItem = new ItemData(Material.PAPER);
 
 	public static ItemData placeholderItem = new ItemData(Material.PAPER);
 
+	public static ItemData shopOpenItem = new ItemData(Material.GREEN_BANNER);
+	public static ItemData shopClosedItem = new ItemData(Material.RED_BANNER);
 	public static ItemData nameItem = new ItemData(Material.NAME_TAG);
 
 	public static boolean enableAllEquipmentEditorSlots = false;
@@ -311,13 +322,20 @@ public class Settings extends Config {
 	 * Non-shopkeeper villagers
 	 */
 	public static boolean disableOtherVillagers = false;
+	public static List<String> disableOtherVillagersWorlds = new ArrayList<>();
 	public static boolean blockVillagerSpawns = false;
+	public static List<String> blockVillagerSpawnsWorlds = new ArrayList<>();
 	public static boolean disableZombieVillagerCuring = false;
+	public static List<String> disableZombieVillagerCuringWorlds = new ArrayList<>();
 	public static boolean hireOtherVillagers = false;
+	public static List<String> hireOtherVillagersWorlds = new ArrayList<>();
 
 	public static boolean disableWanderingTraders = false;
+	public static List<String> disableWanderingTradersWorlds = new ArrayList<>();
 	public static boolean blockWanderingTraderSpawns = false;
+	public static List<String> blockWanderingTraderSpawnsWorlds = new ArrayList<>();
 	public static boolean hireWanderingTraders = false;
+	public static List<String> hireWanderingTradersWorlds = new ArrayList<>();
 
 	public static boolean editRegularVillagers = false;
 	public static boolean editRegularWanderingTraders = false;
@@ -406,6 +424,8 @@ public class Settings extends Config {
 		public static ItemData namingItemData = Unsafe.uncheckedNull();
 
 		// Button items:
+		public static ItemData shopOpenButtonItem = Unsafe.uncheckedNull();
+		public static ItemData shopClosedButtonItem = Unsafe.uncheckedNull();
 		public static ItemData nameButtonItem = Unsafe.uncheckedNull();
 		public static ItemData moveButtonItem = Unsafe.uncheckedNull();
 		public static ItemData containerButtonItem = Unsafe.uncheckedNull();
@@ -579,7 +599,9 @@ public class Settings extends Config {
 			// If enabled, add the shop creation item tag:
 			if (addShopCreationItemTag) {
 				ItemStack shopCreationItemStack = shopCreationItem.createItemStack();
-				ShopCreationItem.addTag(shopCreationItemStack);
+				var shopCreationItemHelper = new ShopCreationItem(shopCreationItemStack);
+				shopCreationItemHelper.addTag();
+				shopCreationItemHelper.applyItemMeta();
 				shopCreationItemData = new ItemData(UnmodifiableItemStack.ofNonNull(
 						shopCreationItemStack
 				));
@@ -599,6 +621,16 @@ public class Settings extends Config {
 			));
 
 			// Button items:
+			shopOpenButtonItem = new ItemData(
+					shopOpenItem,
+					Messages.buttonShopOpen,
+					Messages.buttonShopOpenLore
+			);
+			shopClosedButtonItem = new ItemData(
+					shopClosedItem,
+					Messages.buttonShopClosed,
+					Messages.buttonShopClosedLore
+			);
 			nameButtonItem = new ItemData(
 					nameItem,
 					Messages.buttonName,
@@ -778,6 +810,16 @@ public class Settings extends Config {
 
 		ConfigData configData = getPluginConfigData();
 
+		// The default config is not empty. If the loaded config data is empty, the config file is
+		// either empty (unusual) or the config failed to load. We abort the config loading with an
+		// error here instead of inserting the default settings, because doing so might overwrite
+		// the user's current config file contents.
+		if (configData.isEmpty()) {
+			return new ConfigLoadException("The config file is empty or could not be loaded."
+					+ " Please check the log and config file for errors, or delete the file to have"
+					+ " it reset to the default config during the next restart.");
+		}
+
 		// Load settings from config:
 		boolean configChanged;
 		try {
@@ -789,8 +831,7 @@ public class Settings extends Config {
 
 		if (configChanged) {
 			// If the config was modified (migrations, adding missing settings, ..), save it:
-			Log.info("Saving config.");
-			plugin.saveConfig();
+			saveConfig();
 		}
 		return null; // Config loaded successfully
 	}
@@ -812,7 +853,22 @@ public class Settings extends Config {
 		}
 
 		// Load and validate settings:
+		// Load the data version setting first so that it is available for the loading of ItemData
+		// settings:
+		var dataVersionSetting = Settings.INSTANCE.getSetting("data-version");
+		assert dataVersionSetting != null;
+		Settings.INSTANCE.loadSetting(configData, dataVersionSetting);
+		ItemData.setSerializerDataVersion(dataVersion);
+
 		Settings.INSTANCE.load(configData);
+
+		// Update the data version:
+		// Note: This is done after inserting default values, since the default value might itself
+		// be outdated (we support a range of Minecraft versions).
+		var dataVersionChanged = Settings.INSTANCE.updateDataVersion();
+		if (dataVersionChanged) {
+			configChanged = true;
+		}
 
 		onSettingsChanged();
 		return configChanged;
@@ -851,9 +907,9 @@ public class Settings extends Config {
 			Log.warning(this.getLogPrefix() + "'gravity-chunk-range' cannot be negative.");
 			gravityChunkRange = 0;
 		}
-		if (mobBehaviorTickPeriod <= 0) {
-			Log.warning(this.getLogPrefix() + "'mob-behavior-tick-period' has to be positive.");
-			mobBehaviorTickPeriod = 1;
+		if (entityBehaviorTickPeriod <= 0) {
+			Log.warning(this.getLogPrefix() + "'entity-behavior-tick-period' has to be positive.");
+			entityBehaviorTickPeriod = 1;
 		}
 		if (shulkerPeekHeight < 0 || shulkerPeekHeight > 1) {
 			Log.warning(this.getLogPrefix() + "'shulker-peek-height' must be between 0.0 and 1.0.");
@@ -947,6 +1003,23 @@ public class Settings extends Config {
 				disableInventoryVerification = true;
 			}
 		}
+	}
+
+	// Returns true if the data version has changed.
+	private boolean updateDataVersion() {
+		var currentDataVersion = ServerUtils.getDataVersion();
+		if (dataVersion == currentDataVersion) {
+			return false;
+		}
+
+		Log.info(this.getLogPrefix() + "'data-version' updated from " + dataVersion + " to "
+				+ currentDataVersion + ".");
+		dataVersion = currentDataVersion;
+		// Note: Any item data is automatically migrated during loading. This data version check and
+		// updating ensures that we save back the migrated item data whenever the data version has
+		// changed.
+
+		return true;
 	}
 
 	/**

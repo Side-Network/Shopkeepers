@@ -35,7 +35,7 @@ public final class UserArgumentUtils {
 	 */
 	public static Stream<User> getKnownUsers() {
 		// Note: We are not using the cache inside SKUser here:
-		// - The cache is modified on each call to "uncachedOf" (LRUCache resorts on access), so we
+		// - The cache is modified on each call to "SKUser::of" (LRUCache resorts on access), so we
 		// run into an ConcurrentModificationException when we first stream the online users.
 		// - The cache is of limited size. It might not even cover all of the current shop owners.
 		// - The cache may also contain the dummy values such as the empty user.

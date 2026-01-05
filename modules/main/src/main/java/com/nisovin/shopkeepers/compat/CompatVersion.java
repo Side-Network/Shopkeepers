@@ -1,9 +1,16 @@
 package com.nisovin.shopkeepers.compat;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.util.java.Validate;
 
+/**
+ * Information about a compatibility provider.
+ */
 public class CompatVersion {
 
 	public static final String VARIANT_PAPER = "paper";
@@ -18,17 +25,25 @@ public class CompatVersion {
 
 	private final String compatVersion;
 	private final String variant;
-	private final String minecraftVersion;
-	private final String mappingsVersion;
+	private final List<ServerVersion> supportedServerVersions;
 
-	public CompatVersion(String compatVersion, String minecraftVersion, String mappingsVersion) {
+	// supportedServerVersions: Expected to be sorted from oldest to newest
+	public CompatVersion(String compatVersion, List<ServerVersion> supportedServerVersions) {
 		Validate.notEmpty(compatVersion, "compatVersion is empty");
-		Validate.notEmpty(minecraftVersion, "minecraftVersion is empty");
-		Validate.notEmpty(mappingsVersion, "mappingsVersion is empty");
+		Validate.notNull(supportedServerVersions, "supportedServerVersions is null");
+		Validate.isTrue(!supportedServerVersions.isEmpty(), "supportedServerVersions is empty");
 		this.compatVersion = compatVersion;
 		this.variant = getVariant(compatVersion);
-		this.minecraftVersion = minecraftVersion;
-		this.mappingsVersion = mappingsVersion;
+		// Immutable copy:
+		this.supportedServerVersions
+				= Collections.unmodifiableList(new ArrayList<>(supportedServerVersions));
+	}
+
+	public CompatVersion(String compatVersion, String minecraftVersion, String mappingsVersion) {
+		this(
+				compatVersion,
+				Collections.singletonList(new ServerVersion(minecraftVersion, mappingsVersion))
+		);
 	}
 
 	/**
@@ -60,24 +75,62 @@ public class CompatVersion {
 	}
 
 	/**
-	 * Gets the Minecraft server version.
+	 * Checks if {@link #getVariant()} equals the {@link #VARIANT_PAPER}.
 	 * 
-	 * @return the Minecraft server version
+	 * @return <code>true</code> if this version is a Paper variant
 	 */
-	public String getMinecraftVersion() {
-		return minecraftVersion;
+	public boolean isPaper() {
+		return this.getVariant().equals(VARIANT_PAPER);
 	}
 
 	/**
-	 * Gets the server mappings version.
-	 * <p>
-	 * Note: On Paper, since 1.21.6, the server no longer supports the mappings version, so this
-	 * returns the Minecraft version instead.
+	 * Gets the supported server versions.
 	 * 
-	 * @return the server mappings version
+	 * @return the supported server versions, not <code>null</code> or empty, sorted from oldest to
+	 *         newest
 	 */
-	public String getMappingsVersion() {
-		return mappingsVersion;
+	public List<ServerVersion> getSupportedServerVersions() {
+		return supportedServerVersions;
+	}
+
+	/**
+	 * Gets the {@link ServerVersion#getMinecraftVersion()} of the first
+	 * {@link #getSupportedServerVersions() supported server version}.
+	 * 
+	 * @return the Minecraft version of the first supported server version
+	 */
+	public String getFirstMinecraftVersion() {
+		return supportedServerVersions.getFirst().getMinecraftVersion();
+	}
+
+	/**
+	 * Gets the {@link ServerVersion#getMappingsVersion()} of the first
+	 * {@link #getSupportedServerVersions() supported server version}.
+	 * 
+	 * @return the mappings version of the first supported server version
+	 */
+	public String getFirstMappingsVersion() {
+		return supportedServerVersions.getFirst().getMappingsVersion();
+	}
+
+	/**
+	 * Gets the {@link ServerVersion#getMinecraftVersion()} of the last
+	 * {@link #getSupportedServerVersions() supported server version}.
+	 * 
+	 * @return the Minecraft version of the last supported server version
+	 */
+	public String getLastMinecraftVersion() {
+		return supportedServerVersions.getLast().getMinecraftVersion();
+	}
+
+	/**
+	 * Gets the {@link ServerVersion#getMappingsVersion()} of the last
+	 * {@link #getSupportedServerVersions() supported server version}.
+	 * 
+	 * @return the mappings version of the last supported server version
+	 */
+	public String getLastMappingsVersion() {
+		return supportedServerVersions.getLast().getMappingsVersion();
 	}
 
 	@Override
@@ -85,8 +138,7 @@ public class CompatVersion {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + compatVersion.hashCode();
-		result = prime * result + minecraftVersion.hashCode();
-		result = prime * result + mappingsVersion.hashCode();
+		result = prime * result + supportedServerVersions.hashCode();
 		return result;
 	}
 
@@ -96,8 +148,7 @@ public class CompatVersion {
 		if (!(obj instanceof CompatVersion)) return false;
 		CompatVersion other = (CompatVersion) obj;
 		if (!compatVersion.equals(other.compatVersion)) return false;
-		if (!mappingsVersion.equals(other.mappingsVersion)) return false;
-		if (!minecraftVersion.equals(other.minecraftVersion)) return false;
+		if (!supportedServerVersions.equals(other.supportedServerVersions)) return false;
 		return true;
 	}
 
@@ -106,10 +157,8 @@ public class CompatVersion {
 		StringBuilder builder = new StringBuilder();
 		builder.append("CompatVersion [compatVersion=");
 		builder.append(compatVersion);
-		builder.append(", minecraftVersion=");
-		builder.append(minecraftVersion);
-		builder.append(", mappingsVersion=");
-		builder.append(mappingsVersion);
+		builder.append(", serverVersions=");
+		builder.append(supportedServerVersions);
 		builder.append("]");
 		return builder.toString();
 	}

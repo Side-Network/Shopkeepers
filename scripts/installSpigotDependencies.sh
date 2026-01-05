@@ -48,8 +48,6 @@ buildSpigotIfMissing() {
 # The following versions require JDK 21 to build:
 source installJDK.sh 21
 
-buildSpigotIfMissing 1.20.6 remapped
-
 # Optional argument 'minimal': Only builds the api and main projects, which only depend on the
 # lowest supported Spigot version. So we can skip the building of later Spigot versions.
 # TODO: Removed again. For some reason Jitpack does not find our build artifacts if we build any
@@ -61,18 +59,12 @@ buildSpigotIfMissing 1.20.6 remapped
 #    exit 0
 #fi
 
-# Note: The plugin does not build with Spigot 1.21 versions before 2024-07-07 (due to enum changes).
-# Build specific build number, because Spigot 1.21 was updated to point to 1.21.1.
-buildSpigotIfMissing 1.21 remapped 4289
-
-buildSpigotIfMissing 1.21.1 remapped
-
-# Note: 1.21.2 was immediately replaced and is not supported. BuildTools will automatically build 1.21.3 instead.
-buildSpigotIfMissing 1.21.3 remapped
-
-buildSpigotIfMissing 1.21.4 remapped
-
 buildSpigotIfMissing 1.21.5 remapped
+buildSpigotIfMissing 1.21.6 remapped
+# Note: 1.21.7 was replaced by 1.21.8 and can no longer be built. But the server is identical to 1.21.8.
+buildSpigotIfMissing 1.21.8 remapped
+buildSpigotIfMissing 1.21.10 remapped
+buildSpigotIfMissing 1.21.11 remapped
 
 buildSpigotIfMissing 1.21.6 remapped
 

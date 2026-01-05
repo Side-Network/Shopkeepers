@@ -12,9 +12,14 @@ import org.checkerframework.checker.nullness.qual.PolyNull;
 
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
+import com.nisovin.shopkeepers.util.data.serialization.bukkit.ItemStackSerializers;
 
 /**
  * An unmodifiable view on an {@link ItemStack}.
+ * <p>
+ * Consider using {@link ItemStackSerializers#UNMODIFIABLE} instead of serializing this
+ * {@link UnmodifiableItemStack} directly, which would use the {@link ItemStack}'s default
+ * serialization implementation.
  */
 @DelegateDeserialization(ItemStack.class) // De-/Serialized as a normal modifiable ItemStack
 public class SKUnmodifiableItemStack implements UnmodifiableItemStack {

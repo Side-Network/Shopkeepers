@@ -25,28 +25,9 @@ dependencies {
 	testImplementation libs.asm
 }
 
-// We use Spigot mappings for now to preserve cross-server compatibility for shared compatibility
-// modules (1_20_R5 - 1_21_R4).
-
-// Once we are using Mojang mappings, don't forget to also change the manifest attribute in the
-// final dist jar in the dist module.
-
-// TODO This does not seem to work with Groovy syntax, so we manually replicate the behavior of REOBF_PRODUCTION:
-//paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.getREOBF_PRODUCTION()
-afterEvaluate {
-	reobfJar {
-		def devJar = project.tasks.named('jar') {
-			archiveClassifier.set('dev')
-		}
-		inputJar.set(devJar.flatMap { it.archiveFile })
-		outputJar.convention(project.layout.buildDirectory.file("libs/${project.name}-${project.version}.jar"))
-	}
-}
-
-assemble {
-	// Remove this for Mojang mapped output
-	dependsOn(reobfJar)
-}
+// Note: We use Mojang mappings instead of Spigot mappings on Paper: Mojang mappings are usually
+// supported quicker and support for Spigot might be pending removal.
+// Dist module: Using the Mojang mappings requires adding a manifest attribute to the final jar.
 
 afterEvaluate {
 	configurations {
@@ -61,7 +42,8 @@ afterEvaluate {
 	}
 
 	artifacts {
-		remapped project.tasks.named('reobfJar').map { it.outputJar }
+		// Already using Mojang mappings: No further remapping needed.
+		remapped tasks.named('jar').map { it.archiveFile }
 	}
 }
 

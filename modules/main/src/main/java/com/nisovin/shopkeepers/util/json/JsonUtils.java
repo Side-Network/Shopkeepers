@@ -4,6 +4,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.Strictness;
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 
 public final class JsonUtils {
@@ -22,7 +23,7 @@ public final class JsonUtils {
 		GsonBuilder builder = new GsonBuilder()
 				.disableHtmlEscaping()
 				.serializeSpecialFloatingPointValues()
-				.setLenient()
+				.setStrictness(Strictness.LENIENT)
 				.registerTypeAdapterFactory(BukkitAwareObjectTypeAdapter.FACTORY);
 		assert builder != null;
 		return builder;

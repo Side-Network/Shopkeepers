@@ -1,6 +1,6 @@
 package com.nisovin.shopkeepers.ui.editor;
 
-import com.nisovin.shopkeepers.ui.state.UIState;
+import com.nisovin.shopkeepers.ui.lib.UIState;
 
 /**
  * The captured editor state of a player.

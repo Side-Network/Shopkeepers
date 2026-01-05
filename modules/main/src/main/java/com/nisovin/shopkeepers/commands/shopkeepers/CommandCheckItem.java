@@ -40,16 +40,22 @@ class CommandCheckItem extends PlayerCommand {
 
 		ItemStack mainHandItem = player.getInventory().getItemInMainHand();
 		ItemStack offHandItem = player.getInventory().getItemInOffHand();
+		ShopCreationItem mainHandShopCreationItem = new ShopCreationItem(mainHandItem);
+		ShopCreationItem offHandShopCreationItem = new ShopCreationItem(offHandItem);
 
 		player.sendMessage(ChatColor.YELLOW + "Item in main hand / off hand:");
 		player.sendMessage("- Similar to off-hand item: "
 				+ toDisplayString(ItemUtils.isSimilar(mainHandItem, offHandItem)));
-		player.sendMessage("- Matching off-hand item: "
+		player.sendMessage("- NBT matching off-hand item: "
 				+ toDisplayString(ItemUtils.matchesData(mainHandItem, offHandItem)));
-		player.sendMessage("- MC matching off-hand item: "
+		player.sendMessage("- Trade matching off-hand item: "
 				+ toDisplayString(Compat.getProvider().matches(mainHandItem, offHandItem)));
 		player.sendMessage("- Is shop creation item: "
-				+ checkItems(mainHandItem, offHandItem, ShopCreationItem::isShopCreationItem));
+				+ checkItems(mainHandShopCreationItem, offHandShopCreationItem, ShopCreationItem::isShopCreationItem));
+		player.sendMessage("- Has shop type: "
+				+ checkItems(mainHandShopCreationItem, offHandShopCreationItem, ShopCreationItem::hasShopType));
+		player.sendMessage("- Has object type: "
+				+ checkItems(mainHandShopCreationItem, offHandShopCreationItem, ShopCreationItem::hasObjectType));
 		for (Currency currency : Currencies.getAll()) {
 			player.sendMessage("- Is currency item '" + currency.getId() + "': "
 					+ checkItems(mainHandItem, offHandItem, currency.getItemData()::matches));
@@ -64,7 +70,15 @@ class CommandCheckItem extends PlayerCommand {
 		return toDisplayString(check.test(mainHand)) + " / " + toDisplayString(check.test(offHand));
 	}
 
+	private static String checkItems(
+			ShopCreationItem mainHand,
+			ShopCreationItem offHand,
+			Predicate<? super ShopCreationItem> check
+	) {
+		return toDisplayString(check.test(mainHand)) + " / " + toDisplayString(check.test(offHand));
+	}
+
 	private static String toDisplayString(boolean bool) {
-		return bool ? "yes" : "nope";
+		return bool ? "yes" : "no";
 	}
 }

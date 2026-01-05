@@ -7,14 +7,14 @@ import com.nisovin.shopkeepers.api.ui.UISession;
 
 /**
  * {@link TradingListener}s can be registered via
- * {@link TradingHandler#addListener(TradingListener)} and are then informed on various events
+ * {@link TradingViewProvider#addListener(TradingListener)} and are then informed on various events
  * during the handling of trades.
  */
 public abstract class TradingListener {
 
 	/**
-	 * This is called very early, prior to the {@link TradingHandler}'s own processing, for every
-	 * {@link InventoryClickEvent} forwarded to the {@link TradingHandler}.
+	 * This is called very early, prior to the {@link TradingViewProvider}'s own processing, for
+	 * every {@link InventoryClickEvent} forwarded to the {@link TradingViewProvider}.
 	 * 
 	 * @param uiSession
 	 *            the {@link UISession}, not <code>null</code>
@@ -25,8 +25,8 @@ public abstract class TradingListener {
 	}
 
 	/**
-	 * This is called very early, prior to the {@link TradingHandler}'s own processing, for every
-	 * {@link TradeSelectEvent} forwarded to the {@link TradingHandler}.
+	 * This is called very early, prior to the {@link TradingViewProvider}'s own processing, for
+	 * every {@link TradeSelectEvent} forwarded to the {@link TradingViewProvider}.
 	 * 
 	 * @param uiSession
 	 *            the {@link UISession}, not <code>null</code>

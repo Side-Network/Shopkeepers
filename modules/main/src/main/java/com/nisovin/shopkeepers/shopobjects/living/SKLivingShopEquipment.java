@@ -3,7 +3,6 @@ package com.nisovin.shopkeepers.shopobjects.living;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.bukkit.inventory.EquipmentSlot;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -31,9 +30,13 @@ public class SKLivingShopEquipment implements LivingShopEquipment {
 				public @Nullable Object serialize(LivingShopEquipment value) {
 					Validate.notNull(value, "value is null");
 					DataContainer equipmentData = DataContainer.create();
-					for (Entry<? extends EquipmentSlot, ? extends @Nullable UnmodifiableItemStack> entry : value.getItems().entrySet()) {
+					for (var entry : value.getItems().entrySet()) {
 						// The items are assumed to be immutable.
-						equipmentData.set(entry.getKey().name(), entry.getValue());
+						var item = entry.getValue(); // Not null or empty
+						equipmentData.set(
+								entry.getKey().name(),
+								ItemStackSerializers.UNMODIFIABLE.serialize(item)
+						);
 					}
 					return equipmentData.serialize();
 				}

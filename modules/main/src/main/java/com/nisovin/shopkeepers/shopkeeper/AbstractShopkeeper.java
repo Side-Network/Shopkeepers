@@ -46,6 +46,7 @@ import com.nisovin.shopkeepers.api.util.ChunkCoords;
 import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.debug.Debug;
 import com.nisovin.shopkeepers.debug.DebugOptions;
+import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.migration.Migration;
 import com.nisovin.shopkeepers.shopkeeper.migration.MigrationPhase;
 import com.nisovin.shopkeepers.shopkeeper.migration.ShopkeeperDataMigrator;
@@ -54,8 +55,10 @@ import com.nisovin.shopkeepers.shopobjects.AbstractShopObject;
 import com.nisovin.shopkeepers.shopobjects.AbstractShopObjectType;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
 import com.nisovin.shopkeepers.text.Text;
-import com.nisovin.shopkeepers.ui.UIHandler;
-import com.nisovin.shopkeepers.ui.trading.TradingHandler;
+import com.nisovin.shopkeepers.ui.lib.UISessionManager;
+import com.nisovin.shopkeepers.ui.lib.UIState;
+import com.nisovin.shopkeepers.ui.lib.ViewProvider;
+import com.nisovin.shopkeepers.ui.trading.TradingViewProvider;
 import com.nisovin.shopkeepers.util.annotations.ReadWrite;
 import com.nisovin.shopkeepers.util.bukkit.BlockLocation;
 import com.nisovin.shopkeepers.util.bukkit.ColorUtils;
@@ -73,6 +76,7 @@ import com.nisovin.shopkeepers.util.data.serialization.DataAccessor;
 import com.nisovin.shopkeepers.util.data.serialization.DataSerializer;
 import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
 import com.nisovin.shopkeepers.util.data.serialization.bukkit.ColoredStringSerializers;
+import com.nisovin.shopkeepers.util.data.serialization.java.BooleanSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.DataContainerSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.NumberSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.StringSerializers;
@@ -149,6 +153,7 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 	private @Nullable ChunkCoords chunkCoords; // Null for virtual shops
 	// The ChunkCoords by which the shopkeeper is currently stored:
 	private @Nullable ChunkCoords lastChunkCoords = null;
+	private boolean open = true;
 	private String name = ""; // Not null, can be empty
 
 	private final List<SKShopkeeperSnapshot> snapshots = new ArrayList<>();
@@ -169,8 +174,8 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 	private boolean active = false;
 	private boolean ticking = false;
 
-	// UI type identifier -> UI handler
-	private final Map<String, UIHandler> uiHandlers = new HashMap<>();
+	// UI type identifier -> ViewProvider
+	private final Map<String, ViewProvider> viewProviders = new HashMap<>();
 
 	// Internally used for load balancing purposes:
 	private final int tickingGroup = ShopkeeperTicker.nextTickingGroup();
@@ -316,9 +321,9 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 	 * {@link #onAdded(ShopkeeperAddedEvent.Cause)} may be better suited.
 	 */
 	protected void setup() {
-		// Default trading handler:
-		this.registerUIHandlerIfMissing(DefaultUITypes.TRADING(), () -> {
-			return new TradingHandler(this);
+		// Default trading view provider:
+		this.registerViewProviderIfMissing(DefaultUITypes.TRADING(), () -> {
+			return new TradingViewProvider(this);
 		});
 	}
 
@@ -454,6 +459,7 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 		ShopType<?> shopType = this.getAndValidateShopType(shopkeeperData);
 		assert shopType != null;
 
+		this._setOpen(shopkeeperData.get(OPEN));
 		this._setName(shopkeeperData.get(NAME));
 
 		// Optional shop object data:
@@ -543,6 +549,7 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 	public void saveDynamicState(ShopkeeperData shopkeeperData, boolean saveAll) {
 		Validate.notNull(shopkeeperData, "shopkeeperData is null");
 		shopkeeperData.set(SHOP_TYPE, this.getType());
+		shopkeeperData.set(OPEN, open);
 		shopkeeperData.set(NAME, name);
 
 		// Shop object:
@@ -1262,6 +1269,43 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 		messageArguments.put("object_type", () -> this.getShopObject().getType().getIdentifier());
 	}
 
+	// OPEN STATE
+
+	public static final Property<Boolean> OPEN = new BasicProperty<Boolean>()
+			.dataKeyAccessor("open", BooleanSerializers.STRICT)
+			.useDefaultIfMissing()
+			.defaultValue(true)
+			.build();
+
+	@Override
+	public boolean isOpen() {
+		return open;
+	}
+
+	@Override
+	public void setOpen(boolean open) {
+		this._setOpen(open);
+		this.markDirty();
+	}
+
+	private void _setOpen(boolean open) {
+		this.open = open;
+
+		if (!open) {
+			this.onClosed();
+		}
+	}
+
+	/**
+	 * Called when the shop is {@link #setOpen(boolean) closed}.
+	 */
+	protected void onClosed() {
+		UISessionManager.getInstance()
+				.abortUISessionsForContextDelayed(this, DefaultUITypes.TRADING());
+		UISessionManager.getInstance()
+				.abortUISessionsForContextDelayed(this, DefaultUITypes.HIRING());
+	}
+
 	// NAMING
 
 	public static final Property<String> NAME = new BasicProperty<String>()
@@ -1543,54 +1587,77 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 	}
 
 	/**
-	 * Registers a {@link UIHandler} that implements a specific type of user interface for this
+	 * Registers a {@link ViewProvider} that implements a specific type of user interface for this
 	 * shopkeeper.
 	 * <p>
-	 * This replaces any {@link UIHandler} that has been previously registered for the same
+	 * This replaces any {@link ViewProvider} that has been previously registered for the same
 	 * {@link UIType}.
 	 * 
-	 * @param uiHandler
-	 *            the UI handler
+	 * @param viewProvider
+	 *            the view provider
 	 */
-	public final void registerUIHandler(UIHandler uiHandler) {
-		Validate.notNull(uiHandler, "uiHandler is null");
-		uiHandlers.put(uiHandler.getUIType().getIdentifier(), uiHandler);
+	public final void registerViewProvider(ViewProvider viewProvider) {
+		Validate.notNull(viewProvider, "viewProvider is null");
+		viewProviders.put(viewProvider.getUIType().getIdentifier(), viewProvider);
 	}
 
 	/**
-	 * Registers a {@link UIHandler} that implements a specific type of user interface for this
-	 * shopkeeper if no other UI handler is registered yet.
+	 * Registers a {@link ViewProvider} that implements a specific type of user interface for this
+	 * shopkeeper if no other {@link ViewProvider} is registered yet.
 	 * 
 	 * @param uiType
 	 *            the {@link UIType}
-	 * @param uiHandlerSupplier
-	 *            the {@link UIHandler} supplier
+	 * @param viewProviderSupplier
+	 *            the {@link ViewProvider} supplier
 	 */
-	public final void registerUIHandlerIfMissing(
+	public final void registerViewProviderIfMissing(
 			UIType uiType,
-			Supplier<UIHandler> uiHandlerSupplier
+			Supplier<ViewProvider> viewProviderSupplier
 	) {
-		Validate.notNull(uiHandlerSupplier, "uiHandlerSupplier is null");
-		if (this.getUIHandler(uiType) == null) {
-			this.registerUIHandler(uiHandlerSupplier.get());
+		Validate.notNull(viewProviderSupplier, "viewProviderSupplier is null");
+		if (this.getViewProvider(uiType) == null) {
+			this.registerViewProvider(viewProviderSupplier.get());
 		}
 	}
 
 	/**
-	 * Gets the {@link UIHandler} for the given {@link UIType}.
+	 * Gets the {@link ViewProvider} for the given {@link UIType}.
 	 * 
 	 * @param uiType
 	 *            the {@link UIType}, not <code>null</code>
-	 * @return the {@link UIHandler}, or <code>null</code> if the UI is not supported
+	 * @return the {@link ViewProvider}, or <code>null</code> if the UI is not supported
 	 */
-	public final @Nullable UIHandler getUIHandler(UIType uiType) {
+	public final @Nullable ViewProvider getViewProvider(UIType uiType) {
 		Validate.notNull(uiType, "uiType is null");
-		return uiHandlers.get(uiType.getIdentifier());
+		return viewProviders.get(uiType.getIdentifier());
 	}
 
 	@Override
 	public final boolean openWindow(UIType uiType, Player player) {
-		return SKShopkeepersPlugin.getInstance().getUIRegistry().requestUI(uiType, this, player);
+		return this.openWindow(uiType, player, UIState.EMPTY);
+	}
+
+	public boolean openWindow(UIType uiType, Player player, UIState uiState) {
+		Validate.notNull(uiType, "uiType is null");
+		Validate.notNull(player, "player is null");
+
+		String uiIdentifier = uiType.getIdentifier();
+
+		if (!this.isValid()) {
+			Log.debug(() -> this.getLogPrefix() + "Cannot open UI '" + uiIdentifier
+					+ "' for player " + player.getName() + ": Shopkeeper not valid.");
+			return false;
+		}
+
+		var viewProvider = this.getViewProvider(uiType);
+		if (viewProvider == null) {
+			Log.debug(() -> this.getLogPrefix() + "Cannot open UI '" + uiIdentifier
+					+ "' for player " + player.getName()
+					+ ": This shopkeeper does not support this type of UI.");
+			return false;
+		}
+
+		return UISessionManager.getInstance().requestUI(viewProvider, player, uiState);
 	}
 
 	// Shortcuts for the default UI types:
@@ -1608,9 +1675,10 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 	/***
 	 * Checks if the given {@link CommandSender} has access to the editor.
 	 * <p>
-	 * For players, this delegates to {@link UIHandler#canAccess(Player, boolean)} of the configured
-	 * editor {@link UIHandler}. If no editor {@link UIHandler} is found, this returns
-	 * <code>false</code>. For non-player {@link CommandSender}s, this checks the bypass permission.
+	 * For players, this delegates to {@link ViewProvider#canAccess(Player, boolean)} of the
+	 * configured editor {@link ViewProvider}. If no editor {@link ViewProvider} is found, this
+	 * returns <code>false</code>. For non-player {@link CommandSender}s, this checks the bypass
+	 * permission.
 	 * 
 	 * @param sender
 	 *            the {@link CommandSender}, not <code>null</code>
@@ -1625,28 +1693,45 @@ public abstract class AbstractShopkeeper implements Shopkeeper {
 	/***
 	 * Checks if the given {@link CommandSender} has access to the specified {@link UIType}.
 	 * <p>
-	 * For players, this delegates to {@link UIHandler#canAccess(Player, boolean)} of the configured
-	 * {@link UIHandler}. If no {@link UIHandler} is found, this returns <code>false</code>. For
-	 * non-player {@link CommandSender}s, this checks the bypass permission.
+	 * For players, this delegates to {@link ViewProvider#canAccess(Player, boolean)} of the
+	 * configured {@link ViewProvider}. If no {@link ViewProvider} is found, this returns
+	 * <code>false</code>. For non-player {@link CommandSender}s, this checks the bypass permission.
 	 * 
 	 * @param sender
 	 *            the {@link CommandSender}, not <code>null</code>
+	 * @param uiType
+	 *            the {@link UIType}, not <code>null</code>
 	 * @param silent
 	 *            <code>true</code> to omit any feedback that might otherwise be sent to the sender
 	 * @return <code>true</code> if the sender can access the UI this shopkeeper
 	 */
 	public final boolean canAccess(CommandSender sender, UIType uiType, boolean silent) {
-		var uiHandler = this.getUIHandler(uiType);
-		if (uiHandler == null) return false;
+		var viewProvider = this.getViewProvider(uiType);
+		if (viewProvider == null) return false;
 
 		if (sender instanceof Player player) {
-			return uiHandler.canAccess(player, silent);
+			return viewProvider.canAccess(player, silent);
 		} else {
 			// Check if the command sender has the bypass permission (e.g. the case for the console
 			// and block command senders, but might not be the case for other unexpected types of
 			// command senders):
 			return PermissionUtils.hasPermission(sender, ShopkeepersPlugin.BYPASS_PERMISSION);
 		}
+	}
+
+	// EDITOR
+
+	/**
+	 * Gets a user-friendly short multi-line overview of the primary properties of this shopkeeper
+	 * (id, unique id, name, shop type, object type, location, owner, etc.).
+	 * <p>
+	 * Sub-types may add additional properties.
+	 * 
+	 * @return the shop information
+	 */
+	public List<String> getInformation() {
+		var messageArguments = this.getMessageArguments("shop_");
+		return StringUtils.replaceArguments(Messages.shopInformation, messageArguments);
 	}
 
 	// INTERACTION HANDLING

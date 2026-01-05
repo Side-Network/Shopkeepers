@@ -26,10 +26,10 @@ import com.nisovin.shopkeepers.commands.lib.BaseCommand;
 import com.nisovin.shopkeepers.commands.lib.CommandException;
 import com.nisovin.shopkeepers.commands.lib.CommandInput;
 import com.nisovin.shopkeepers.commands.lib.CommandRegistry;
+import com.nisovin.shopkeepers.commands.lib.NoPermissionException;
 import com.nisovin.shopkeepers.commands.lib.commands.PlayerCommand;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContextView;
 import com.nisovin.shopkeepers.commands.shopkeepers.snapshot.CommandSnapshot;
-import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopcreation.ShopkeeperPlacement;
 import com.nisovin.shopkeepers.shopkeeper.registry.SKShopkeeperRegistry;
@@ -76,12 +76,12 @@ public class ShopkeepersCommand extends BaseCommand {
 		childCommands.register(new CommandDebug());
 		childCommands.register(new CommandNotify());
 		childCommands.register(new CommandList(shopkeeperRegistry));
+		childCommands.register(new CommandHistory(plugin));
 		childCommands.register(new CommandRemove(confirmations));
 		childCommands.register(new CommandRemoveAll(plugin, shopkeeperRegistry, confirmations));
 		childCommands.register(new CommandGive());
 		childCommands.register(new CommandGiveCurrency());
 		childCommands.register(new CommandSetCurrency());
-		childCommands.register(new CommandConvertItems());
 		childCommands.register(new CommandUpdateItems());
 		childCommands.register(new CommandRemote());
 		childCommands.register(new CommandEdit());
@@ -99,6 +99,8 @@ public class ShopkeepersCommand extends BaseCommand {
 		// Hidden debugging / utility commands:
 		childCommands.register(new CommandReplaceAllWithVanillaVillagers(plugin, shopkeeperRegistry,
 				confirmations));
+		childCommands.register(new CommandDeleteUnspawnableShopkeepers(shopkeeperRegistry,
+				confirmations));
 		childCommands.register(new CommandCleanupCitizenShopkeepers());
 		childCommands.register(new CommandCheck(plugin));
 		childCommands.register(new CommandCheckItem());
@@ -113,8 +115,14 @@ public class ShopkeepersCommand extends BaseCommand {
 	@Override
 	public boolean testPermission(CommandSender sender) {
 		if (!super.testPermission(sender)) return false;
-		return Settings.createPlayerShopWithCommand
-				|| PermissionUtils.hasPermission(sender, ShopkeepersPlugin.ADMIN_PERMISSION);
+		return PermissionUtils.hasPermission(sender, ShopkeepersPlugin.CREATE_PERMISSION);
+	}
+
+	@Override
+	protected NoPermissionException noPermissionException() {
+		// Custom no-permission message to note about using the shop creation item to create player
+		// shops:
+		return new NoPermissionException(Messages.commandCreateNoPermission);
 	}
 
 	@Override
@@ -154,7 +162,7 @@ public class ShopkeepersCommand extends BaseCommand {
 		BlockFace targetBlockFace = Unsafe.assertNonNull(targetBlockInfo.getHitBlockFace());
 
 		ShopType<?> shopType = context.getOrNull(ARGUMENT_SHOP_TYPE);
-		ShopObjectType<?> shopObjType = context.getOrNull(ARGUMENT_OBJECT_TYPE);
+		ShopObjectType<?> shopObjectType = context.getOrNull(ARGUMENT_OBJECT_TYPE);
 
 		// We use different defaults depending on whether the player might be trying to create a
 		// player or admin shop:
@@ -174,22 +182,19 @@ public class ShopkeepersCommand extends BaseCommand {
 			}
 		}
 
-		if (shopObjType == null) {
-			shopObjType = plugin.getShopObjectTypeRegistry().getDefaultSelection(player);
+		if (shopObjectType == null) {
+			shopObjectType = plugin.getShopObjectTypeRegistry().getDefaultSelection(player);
 		}
-		if (shopType == null || shopObjType == null) {
+		if (shopType == null || shopObjectType == null) {
 			// The player cannot create shops at all:
 			TextUtils.sendMessage(player, Messages.noPermission);
 			return;
 		}
-		assert shopType != null && shopObjType != null;
+		assert shopType != null && shopObjectType != null;
 		boolean isPlayerShopType = (shopType instanceof PlayerShopType);
 
 		if (isPlayerShopType) {
-			if (!Settings.createPlayerShopWithCommand) {
-				TextUtils.sendMessage(player, Messages.noPlayerShopsViaCommand);
-				return;
-			} else if (!containerTargeted) {
+			if (!containerTargeted) {
 				TextUtils.sendMessage(player, Messages.mustTargetContainer);
 				return;
 			}
@@ -211,7 +216,7 @@ public class ShopkeepersCommand extends BaseCommand {
 			shopCreationData = PlayerShopCreationData.create(
 					player,
 					(PlayerShopType<?>) shopType,
-					shopObjType,
+					shopObjectType,
 					spawnLocation,
 					targetBlockFace,
 					targetBlock
@@ -221,7 +226,7 @@ public class ShopkeepersCommand extends BaseCommand {
 			shopCreationData = AdminShopCreationData.create(
 					player,
 					(AdminShopType<?>) shopType,
-					shopObjType,
+					shopObjectType,
 					spawnLocation, targetBlockFace
 			);
 		}

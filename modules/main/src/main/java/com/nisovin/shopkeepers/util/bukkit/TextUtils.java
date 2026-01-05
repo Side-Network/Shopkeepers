@@ -21,14 +21,15 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
+import com.nisovin.shopkeepers.api.shopkeeper.Shopkeeper;
 import com.nisovin.shopkeepers.api.user.User;
 import com.nisovin.shopkeepers.api.util.ChunkCoords;
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
-import com.nisovin.shopkeepers.compat.Compat;
 import com.nisovin.shopkeepers.spigot.text.SpigotText;
 import com.nisovin.shopkeepers.text.HoverEventText;
 import com.nisovin.shopkeepers.text.Text;
 import com.nisovin.shopkeepers.text.TextBuilder;
+import com.nisovin.shopkeepers.tradelog.data.PlayerRecord;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 import com.nisovin.shopkeepers.util.java.StringUtils;
@@ -42,6 +43,12 @@ import com.nisovin.shopkeepers.util.text.MessageArguments;
  * specific.
  */
 public final class TextUtils {
+
+	/**
+	 * A recommended maximum length limit (defined by us) for item lore lines to avoid the item
+	 * hover to become to large in width.
+	 */
+	public static final int LORE_MAX_LENGTH = 32;
 
 	/*
 	 * PLAIN TEXT
@@ -388,6 +395,108 @@ public final class TextUtils {
 		return hexCode.toString();
 	}
 
+	// Wraps the individual texts in the list.
+	// Tries to wrap at whitespace, but falls back to wrapping at the length limit.
+	// Color and formatting codes do not count towards the limit and are preserved in the next line.
+	public static void wrap(List<String> source, int maxVisibleLength) {
+		var iterator = source.listIterator();
+
+		var activeFormat = new StringBuilder();
+		var currentLine = new StringBuilder();
+
+		while (iterator.hasNext()) {
+			String line = Unsafe.assertNonNull(iterator.next());
+			if (getVisibleLength(line) <= maxVisibleLength) {
+				continue;
+			}
+
+			iterator.remove();
+
+			activeFormat.setLength(0);
+			currentLine.setLength(0);
+
+			int visibleLength = 0;
+			int lastWhitespaceIndex = -1;
+			int lastWhitespaceVisibleLength = -1;
+
+			for (int i = 0; i < line.length(); i++) {
+				char c = line.charAt(i);
+
+				// Formatting code:
+				if (c == ChatColor.COLOR_CHAR) {
+					currentLine.append(c);
+					activeFormat.append(c);
+
+					i++;
+					if (i < line.length()) {
+						char code = line.charAt(i);
+						var chatColor = ChatColor.getByChar(code);
+						if (chatColor != null
+								&& (chatColor.isColor() || chatColor == ChatColor.RESET)) {
+							// Reset the active format at colors and reset:
+							activeFormat.setLength(0);
+							activeFormat.append(c);
+						}
+						currentLine.append(code);
+						activeFormat.append(code);
+					}
+					continue;
+				}
+
+				// Track whitespace for word wrap:
+				if (Character.isWhitespace(c)) {
+					lastWhitespaceIndex = currentLine.length();
+					lastWhitespaceVisibleLength = visibleLength;
+				}
+
+				currentLine.append(c);
+				visibleLength++;
+
+				if (visibleLength >= maxVisibleLength) {
+					if (lastWhitespaceIndex != -1) {
+						// Word wrap at last whitespace:
+						iterator.add(currentLine.substring(0, lastWhitespaceIndex));
+
+						// Remainder without the whitespace:
+						String remainder = currentLine.substring(lastWhitespaceIndex + 1);
+						currentLine.setLength(0);
+						currentLine.append(activeFormat).append(remainder);
+
+						visibleLength -= (lastWhitespaceVisibleLength + 1);
+						lastWhitespaceIndex = -1;
+						lastWhitespaceVisibleLength = -1;
+					} else {
+						// Hard wrap:
+						iterator.add(currentLine.toString());
+						currentLine.setLength(0);
+						currentLine.append(activeFormat);
+						visibleLength = 0;
+					}
+				}
+			}
+
+			if (currentLine.length() > 0) {
+				iterator.add(currentLine.toString());
+			}
+		}
+	}
+
+	// Calculates the visible length (ignores formatting codes)
+	private static int getVisibleLength(String text) {
+		int length = 0;
+		for (int i = 0; i < text.length(); i++) {
+			char c = text.charAt(i);
+			if (c == ChatColor.COLOR_CHAR) {
+				// The color char is not counted and neither is the subsequent char:
+				i++;
+				continue;
+			}
+
+			length++;
+		}
+		return length;
+	}
+
 	// SENDING
 
 	public static void sendMessage(CommandSender recipient, String message) {
@@ -429,9 +538,22 @@ public final class TextUtils {
 		return getPlayerText(player.getName(), player.getUniqueId());
 	}
 
+	public static Text getPlayerText(PlayerRecord playerRecord) {
+		Validate.notNull(playerRecord, "playerRecord is null");
+		return getPlayerText(playerRecord.getName(), playerRecord.getUniqueId());
+	}
+
 	public static Text getPlayerText(User user) {
 		Validate.notNull(user, "user is null");
 		return getPlayerText(user.getName(), user.getUniqueId());
+	}
+
+	public static Text getPlayerText(@Nullable User user, String fallback) {
+		if (user != null) {
+			return getPlayerText(user);
+		} else {
+			return getPlayerText(fallback, null);
+		}
 	}
 
 	public static Text getPlayerText(@Nullable String playerName, @Nullable UUID playerUUID) {
@@ -454,6 +576,23 @@ public final class TextUtils {
 		}
 	}
 
+	public static Text getShopText(Shopkeeper shopkeeper) {
+		return getShopText(Text.of(shopkeeper.getDisplayName()), shopkeeper.getUniqueId());
+	}
+
+	public static Text getShopText(Text displayName, UUID uniqueId) {
+		var uniqueIdString = uniqueId.toString();
+		return Text.hoverEvent(Text.of(uniqueIdString))
+				.childInsertion(uniqueIdString)
+				// Placeholder instead of child text: The given displayName Text is of unknown
+				// origin. Adding it has child here assigns its parent which may cause issues down
+				// the line (e.g. if the same Text instance is later reused). We either need to copy
+				// it, or supply it as a placeholder argument.
+				.childPlaceholder("displayName")
+				.buildRoot()
+				.setPlaceholderArguments("displayName", displayName);
+	}
+
 	public static Text getItemText(@Nullable UnmodifiableItemStack itemStack) {
 		return getItemText(ItemUtils.asItemStackOrNull(itemStack));
 	}
@@ -467,14 +606,8 @@ public final class TextUtils {
 
 	public static TextBuilder getItemHover(@ReadOnly ItemStack itemStack) {
 		Validate.notNull(itemStack, "itemStack is null");
-		String itemSNBT = Compat.getProvider().getItemSNBT(itemStack);
-		if (itemSNBT == null) {
-			// Item SNBT is not supported.
-			return Text.text("");
-		} else {
-			var unmodifiableItem = UnmodifiableItemStack.ofNonNull(itemStack);
-			return Text.hoverEvent(new HoverEventText.ItemContent(unmodifiableItem));
-		}
+		var unmodifiableItem = UnmodifiableItemStack.ofNonNull(itemStack);
+		return Text.hoverEvent(new HoverEventText.ItemContent(unmodifiableItem));
 	}
 
 	/**

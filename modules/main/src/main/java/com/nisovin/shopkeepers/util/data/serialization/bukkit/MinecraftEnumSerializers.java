@@ -12,7 +12,7 @@ import com.nisovin.shopkeepers.util.data.serialization.java.EnumSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.EnumSerializers.EnumSerializer;
 
 /**
- * Default {@link DataSerializer}s for Bukkit {@link Enum} values that are based on Minecaft
+ * Default {@link DataSerializer}s for Bukkit {@link Enum} values that are based on Minecraft
  * namespaced ids, such as {@link Material}.
  * <p>
  * These serializers behaves similar to the normal {@link EnumSerializers}, but may take into

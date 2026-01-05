@@ -17,7 +17,7 @@ public abstract class Button {
 
 	private final boolean placeAtEnd;
 
-	private @Nullable AbstractEditorHandler editorHandler;
+	private @Nullable EditorLayout editorLayout;
 	private int slot = NO_SLOT;
 
 	public Button() {
@@ -28,13 +28,11 @@ public abstract class Button {
 		this.placeAtEnd = placeAtEnd;
 	}
 
-	void setEditorHandler(AbstractEditorHandler editorHandler) {
-		if (this.editorHandler != null) {
-			throw new IllegalStateException(
-					"The button has already been added to some editor handler!"
-			);
+	void setEditorLayout(EditorLayout editorLayout) {
+		if (this.editorLayout != null) {
+			throw new IllegalStateException("Button was already added to some editor layout!");
 		}
-		this.editorHandler = editorHandler;
+		this.editorLayout = editorLayout;
 	}
 
 	boolean isPlaceAtEnd() {
@@ -49,31 +47,31 @@ public abstract class Button {
 		this.slot = slot;
 	}
 
-	protected boolean isApplicable(AbstractEditorHandler editorHandler) {
+	protected boolean isApplicable(EditorLayout editorLayout) {
 		return true;
 	}
 
-	protected @Nullable AbstractEditorHandler getEditorHandler() {
-		return editorHandler;
+	protected @Nullable EditorLayout getEditorLayout() {
+		return editorLayout;
 	}
 
-	public abstract @Nullable ItemStack getIcon(EditorSession editorSession);
+	public abstract @Nullable ItemStack getIcon(EditorView editorView);
 
-	// Updates the icon in all sessions.
+	// Updates the icon in all editor views.
 	// Note: Cannot deal with changes to the registered buttons (the button's slot) while the
 	// inventory is open.
-	protected final void updateIcon() {
-		if (slot != NO_SLOT && editorHandler != null) {
-			editorHandler.updateButtonInAllSessions(this);
+	protected final void updateIcon(EditorView editorView) {
+		if (slot != NO_SLOT && editorLayout != null) {
+			editorView.updateSlotInAllViews(slot);
 		}
 	}
 
-	// Updates all icons in all sessions.
-	protected final void updateAllIcons() {
-		if (editorHandler != null) {
-			editorHandler.updateButtonsInAllSessions();
+	// Updates all icons in all editor views.
+	protected final void updateAllIcons(EditorView editorView) {
+		if (editorLayout != null) {
+			editorView.updateButtonsInAllViews();
 		}
 	}
 
-	protected abstract void onClick(EditorSession editorSession, InventoryClickEvent clickEvent);
+	protected abstract void onClick(EditorView editorView, InventoryClickEvent clickEvent);
 }

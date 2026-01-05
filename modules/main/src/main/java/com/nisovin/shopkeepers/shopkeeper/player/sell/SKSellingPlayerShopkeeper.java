@@ -50,11 +50,11 @@ public class SKSellingPlayerShopkeeper
 
 	@Override
 	protected void setup() {
-		this.registerUIHandlerIfMissing(DefaultUITypes.EDITOR(), () -> {
-			return new SellingPlayerShopEditorHandler(this);
+		this.registerViewProviderIfMissing(DefaultUITypes.EDITOR(), () -> {
+			return new SellingPlayerShopEditorViewProvider(this);
 		});
-		this.registerUIHandlerIfMissing(DefaultUITypes.TRADING(), () -> {
-			return new SellingPlayerShopTradingHandler(this);
+		this.registerViewProviderIfMissing(DefaultUITypes.TRADING(), () -> {
+			return new SellingPlayerShopTradingViewProvider(this);
 		});
 		super.setup();
 	}

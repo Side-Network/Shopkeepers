@@ -88,6 +88,13 @@ public class ForcingEntityTeleporter implements Listener {
 		// instead of Paper servers):
 		this.resetForcedEntityTeleport();
 
+		// MC-44654: For some entities (e.g. end crystals), the server does not automatically send
+		// an update packet to the client when their position changes. We force the client-side
+		// update here by toggling some other entity property.
+		var customNameVisible = entity.isCustomNameVisible();
+		entity.setCustomNameVisible(!customNameVisible);
+		entity.setCustomNameVisible(customNameVisible);
+
 		return result;
 	}
 

@@ -18,12 +18,12 @@ import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
-import com.nisovin.shopkeepers.shopobjects.living.LivingEntityAI;
-import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectCreationContext;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectType;
+import com.nisovin.shopkeepers.shopobjects.entity.base.EntityAI;
 import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObject;
-import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
 import com.nisovin.shopkeepers.ui.editor.Button;
-import com.nisovin.shopkeepers.ui.editor.EditorSession;
+import com.nisovin.shopkeepers.ui.editor.EditorView;
 import com.nisovin.shopkeepers.ui.editor.ShopkeeperActionButton;
 import com.nisovin.shopkeepers.util.bukkit.BlockFaceUtils;
 import com.nisovin.shopkeepers.util.bukkit.EntityUtils;
@@ -67,12 +67,12 @@ public class ShulkerShop extends SKLivingShopObject<Shulker> {
 			.build(properties);
 
 	public ShulkerShop(
-			LivingShops livingShops,
-			SKLivingShopObjectType<ShulkerShop> livingObjectType,
+			BaseEntityShopObjectCreationContext context,
+			BaseEntityShopObjectType<ShulkerShop> shopObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
-		super(livingShops, livingObjectType, shopkeeper, creationData);
+		super(context, shopObjectType, shopkeeper, creationData);
 		if (creationData != null) {
 			BlockFace targetedBlockFace = creationData.getTargetedBlockFace();
 			if (targetedBlockFace != null) {
@@ -128,7 +128,7 @@ public class ShulkerShop extends SKLivingShopObject<Shulker> {
 		if (!Settings.shulkerPeekIfPlayerNearby) return;
 
 		Location entityLocation = entity.getLocation();
-		Player nearestPlayer = EntityUtils.getNearestPlayer(entityLocation, LivingEntityAI.LOOK_RANGE);
+		Player nearestPlayer = EntityUtils.getNearestPlayer(entityLocation, EntityAI.LOOK_RANGE);
 		if (nearestPlayer != null) {
 			// Performance: Avoid updating the peek value if not necessary.
 			if (!MathUtils.fuzzyEquals(entity.getPeek(), Settings.shulkerPeekHeight, PEEK_EPSILON)) {
@@ -194,15 +194,12 @@ public class ShulkerShop extends SKLivingShopObject<Shulker> {
 	private Button getColorEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
-			public @Nullable ItemStack getIcon(EditorSession editorSession) {
+			public @Nullable ItemStack getIcon(EditorView editorView) {
 				return getColorEditorItem();
 			}
 
 			@Override
-			protected boolean runAction(
-					EditorSession editorSession,
-					InventoryClickEvent clickEvent
-			) {
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				boolean backwards = clickEvent.isRightClick();
 				cycleColor(backwards);
 				return true;

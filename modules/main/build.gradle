@@ -46,20 +46,6 @@ dependencies {
 	compileOnly libs.bstats.bukkit
 
 	shaded libs.bstats.bukkit
-
-	testImplementation libs.spigot.api
-	testImplementation libs.junit
-	testImplementation libs.hamcrest
-	(testImplementation libs.craftbukkit) {
-		artifact {
-			classifier = 'remapped-mojang'
-		}
-	}
-}
-
-// Note: There is no need to remap the test classes to run them.
-test {
-	exclude 'com/nisovin/shopkeepers/PerformanceTests.class'
 }
 
 processResources {
@@ -93,6 +79,11 @@ javadoc {
 	options.addStringOption('Xmaxwarns', '1')
 }
 */
+
+check {
+	// Test compilation against Paper API:
+	dependsOn compileWithPaper
+}
 
 shadowJar {
 	configureJarTaskWithMavenMetadata(project, it)

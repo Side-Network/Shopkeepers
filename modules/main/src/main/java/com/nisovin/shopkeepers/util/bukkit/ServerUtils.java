@@ -23,34 +23,49 @@ public final class ServerUtils {
 		}
 		IS_PAPER = isPaper;
 
-		if (isPaper) {
+		String mappingsVersion;
+		try {
+			mappingsVersion = findMappingsVersion();
+		} catch (Exception e) {
 			// Since Paper 1.21.6, the server no longer supports the mappings version. We use the
 			// Minecraft version instead.
-			try {
-				var serverBuildInfoClass = Class.forName("io.papermc.paper.ServerBuildInfo");
-				var serverBuildInfo = serverBuildInfoClass.getMethod("buildInfo").invoke(null);
-				var serverVersion = serverBuildInfoClass.getMethod("minecraftVersionId").invoke(serverBuildInfo);
-				assert serverVersion != null;
-				MAPPINGS_VERSION = Unsafe.assertNonNull(serverVersion.toString());
-			} catch (Exception e) {
-				throw new RuntimeException("Could not retrieve the server's version!", e);
+			if (isPaper) {
+				mappingsVersion = findPaperMinecraftVersion();
+			} else {
+				throw e;
 			}
-		} else {
-			UnsafeValues unsafeValues = Bukkit.getUnsafe();
-			Method getMappingsVersionMethod;
-			try {
-				getMappingsVersionMethod = unsafeValues.getClass().getDeclaredMethod("getMappingsVersion");
-			} catch (NoSuchMethodException | SecurityException e) {
-				throw new RuntimeException(
-						"Could not find method 'getMappingsVersion' in the UnsafeValues implementation!",
-						e
-				);
-			}
-			try {
-				MAPPINGS_VERSION = Unsafe.cast(getMappingsVersionMethod.invoke(unsafeValues));
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-				throw new RuntimeException("Could not retrieve the server's mappings version!", e);
-			}
+		}
+
+		MAPPINGS_VERSION = mappingsVersion;
+	}
+
+	private static String findMappingsVersion() {
+		UnsafeValues unsafeValues = Bukkit.getUnsafe();
+		Method getMappingsVersionMethod;
+		try {
+			getMappingsVersionMethod = unsafeValues.getClass().getDeclaredMethod("getMappingsVersion");
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(
+					"Could not find method 'getMappingsVersion' in the UnsafeValues implementation!",
+					e
+			);
+		}
+		try {
+			return Unsafe.cast(getMappingsVersionMethod.invoke(unsafeValues));
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException("Could not retrieve the server's mappings version!", e);
+		}
+	}
+
+	private static String findPaperMinecraftVersion() {
+		try {
+			var serverBuildInfoClass = Class.forName("io.papermc.paper.ServerBuildInfo");
+			var serverBuildInfo = serverBuildInfoClass.getMethod("buildInfo").invoke(null);
+			var serverVersion = serverBuildInfoClass.getMethod("minecraftVersionId").invoke(serverBuildInfo);
+			assert serverVersion != null;
+			return Unsafe.assertNonNull(serverVersion.toString());
+		} catch (Exception e) {
+			throw new RuntimeException("Could not retrieve the server's Minecraft version!", e);
 		}
 	}
 
@@ -78,6 +93,15 @@ public final class ServerUtils {
 	public static String getCraftBukkitPackage() {
 		Package pkg = Unsafe.assertNonNull(Bukkit.getServer().getClass().getPackage());
 		return pkg.getName();
+	}
+
+	/**
+	 * Gets the server's current data version.
+	 * 
+	 * @return the server's data version
+	 */
+	public static int getDataVersion() {
+		return Bukkit.getUnsafe().getDataVersion();
 	}
 
 	private ServerUtils() {

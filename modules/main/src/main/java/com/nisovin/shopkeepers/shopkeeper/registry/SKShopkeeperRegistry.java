@@ -352,8 +352,8 @@ public class SKShopkeeperRegistry implements ShopkeeperRegistry {
 		}
 
 		// Delayed closing of all active UI sessions:
-		// TODO UI handlers might want/need to handle the UI closing immediately here (e.g. to save
-		// UI state and apply shopkeeper changes).
+		// TODO Views might want/need to handle the UI closing immediately here (e.g. to save UI
+		// state and apply shopkeeper changes).
 		shopkeeper.abortUISessionsDelayed();
 
 		// If necessary, deactivate the shopkeeper (stop ticking, despawn, etc.):

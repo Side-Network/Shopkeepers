@@ -20,8 +20,8 @@ import com.nisovin.shopkeepers.commands.lib.context.CommandContextView;
 import com.nisovin.shopkeepers.util.java.Validate;
 
 /**
- * Accepts a {@link User} specified by either name (might not have to be exact, depending on the
- * used matching function) or UUID.
+ * Accepts a {@link User} specified by either UUID or name (might not have to be exact, depending on
+ * the used matching function).
  * <p>
  * Accounts for known users, e.g. online players and shop owners. This does, however, not check for
  * matching offline players by name (see rationale in {@link UserByNameArgument}), nor does this
@@ -30,8 +30,8 @@ import com.nisovin.shopkeepers.util.java.Validate;
 public class UserArgument extends CommandArgument<User> {
 
 	protected final ArgumentFilter<? super User> filter; // Not null
-	private final UserByNameArgument userNameArgument;
 	private final UserByUUIDArgument userUUIDArgument;
+	private final UserByNameArgument userNameArgument;
 	private final TypedFirstOfArgument<User> firstOfArgument;
 
 	public UserArgument(String name) {
@@ -56,6 +56,26 @@ public class UserArgument extends CommandArgument<User> {
 		super(name);
 		Validate.notNull(filter, "filter is null");
 		this.filter = filter;
+		this.userUUIDArgument = new UserByUUIDArgument(
+				name + ":uuid",
+				filter,
+				minimumUUIDCompletionInput
+		) {
+			@Override
+			protected Iterable<? extends UUID> getCompletionSuggestions(
+					CommandInput input,
+					CommandContextView context,
+					int minimumCompletionInput,
+					String idPrefix
+			) {
+				return Unsafe.initialized(UserArgument.this).getUUIDCompletionSuggestions(
+						input,
+						context,
+						minimumCompletionInput,
+						idPrefix
+				);
+			}
+		};
 		this.userNameArgument = new UserByNameArgument(
 				name + ":name",
 				filter,
@@ -85,29 +105,9 @@ public class UserArgument extends CommandArgument<User> {
 				);
 			}
 		};
-		this.userUUIDArgument = new UserByUUIDArgument(
-				name + ":uuid",
-				filter,
-				minimumUUIDCompletionInput
-		) {
-			@Override
-			protected Iterable<? extends UUID> getCompletionSuggestions(
-					CommandInput input,
-					CommandContextView context,
-					int minimumCompletionInput,
-					String idPrefix
-			) {
-				return Unsafe.initialized(UserArgument.this).getUUIDCompletionSuggestions(
-						input,
-						context,
-						minimumCompletionInput,
-						idPrefix
-				);
-			}
-		};
 		this.firstOfArgument = new TypedFirstOfArgument<>(
 				name + ":firstOf",
-				Arrays.asList(userNameArgument, userUUIDArgument),
+				Arrays.asList(userUUIDArgument, userNameArgument),
 				false,
 				false
 		);

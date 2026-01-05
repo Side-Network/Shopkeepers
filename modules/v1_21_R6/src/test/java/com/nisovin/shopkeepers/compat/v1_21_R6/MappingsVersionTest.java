@@ -12,7 +12,7 @@ public class MappingsVersionTest {
 	public void testMappingsVersion() throws Exception {
 		CompatProviderImpl compatProvider = new CompatProviderImpl();
 		CompatVersion compatVersion = compatProvider.getCompatVersion();
-		String expectedMappingsVersion = compatVersion.getMappingsVersion();
+		String expectedMappingsVersion = compatVersion.getFirstMappingsVersion();
 		String actualMappingsVersion = MappingsVersionExtractor.getMappingsVersion(
 				compatProvider.getCraftMagicNumbersClass()
 		);

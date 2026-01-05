@@ -1,11 +1,6 @@
 package com.nisovin.shopkeepers.shopobjects.living;
 
-import org.bukkit.Location;
-import org.bukkit.entity.EntityType;
-
 import com.nisovin.shopkeepers.SKShopkeepersPlugin;
-import com.nisovin.shopkeepers.api.internal.util.Unsafe;
-import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopkeeper.ShopkeeperData;
 import com.nisovin.shopkeepers.shopkeeper.migration.Migration;
@@ -13,6 +8,7 @@ import com.nisovin.shopkeepers.shopkeeper.migration.MigrationPhase;
 import com.nisovin.shopkeepers.shopkeeper.migration.ShopkeeperDataMigrator;
 import com.nisovin.shopkeepers.shopobjects.AbstractShopObject;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShops;
 import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
 import com.nisovin.shopkeepers.util.logging.Log;
 
@@ -71,47 +67,23 @@ public class LivingShops {
 		});
 	}
 
-	private final SKShopkeepersPlugin plugin;
-	private final SKLivingShopObjectTypes livingShopObjectTypes = new SKLivingShopObjectTypes(
-			Unsafe.initialized(this)
-	);
-	private final LivingEntityAI livingEntityAI;
+	private final SKLivingShopObjectTypes livingShopObjectTypes;
 	private final LivingEntityShopListener livingEntityShopListener;
 
-	public LivingShops(SKShopkeepersPlugin plugin) {
-		this.plugin = plugin;
-		livingEntityAI = new LivingEntityAI(plugin);
+	public LivingShops(SKShopkeepersPlugin plugin, BaseEntityShops baseEntityShops) {
+		livingShopObjectTypes = new SKLivingShopObjectTypes(baseEntityShops, this);
 		livingEntityShopListener = new LivingEntityShopListener(plugin);
 	}
 
-	public void onRegisterDefaults() {
-		livingShopObjectTypes.onRegisterDefaults();
-	}
-
 	public void onEnable() {
-		livingEntityAI.onEnable();
 		livingEntityShopListener.onEnable();
 	}
 
 	public void onDisable() {
 		livingEntityShopListener.onDisable();
-
-		// Stop living entity AI:
-		livingEntityAI.onDisable();
 	}
 
 	public SKLivingShopObjectTypes getLivingShopObjectTypes() {
 		return livingShopObjectTypes;
-	}
-
-	public LivingEntityAI getLivingEntityAI() {
-		return livingEntityAI;
-	}
-
-	// Bypassing creature spawn blocking plugins (e.g. region protection plugins):
-	void forceCreatureSpawn(Location location, EntityType entityType) {
-		if (Settings.bypassSpawnBlocking) {
-			plugin.getForcingCreatureSpawner().forceCreatureSpawn(location, entityType);
-		}
 	}
 }

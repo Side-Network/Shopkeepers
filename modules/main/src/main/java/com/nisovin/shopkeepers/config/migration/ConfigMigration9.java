@@ -1,7 +1,13 @@
 package com.nisovin.shopkeepers.config.migration;
 
-import org.bukkit.Sound;
+import java.util.Locale;
 
+import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import com.nisovin.shopkeepers.compat.Compat;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.bukkit.SoundEffect;
 import com.nisovin.shopkeepers.util.data.container.DataContainer;
 import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
@@ -45,10 +51,8 @@ public class ConfigMigration9 implements ConfigMigration {
 			}
 
 			// Try to get the sound by the old enum name:
-			Sound sound;
-			try {
-				sound = Sound.valueOf(soundName);
-			} catch (IllegalArgumentException e) {
+			Sound sound = this.getSoundByEnumName(soundName);
+			if (sound == null) {
 				// Sound not found: Skipping migration.
 				Log.info("  Setting '" + key + "': Sound enum value not found. Skipping migration.");
 				return;
@@ -64,11 +68,30 @@ public class ConfigMigration9 implements ConfigMigration {
 			assert newData != null;
 
 			Log.info("  Migrating setting '" + key + "' from sound name '" + soundName
-					+ "' to sound key '" + sound.getKey() + "'.");
+					+ "' to sound key '" + RegistryUtils.getKeyOrThrow(sound) + "'.");
 			configData.set(key, newData);
 		} catch (InvalidDataException e) {
 			Log.warning("  Setting '" + key + "': Failed to load. Skipping migration.");
 			return;
+		}
+	}
+
+	private @Nullable Sound getSoundByEnumName(String name) {
+		var key = NamespacedKey.fromString(name.toLowerCase(Locale.ROOT));
+		if (key != null) {
+			var sound = Compat.getProvider().getRegistry(Sound.class).get(key);
+			if (sound != null) {
+				return sound;
+			}
+		}
+
+		// Sound keys can have dots in them which were converted to _ in the enum/field names.
+		// Converting the _ back to dots would be to complex, because not all _ need to be converted
+		// back. We therefore check for a matching field name.
+		try {
+			return (Sound) Sound.class.getField(name).get(null);
+		} catch (NoSuchFieldException | IllegalAccessException e) {
+			return null;
 		}
 	}
 }

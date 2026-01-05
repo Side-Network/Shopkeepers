@@ -1,7 +1,7 @@
 package com.nisovin.shopkeepers.ui.hiring;
 
 import com.nisovin.shopkeepers.api.ShopkeepersPlugin;
-import com.nisovin.shopkeepers.ui.AbstractUIType;
+import com.nisovin.shopkeepers.ui.lib.AbstractUIType;
 
 public final class HiringUIType extends AbstractUIType {
 

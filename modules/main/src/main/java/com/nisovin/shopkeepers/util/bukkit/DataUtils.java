@@ -5,7 +5,6 @@ import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
-import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
 import com.nisovin.shopkeepers.util.data.container.DataContainer;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
@@ -26,18 +25,11 @@ public final class DataUtils {
 		return material;
 	}
 
-	// Additional processing whenever we save an item stack.
-	// itemStack can be null.
-	public static @Nullable Object serializeItemStack(@Nullable UnmodifiableItemStack itemStack) {
-		// Shallow copy: Prevents SnakeYaml from representing the item stack using anchors and
-		// aliases if the same item stack instance is saved to the same Yaml document multiple times
-		// in different contexts.
-		return ItemUtils.shallowCopy(itemStack);
-	}
-
 	// Additional processing whenever we load serialized item stacks.
 	// ReadOnly: Returns a new ItemStack instance if modifications are necessary.
-	public static @Nullable ItemStack deserializeItemStack(@ReadOnly @Nullable ItemStack loadedItemStack) {
+	public static @Nullable ItemStack processLoadedItemStack(
+			@ReadOnly @Nullable ItemStack loadedItemStack
+	) {
 		if (loadedItemStack == null) return null;
 		// Note: Spigot creates Bukkit ItemStacks, whereas Paper automatically replaces the
 		// deserialized Bukkit ItemStacks with CraftItemStacks. However, as long as the deserialized
@@ -59,8 +51,8 @@ public final class DataUtils {
 		return processed;
 	}
 
-	public static ItemStack deserializeNonNullItemStack(@ReadOnly ItemStack loadedItemStack) {
-		return Unsafe.assertNonNull(deserializeItemStack(loadedItemStack));
+	public static ItemStack processNonNullLoadedItemStack(@ReadOnly ItemStack loadedItemStack) {
+		return Unsafe.assertNonNull(processLoadedItemStack(loadedItemStack));
 	}
 
 	private DataUtils() {

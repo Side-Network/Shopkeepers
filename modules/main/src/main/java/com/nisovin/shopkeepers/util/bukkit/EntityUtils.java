@@ -16,11 +16,13 @@ import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.entity.ComplexEntityPart;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Pose;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Zombie;
 import org.bukkit.util.RayTraceResult;
@@ -33,6 +35,9 @@ import com.nisovin.shopkeepers.util.java.Validate;
 import com.nisovin.shopkeepers.util.logging.Log;
 
 public final class EntityUtils {
+
+	private static final double GROUND_DISTANCE_CHECK_OFFSET = 0.98D;
+	private static final double GROUND_DISTANCE_CHECK_RANGE = 1.0D;
 
 	// Temporarily re-used location object:
 	private static final Location SHARED_LOCATION = new Location(null, 0, 0, 0);
@@ -63,6 +68,32 @@ public final class EntityUtils {
 		}
 	}
 
+	public static @Nullable Location getStandingLocation(EntityType entityType, Block block) {
+		try {
+			// We check for collisions from slightly below the top of the block:
+			Location location = Unsafe.assertNonNull(block.getLocation(SHARED_LOCATION))
+					.add(0.5, GROUND_DISTANCE_CHECK_OFFSET, 0.5);
+
+			double distanceToGround = WorldUtils.getCollisionDistanceToGround(
+					location,
+					GROUND_DISTANCE_CHECK_RANGE,
+					EntityUtils.getCollidableFluids(entityType)
+			);
+			if (distanceToGround == GROUND_DISTANCE_CHECK_RANGE) {
+				// No collision within the checked range, i.e. no block for the entity to stand on:
+				return null;
+			}
+
+			// Adjust the location:
+			location.add(0.0D, -distanceToGround, 0.0D);
+
+			return location.clone();
+		} finally {
+			// Cleanup temporarily used location
+			SHARED_LOCATION.setWorld(null);
+		}
+	}
+
 	/**
 	 * Checks whether the given entity type burns in sunlight.
 	 * 
@@ -72,6 +103,8 @@ public final class EntityUtils {
 	 */
 	public static boolean burnsInSunlight(EntityType entityType) {
 		// Husks (a zombie sub-type) is not affected by sunburn.
+		// Note: Camel husk is also not affected by sunburn, but it does not derive from Zombie, so
+		// no special case is needed for it here.
 		if (entityType == EntityType.HUSK) return false;
 		if (entityType == EntityType.PHANTOM) return true;
 
@@ -98,6 +131,8 @@ public final class EntityUtils {
 	 */
 	public static boolean isRemovedOnPeacefulDifficulty(EntityType entityType) {
 		assert entityType != null;
+		// Note: Some mobs, like camel husk and zombie nautilus (not sub-types of Monster) do not
+		// spawn naturally in peaceful mode, but do not despawn automatically either.
 		switch (entityType) {
 		case EntityType.PIGLIN:
 			return false;
@@ -112,6 +147,53 @@ public final class EntityUtils {
 			} else {
 				return false;
 			}
+		}
+	}
+
+	/**
+	 * Checks if the given entity type can fly.
+	 * 
+	 * @param entityType
+	 *            the entity type
+	 * @return <code>true</code> if the entity of this type can fly
+	 */
+	public static boolean canFly(EntityType entityType) {
+		switch (entityType.name()) {
+		case "ALLAY":
+		case "BAT":
+		case "BEE":
+		case "CHICKEN":
+		case "BLAZE":
+		case "ENDER_DRAGON":
+		case "GHAST":
+		case "HAPPY_GHAST":
+		case "PARROT":
+		case "PHANTOM":
+		case "VEX":
+		case "WITHER":
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/**
+	 * Checks if the given {@link Pose} is a valid mannequin pose.
+	 * 
+	 * @param pose
+	 *            the pose
+	 * @return <code>true</code> if valid for mannequins
+	 */
+	public static boolean isValidMannequinPose(Pose pose) {
+		switch (pose) {
+		case STANDING:
+		case SNEAKING:
+		case SWIMMING:
+		case FALL_FLYING:
+		case SLEEPING:
+			return true;
+		default:
+			return false;
 		}
 	}
 

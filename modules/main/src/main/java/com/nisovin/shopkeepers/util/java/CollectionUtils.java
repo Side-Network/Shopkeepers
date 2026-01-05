@@ -277,6 +277,36 @@ public final class CollectionUtils {
 		return result;
 	}
 
+	// Note: Does not work for primitive arrays.
+	@SafeVarargs
+	public static <T> T[] concat(T @Nullable []... arrays) {
+		if (arrays == null || arrays.length == 0) {
+			return Unsafe.castNonNull(new Object[0]);
+		}
+
+		int length = 0;
+		for (T @Nullable [] array : arrays) {
+			Validate.notNull(array, "array element is null");
+			length += Unsafe.assertNonNull(array).length;
+		}
+
+		T @NonNull [] result = Unsafe.assertNonNull(Arrays.copyOf(arrays[0], length));
+		int resultLength = 0;
+		boolean first = true;
+		for (T @Nullable [] array : arrays) {
+			T[] nonNullArray = Unsafe.assertNonNull(array);
+			resultLength += nonNullArray.length;
+
+			if (first) {
+				first = false;
+				continue;
+			}
+
+			System.arraycopy(nonNullArray, 0, result, resultLength, nonNullArray.length);
+		}
+		return result;
+	}
+
 	public static <T> Stream<T> stream(Iterable<T> iterable) {
 		if (iterable instanceof Collection) {
 			Collection<T> collection = (Collection<T>) iterable;

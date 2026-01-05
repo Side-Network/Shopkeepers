@@ -8,8 +8,8 @@ import com.nisovin.shopkeepers.commands.lib.CommandInput;
 import com.nisovin.shopkeepers.commands.lib.argument.ArgumentParseException;
 import com.nisovin.shopkeepers.commands.lib.argument.ArgumentsReader;
 import com.nisovin.shopkeepers.commands.lib.argument.CommandArgument;
-import com.nisovin.shopkeepers.commands.lib.argument.fallback.FallbackArgument;
 import com.nisovin.shopkeepers.commands.lib.argument.fallback.FallbackArgumentException;
+import com.nisovin.shopkeepers.commands.lib.argument.filter.ArgumentRejectedException;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContext;
 import com.nisovin.shopkeepers.commands.lib.context.CommandContextView;
 import com.nisovin.shopkeepers.text.Text;
@@ -23,11 +23,25 @@ import com.nisovin.shopkeepers.util.java.Validate;
  * <p>
  * Currently this might only function correctly for command arguments that consume exactly one input
  * argument.
+ * <p>
+ * This command argument does not support fallbacks for the nested command argument: If the nested
+ * command argument were to use fallbacks, and there are earlier command arguments with fallbacks
+ * that are also able to parse the named argument (e.g. earlier {@link AnyStringFallback} or
+ * similar), the behavior would be unexpected: Rather then the named argument input being parsed by
+ * the fallback of the matching {@link NamedArgument} or its eventual parsing error being forwarded
+ * to the user, the input might instead be bound to the earlier {@link AnyStringFallback}. To avoid
+ * this unexpected behavior of the named input potentially being parsed by an earlier command
+ * argument fallback, this command argument does not support nested fallbacks and throws an
+ * {@link ArgumentRejectedException} to abort the command argument parsing right away when it
+ * successfully parses the name prefix but the inner command argument fails to parse the argument
+ * value. Instead of using using fallbacks, the inner command argument can be a
+ * {@link FirstOfArgument} that immediately either resolves to one of the nested command arguments
+ * or aborts with an argument parsing error.
  * 
  * @param <T>
  *            the type of the parsed argument
  */
-public class NamedArgument<T> extends FallbackArgument<T> {
+public class NamedArgument<T> extends CommandArgument<T> {
 
 	private static final String NAME_DELIMITER = "=";
 
@@ -35,6 +49,10 @@ public class NamedArgument<T> extends FallbackArgument<T> {
 
 	public NamedArgument(CommandArgument<T> argument) {
 		super(Validate.notNull(argument, "argument is null").getName());
+		// Note: We cannot check for and reject nested FallbackArguments here, because we want to
+		// support nested arguments like FirstOfArgument, which must derive from FallbackArgument to
+		// supported nested FallbackArguments in the general case. Instead, we throw a runtime
+		// exception should we ever observe a FallbackArgumentException at runtime.
 		this.argument = argument;
 		argument.setParent(this);
 	}
@@ -117,8 +135,19 @@ public class NamedArgument<T> extends FallbackArgument<T> {
 			argsReader.setCursor(adjustedArgsReader.getCursor()); // Mirror args reader changes
 			return value;
 		} catch (FallbackArgumentException e) {
-			// Wrap into our own fallback exception, so that we get informed:
-			throw new FallbackArgumentException(this, e);
+			// Fallbacks are not supported here.
+			throw Validate.State.error("NamedArgument '" + this.getName() + "' does not support"
+					+ " fallbacks! Observed: " + e);
+		} catch (ArgumentParseException e) {
+			// We successfully parsed the argument prefix, but the inner argument failed to parse:
+			// By always throwing an ArgumentRejectedException here, we ensure that the command
+			// argument parsing is aborted right away, rather then fallbacks being evaluated that
+			// might end up parsing the argument with the name prefix and result in a less relevant
+			// argument binding or error message. E.g. an earlier command argument might have a
+			// fallback that simply accepts any text. But since the argument prefix parsed
+			// successfully here, we assume that such a fallback is usually less relevant and
+			// therefore prefer to abort the parsing here right away.
+			throw new ArgumentRejectedException(this, e.getMessageText(), e);
 		}
 	}
 
@@ -171,24 +200,5 @@ public class NamedArgument<T> extends FallbackArgument<T> {
 		} catch (ArgumentParseException e) {
 			return Collections.emptyList();
 		}
-	}
-
-	@Override
-	public T parseFallback(
-			CommandInput input,
-			CommandContext context,
-			ArgumentsReader argsReader,
-			FallbackArgumentException fallbackException,
-			boolean parsingFailed
-	) throws ArgumentParseException {
-		return this.parseNamedArgument(input, argsReader, (adjustedInput, adjustedArgsReader) -> {
-			FallbackArgumentException originalFallback = (FallbackArgumentException) fallbackException.getOriginalException();
-			return ((FallbackArgument<T>) argument).parseFallback(
-					adjustedInput, context,
-					adjustedArgsReader,
-					originalFallback,
-					parsingFailed
-			);
-		});
 	}
 }

@@ -5,7 +5,6 @@ import java.util.List;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.Registry;
 import org.bukkit.entity.Wolf;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -16,10 +15,10 @@ import com.nisovin.shopkeepers.api.shopkeeper.ShopCreationData;
 import com.nisovin.shopkeepers.lang.Messages;
 import com.nisovin.shopkeepers.shopkeeper.AbstractShopkeeper;
 import com.nisovin.shopkeepers.shopobjects.ShopObjectData;
-import com.nisovin.shopkeepers.shopobjects.living.LivingShops;
-import com.nisovin.shopkeepers.shopobjects.living.SKLivingShopObjectType;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectCreationContext;
+import com.nisovin.shopkeepers.shopobjects.entity.base.BaseEntityShopObjectType;
 import com.nisovin.shopkeepers.ui.editor.Button;
-import com.nisovin.shopkeepers.ui.editor.EditorSession;
+import com.nisovin.shopkeepers.ui.editor.EditorView;
 import com.nisovin.shopkeepers.ui.editor.ShopkeeperActionButton;
 import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
@@ -46,7 +45,7 @@ public class WolfShop extends SittableShop<Wolf> {
 			.build();
 
 	public static final Property<Wolf.Variant> VARIANT = new BasicProperty<Wolf.Variant>()
-			.dataKeyAccessor("wolfVariant", KeyedSerializers.forRegistry(Wolf.Variant.class, Registry.WOLF_VARIANT))
+			.dataKeyAccessor("wolfVariant", KeyedSerializers.forRegistry(Wolf.Variant.class))
 			.defaultValue(Wolf.Variant.PALE)
 			.build();
 
@@ -61,12 +60,12 @@ public class WolfShop extends SittableShop<Wolf> {
 			.build(properties);
 
 	public WolfShop(
-			LivingShops livingShops,
-			SKLivingShopObjectType<WolfShop> livingObjectType,
+			BaseEntityShopObjectCreationContext context,
+			BaseEntityShopObjectType<WolfShop> shopObjectType,
 			AbstractShopkeeper shopkeeper,
 			@Nullable ShopCreationData creationData
 	) {
-		super(livingShops, livingObjectType, shopkeeper, creationData);
+		super(context, shopObjectType, shopkeeper, creationData);
 	}
 
 	@Override
@@ -147,15 +146,12 @@ public class WolfShop extends SittableShop<Wolf> {
 	private Button getAngryEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
-			public @Nullable ItemStack getIcon(EditorSession editorSession) {
+			public @Nullable ItemStack getIcon(EditorView editorView) {
 				return getAngryEditorItem();
 			}
 
 			@Override
-			protected boolean runAction(
-					EditorSession editorSession,
-					InventoryClickEvent clickEvent
-			) {
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				cycleAngry();
 				return true;
 			}
@@ -215,15 +211,12 @@ public class WolfShop extends SittableShop<Wolf> {
 	private Button getCollarColorEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
-			public @Nullable ItemStack getIcon(EditorSession editorSession) {
+			public @Nullable ItemStack getIcon(EditorView editorView) {
 				return getCollarColorEditorItem();
 			}
 
 			@Override
-			protected boolean runAction(
-					EditorSession editorSession,
-					InventoryClickEvent clickEvent
-			) {
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				boolean backwards = clickEvent.isRightClick();
 				cycleCollarColor(backwards);
 				return true;
@@ -242,11 +235,7 @@ public class WolfShop extends SittableShop<Wolf> {
 	}
 
 	public void cycleVariant(boolean backwards) {
-		this.setVariant(RegistryUtils.cycleKeyed(
-				Registry.WOLF_VARIANT,
-				this.getVariant(),
-				backwards
-		));
+		this.setVariant(RegistryUtils.cycleKeyed(Wolf.Variant.class, this.getVariant(), backwards));
 	}
 
 	private void applyVariant() {
@@ -298,15 +287,12 @@ public class WolfShop extends SittableShop<Wolf> {
 	private Button getVariantEditorButton() {
 		return new ShopkeeperActionButton() {
 			@Override
-			public @Nullable ItemStack getIcon(EditorSession editorSession) {
+			public @Nullable ItemStack getIcon(EditorView editorView) {
 				return getVariantEditorItem();
 			}
 
 			@Override
-			protected boolean runAction(
-					EditorSession editorSession,
-					InventoryClickEvent clickEvent
-			) {
+			protected boolean runAction(EditorView editorView, InventoryClickEvent clickEvent) {
 				boolean backwards = clickEvent.isRightClick();
 				cycleVariant(backwards);
 				return true;

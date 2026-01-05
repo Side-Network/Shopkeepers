@@ -1,20 +1,23 @@
 package com.nisovin.shopkeepers.compat;
 
+import org.bukkit.Keyed;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Chicken;
-import org.bukkit.entity.Cow;
+import org.bukkit.Registry;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Golem;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Salmon;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.entity.EntityExplodeEvent;
+import org.bukkit.entity.Pose;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MainHand;
+import org.bukkit.inventory.view.builder.InventoryViewBuilder;
+import org.bukkit.profile.PlayerProfile;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
+import com.nisovin.shopkeepers.util.inventory.ItemStackComponentsData;
+import com.nisovin.shopkeepers.util.inventory.ItemStackMetaTag;
 import com.nisovin.shopkeepers.util.inventory.ItemUtils;
 import com.nisovin.shopkeepers.util.java.Validate;
 
@@ -113,65 +116,70 @@ public interface CompatProvider {
 			@ReadOnly @Nullable ItemStack required
 	);
 
+	// Note: Different API on Paper (Component instead of String).
+	// Note: We cannot add the Spigot implementation as the default implementation here, since this
+	// would break our Paper-API compilation check.
+	public void setInventoryViewTitle(InventoryViewBuilder<?> builder, String title);
+
 	// Note: It is not safe to reduce the number of trading recipes! Reducing the size below the
 	// selected index can crash the client. It's left to the caller to ensure that the number of
 	// recipes does not get reduced, for example by inserting dummy entries.
 	public void updateTrades(Player player);
 
-	// For use in chat hover messages, null if not supported.
-	// TODO: Bukkit 1.20.6 also contains ItemMeta#getAsString now. However, this only includes the
-	// item's NBT data, not the full item stack NBT. And BungeeCord's HoverEvent Item content does
-	// not correctly serialize the data currently
-	// (https://github.com/SpigotMC/BungeeCord/issues/3688).
-	public @Nullable String getItemSNBT(@ReadOnly ItemStack itemStack);
+	public ItemStackMetaTag getItemStackMetaTag(@ReadOnly @Nullable ItemStack itemStack);
 
-	// MC 1.21+ TODO Can be removed once we only support Bukkit 1.21+
+	public boolean matches(ItemStackMetaTag provided, ItemStackMetaTag required, boolean matchPartialLists);
 
-	public boolean isDestroyingBlocks(EntityExplodeEvent event);
+	public @Nullable ItemStackComponentsData getItemStackComponentsData(@ReadOnly ItemStack itemStack);
 
-	public boolean isDestroyingBlocks(BlockExplodeEvent event);
+	public ItemStack deserializeItemStack(
+			int dataVersion,
+			NamespacedKey id,
+			int count,
+			@Nullable ItemStackComponentsData componentsData
+	);
 
-	// MC 1.21.3+ TODO Can be removed once we only support Bukkit 1.21.3+
+	// Note: Different implementation on Paper.
+	public <T extends Keyed> Registry<T> getRegistry(Class<T> clazz);
 
-	public default void setSalmonVariant(Salmon salmon, String variant) {
+	// MC 1.21.9+ TODO Can be removed once we only support Bukkit 1.21.9+
+
+	public default void setCopperGolemWeatherState(Golem golem, String weatherState) {
 		// Not supported by default.
 	}
 
-	// MC 1.21.5+ TODO Can be removed once we only support Bukkit 1.21.5+
-
-	/**
-	 * Whether this MC version supports item hover events with the item SNBT in the "value" field.
-	 * This is no longer supported in MC version 1.21.5 and above.
-	 * 
-	 * @return <code>true</code> if item SNBT hover event values are supported
-	 */
-	public default boolean supportsItemSNBTHoverEvents() {
-		return false;
-	}
-
-	public default void setCowVariant(Cow cow, NamespacedKey variant) {
+	// -2 to disable weathering state changes (waxed).
+	public default void setCopperGolemNextWeatheringTick(Golem golem, int tick) {
 		// Not supported by default.
 	}
 
-	public default NamespacedKey cycleCowVariant(NamespacedKey variant, boolean backwards) {
-		// Not supported by default.
-		return variant;
-	}
-
-	public default void setPigVariant(Pig pig, NamespacedKey variant) {
+	public default void setMannequinHideDescription(LivingEntity mannequin, boolean hideDescription) {
 		// Not supported by default.
 	}
 
-	public default NamespacedKey cyclePigVariant(NamespacedKey variant, boolean backwards) {
-		// Not supported by default.
-		return variant;
-	}
-
-	public default void setChickenVariant(Chicken chicken, NamespacedKey variant) {
+	public default void setMannequinDescription(LivingEntity mannequin, @Nullable String description) {
 		// Not supported by default.
 	}
 
-	public default NamespacedKey cycleChickenVariant(NamespacedKey variant, boolean backwards) {
+	public default void setMannequinMainHand(LivingEntity mannequin, MainHand mainHand) {
+		// Not supported by default.
+	}
+
+	public default void setMannequinPose(LivingEntity mannequin, Pose pose) {
+		// Not supported by default.
+	}
+
+	public default void setMannequinProfile(LivingEntity mannequin, @Nullable PlayerProfile profile) {
+		// Not supported by default.
+	}
+
+	// MC 1.21.11+ TODO Can maybe be removed once we only support Bukkit 1.21.11+
+
+	public default void setZombieNautilusVariant(LivingEntity zombieNautilus, NamespacedKey variant) {
+		// Not supported by default.
+	}
+
+	public default NamespacedKey cycleZombieNautilusVariant(NamespacedKey variant, boolean backwards) {
 		// Not supported by default.
 		return variant;
 	}

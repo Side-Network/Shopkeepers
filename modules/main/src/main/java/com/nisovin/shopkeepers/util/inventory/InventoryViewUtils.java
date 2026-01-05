@@ -12,6 +12,7 @@ public final class InventoryViewUtils {
 		return rawSlot >= 0 && rawSlot < view.getTopInventory().getSize();
 	}
 
+	// This only considers storage slots, i.e. container and quickbar slots.
 	public static boolean isPlayerInventory(InventoryView view, int rawSlot) {
 		if (rawSlot < view.getTopInventory().getSize()) return false;
 

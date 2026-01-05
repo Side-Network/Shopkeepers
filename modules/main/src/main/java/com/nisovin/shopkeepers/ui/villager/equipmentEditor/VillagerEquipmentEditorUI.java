@@ -3,7 +3,7 @@ package com.nisovin.shopkeepers.ui.villager.equipmentEditor;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Player;
 
-import com.nisovin.shopkeepers.SKShopkeepersPlugin;
+import com.nisovin.shopkeepers.ui.lib.UISessionManager;
 import com.nisovin.shopkeepers.util.java.Validate;
 
 public class VillagerEquipmentEditorUI {
@@ -12,8 +12,9 @@ public class VillagerEquipmentEditorUI {
 		Validate.notNull(entity, "entity is null");
 		Validate.notNull(player, "player is null");
 
-		VillagerEquipmentEditorHandler ui = new VillagerEquipmentEditorHandler(entity);
-		return SKShopkeepersPlugin.getInstance().getUIRegistry().requestUI(ui, player);
+		var viewProvider = new VillagerEquipmentEditorViewProvider(entity);
+		var config = new VillagerEquipmentEditorUIState(entity);
+		return UISessionManager.getInstance().requestUI(viewProvider, player, config);
 	}
 
 	private VillagerEquipmentEditorUI() {

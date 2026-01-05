@@ -14,7 +14,7 @@ public final class Retry {
 		 * {@link Retry#retry(Callable, int, Retry.Callback)}.
 		 * <p>
 		 * This can be used to process the failed attempt (e.g. log it) and to prepare a subsequent
-		 * reattempt.
+		 * re-attempt.
 		 * 
 		 * @param attemptNumber
 		 *            the number of the last failed attempt, starting at <code>1</code> for the
@@ -36,7 +36,7 @@ public final class Retry {
 	 * If the callable throws an {@link Exception} (checked or unchecked), the exception is silently
 	 * ignored and the callable is executed another time, up until the specified limit of attempts
 	 * is reached. Any other type of {@link Throwable} is forwarded to the caller and does not
-	 * trigger another reattempt.
+	 * trigger another re-attempt.
 	 * <p>
 	 * In case of success, the return value of the callable is returned. In case of failure, the
 	 * exception thrown by the callable during the last failed attempt is forwarded.
@@ -62,7 +62,7 @@ public final class Retry {
 	 * If the callable throws an {@link Exception} (checked or unchecked), the exception is silently
 	 * ignored and the callable is executed another time, up until the specified limit of attempts
 	 * is reached. Any other type of {@link Throwable} is forwarded to the caller and does not
-	 * trigger another reattempt.
+	 * trigger another re-attempt.
 	 * <p>
 	 * In case of success, the return value of the callable is returned. In case of failure, the
 	 * exception thrown by the callable during the last failed attempt is forwarded.
@@ -70,7 +70,7 @@ public final class Retry {
 	 * Optionally, a {@link Retry.Callback} can be provided which gets run after every failed
 	 * execution attempt. It provides the number of the last failed attempt together with the thrown
 	 * exception. This can be used to process failed attempts and to perform preparation for any
-	 * subsequent reattempt. Any exception thrown by the {@link Retry.Callback} itself will abort
+	 * subsequent re-attempt. Any exception thrown by the {@link Retry.Callback} itself will abort
 	 * the retrying with that exception.
 	 * 
 	 * @param <T>

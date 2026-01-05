@@ -193,7 +193,7 @@ public class AnyFallbackArgument extends FallbackArgument<@Nullable Object> {
 				));
 			} catch (FallbackArgumentException e) {
 				// Fallback is not allowed to throw another fallback exception here.
-				Validate.State.error("Original fallback argument '"
+				throw Validate.State.error("Original fallback argument '"
 						+ originalFallbackArgument.getName()
 						+ "' threw another FallbackArgumentException while parsing fallback: " + e);
 			} catch (ArgumentParseException e) {

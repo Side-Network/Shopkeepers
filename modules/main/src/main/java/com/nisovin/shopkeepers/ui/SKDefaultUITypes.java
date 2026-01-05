@@ -9,6 +9,7 @@ import com.nisovin.shopkeepers.ui.confirmations.ConfirmationUIType;
 import com.nisovin.shopkeepers.ui.editor.EditorUIType;
 import com.nisovin.shopkeepers.ui.equipmentEditor.EquipmentEditorUIType;
 import com.nisovin.shopkeepers.ui.hiring.HiringUIType;
+import com.nisovin.shopkeepers.ui.lib.AbstractUIType;
 import com.nisovin.shopkeepers.ui.trading.TradingUIType;
 import com.nisovin.shopkeepers.ui.villager.editor.VillagerEditorUIType;
 import com.nisovin.shopkeepers.ui.villager.equipmentEditor.VillagerEquipmentEditorUIType;

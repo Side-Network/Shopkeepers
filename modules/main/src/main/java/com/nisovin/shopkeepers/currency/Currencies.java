@@ -32,8 +32,14 @@ public final class Currencies {
 	private static final List<Currency> ALL = new ArrayList<>();
 	private static final List<? extends Currency> ALL_VIEW = Collections.unmodifiableList(ALL);
 
+	// Skip the ItemData matches check for the initial loading of the default currencies, since the
+	// compat provider is not available yet at this point. The default data is assumed to be valid.
+	// Also, we load the currencies again with full validation after the config has been loaded.
+	private static boolean SKIP_ITEM_DATA_CHECK = true;
+
 	static {
 		load();
+		SKIP_ITEM_DATA_CHECK = false;
 	}
 
 	public static void load() {
@@ -59,14 +65,18 @@ public final class Currencies {
 					+ "': There is already another currency with the same id!");
 			return;
 		}
-		for (Currency otherCurrency : ALL) {
-			if (otherCurrency.getItemData().matches(currency.getItemData().asUnmodifiableItemStack())
-					|| currency.getItemData().matches(otherCurrency.getItemData().asUnmodifiableItemStack())) {
-				Log.severe("Invalid currency '" + currency.getId()
-						+ "': There is already another currency with a matching item!");
-				return;
+
+		if (!SKIP_ITEM_DATA_CHECK) {
+			for (Currency otherCurrency : ALL) {
+				if (otherCurrency.getItemData().matches(currency.getItemData().asUnmodifiableItemStack())
+						|| currency.getItemData().matches(otherCurrency.getItemData().asUnmodifiableItemStack())) {
+					Log.severe("Invalid currency '" + currency.getId()
+							+ "': There is already another currency with a matching item!");
+					return;
+				}
 			}
 		}
+
 		ALL.add(currency);
 	}
 

@@ -3,20 +3,17 @@ package com.nisovin.shopkeepers.util.inventory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.internal.util.Unsafe;
 import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
 import com.nisovin.shopkeepers.util.bukkit.ConfigUtils;
-import com.nisovin.shopkeepers.util.bukkit.TextUtils;
+import com.nisovin.shopkeepers.util.bukkit.RegistryUtils;
 import com.nisovin.shopkeepers.util.data.container.DataContainer;
 import com.nisovin.shopkeepers.util.data.property.BasicProperty;
 import com.nisovin.shopkeepers.util.data.property.Property;
@@ -24,9 +21,10 @@ import com.nisovin.shopkeepers.util.data.property.validation.bukkit.MaterialVali
 import com.nisovin.shopkeepers.util.data.serialization.DataSerializer;
 import com.nisovin.shopkeepers.util.data.serialization.InvalidDataException;
 import com.nisovin.shopkeepers.util.data.serialization.MissingDataException;
+import com.nisovin.shopkeepers.util.data.serialization.bukkit.ItemStackSerializers;
 import com.nisovin.shopkeepers.util.data.serialization.bukkit.MinecraftEnumSerializers;
+import com.nisovin.shopkeepers.util.data.serialization.bukkit.NamespacedKeySerializers;
 import com.nisovin.shopkeepers.util.data.serialization.java.DataContainerSerializers;
-import com.nisovin.shopkeepers.util.java.Lazy;
 import com.nisovin.shopkeepers.util.java.Validate;
 
 /**
@@ -34,26 +32,11 @@ import com.nisovin.shopkeepers.util.java.Validate;
  */
 public final class ItemData {
 
-	/**
-	 * Disabled by default because the conversion from the plain to the Json text format can be
-	 * unstable from one server version to another.
-	 */
-	// Also: SPIGOT-7571: Legacy color codes are now valid JSON text components. However, Bukkit
-	// handles these display name and lore strings differently depending on whether they are loaded
-	// from a config file (tries to parse the text as JSON components) versus when a plugin calls
-	// ItemMeta#setDisplayName / #setLore (does not attempt to parse the given strings as Json).
-	// When we serialize an ItemStack / ItemData that had a display name or lore set via the
-	// ItemMeta, and we use this 'preferPlainTextFormat' mode, we can end up with strings with
-	// legacy color codes inside the config that produce a different component format when loaded,
-	// since they are now considered valid Json text.
-	private static boolean SERIALIZER_PREFERS_PLAIN_TEXT_FORMAT = false;
+	// Null: Will use the server's current data version.
+	private static @Nullable Integer SERIALIZER_DATA_VERSION = null;
 
-	public static void serializerPrefersPlainTextFormat(boolean preferPlainTextFormat) {
-		SERIALIZER_PREFERS_PLAIN_TEXT_FORMAT = preferPlainTextFormat;
-	}
-
-	public static void resetSerializerPrefersPlainTextFormat() {
-		serializerPrefersPlainTextFormat(false);
+	public static void setSerializerDataVersion(int dataVersion) {
+		SERIALIZER_DATA_VERSION = dataVersion;
 	}
 
 	private static final Property<Material> ITEM_TYPE = new BasicProperty<Material>()
@@ -63,11 +46,6 @@ public final class ItemData {
 			.build();
 
 	private static final String META_TYPE_KEY = "meta-type";
-	private static final String DISPLAY_NAME_KEY = "display-name";
-	private static final String LORE_KEY = "lore";
-
-	// Special case: Omitting 'blockMaterial' for empty TILE_ENTITY item meta.
-	private static final String TILE_ENTITY_BLOCK_MATERIAL_KEY = "blockMaterial";
 
 	// Entries are lazily added and then cached:
 	// The mapped value can be null for items that do not support item meta.
@@ -105,128 +83,79 @@ public final class ItemData {
 
 	/**
 	 * A {@link DataSerializer} for values of type {@link ItemData}.
+	 * <p>
+	 * {@link ItemData} is primarily used for item data inside the config. In order to keep the
+	 * config representation concise, we don't serialize the data version for each {@link ItemData}
+	 * value, but expect it to be persisted in a separate setting once and injected via
+	 * {@link #setSerializerDataVersion(int)} before the first {@link ItemData} setting is
+	 * deserialized.
 	 */
 	public static final DataSerializer<ItemData> SERIALIZER = new DataSerializer<ItemData>() {
 		@Override
 		public @Nullable Object serialize(ItemData value) {
 			Validate.notNull(value, "value is null");
-			Map<? extends String, @NonNull ?> serializedMetaData = value.getSerializedMetaData();
-			if (serializedMetaData.isEmpty()) {
-				// Use a more compact representation if there is no additional item data:
-				return value.getType().name();
+
+			// getKey instead of getKeyOrThrow: Compatible with both Spigot and Paper.
+			var itemTypeKey = RegistryUtils.getKeyOrThrow(value.getType());
+
+			var componentsData = ItemStackComponentsData.of(ItemUtils.asItemStack(value.dataItem));
+			if (componentsData == null) {
+				// Use a more compact representation if there is no components data:
+				return NamespacedKeySerializers.DEFAULT.serialize(itemTypeKey);
 			}
 
-			DataContainer itemDataData = DataContainer.create();
-			itemDataData.set(ITEM_TYPE, value.getType());
-
-			// Lazily instantiated, only if needed during serialization:
-			Lazy<@Nullable ItemMeta> lazyItemMeta = new Lazy<>(value::getItemMeta);
-			Lazy<Map<? extends String, @NonNull ?>> lazyPlainSerializedMetaData = new Lazy<>(
-					() -> {
-						ItemMeta itemMeta = lazyItemMeta.get();
-						if (itemMeta != null) {
-							// ItemMeta#getDisplayName and #getLore convert from the ItemMeta's
-							// internal Json representations to plain legacy text representations.
-							// By applying those plain representations back to the ItemMeta and then
-							// serializing the ItemMeta, we are able check if the resulting Json
-							// representations in the newly serialized ItemMeta matches our original
-							// serialized representations.
-							if (itemMeta.hasDisplayName()) {
-								itemMeta.setDisplayName(itemMeta.getDisplayName());
-							}
-							if (itemMeta.hasLore()) {
-								itemMeta.setLore(itemMeta.getLore());
-							}
-						}
-						return ItemSerialization.serializeItemMetaOrEmpty(itemMeta);
-					}
-			);
-			boolean preferPlainTextFormat = SERIALIZER_PREFERS_PLAIN_TEXT_FORMAT;
-
-			for (Entry<? extends String, @NonNull ?> metaEntry : serializedMetaData.entrySet()) {
-				String metaKey = metaEntry.getKey();
-				Object metaValue = metaEntry.getValue();
-
-				// We omit any data that can be easily restored during deserialization:
-				// Omit meta type key:
-				if (META_TYPE_KEY.equals(metaKey)) continue;
-
-				// Omit 'blockMaterial' for empty TILE_ENTITY item meta:
-				if (TILE_ENTITY_BLOCK_MATERIAL_KEY.equals(metaKey)) {
-					// Check if specific meta type only contains unspecific metadata:
-					ItemMeta specificItemMeta = Unsafe.assertNonNull(lazyItemMeta.get());
-					// TODO Relies on some material with unspecific item meta.
-					ItemMeta unspecificItemMeta = Bukkit.getItemFactory().asMetaFor(
-							specificItemMeta,
-							Material.STONE
-					);
-					if (Bukkit.getItemFactory().equals(unspecificItemMeta, specificItemMeta)) {
-						continue; // Skip 'blockMaterial' entry
-					}
-				}
-
-				// Special handling of text data:
-				// - We might optionally prefer the plain text format with color codes for texts
-				// that the server can loss-less convert back to the Json text format.
-				// - We want to use alternative color codes.
-				if (DISPLAY_NAME_KEY.equals(metaKey)) {
-					if (metaValue instanceof String) {
-						String serializedDisplayName = (String) metaValue;
-
-						if (preferPlainTextFormat) {
-							ItemMeta itemMeta = Unsafe.assertNonNull(lazyItemMeta.get());
-							String plainDisplayName = itemMeta.getDisplayName();
-							if (!serializedDisplayName.equals(plainDisplayName)) {
-								// The serialized display name might be in Json format. Check if we
-								// can preserve it even if we serialize it in plain format:
-								String plainSerializedDisplayName = Unsafe.castNonNull(
-										lazyPlainSerializedMetaData.get().get(DISPLAY_NAME_KEY)
-								);
-								if (serializedDisplayName.equals(plainSerializedDisplayName)) {
-									// Use the plain representation:
-									serializedDisplayName = plainDisplayName;
-								}
-							}
-						}
-
-						// Use alternative color codes:
-						metaValue = TextUtils.decolorize(serializedDisplayName);
-					}
-				} else if (LORE_KEY.equals(metaKey)) {
-					if (metaValue instanceof List) {
-						List<?> serializedLore = (List<?>) metaValue;
-
-						if (preferPlainTextFormat) {
-							ItemMeta itemMeta = Unsafe.assertNonNull(lazyItemMeta.get());
-							List<?> plainLore = Unsafe.assertNonNull(itemMeta.getLore());
-							if (!serializedLore.equals(plainLore)) {
-								// The serialized lore might be in Json format. Check if we can
-								// preserve it even if we serialize it in plain format:
-								List<?> plainSerializedLore = Unsafe.castNonNull(
-										lazyPlainSerializedMetaData.get().get(LORE_KEY)
-								);
-								if (serializedLore.equals(plainSerializedLore)) {
-									// Use the plain representation:
-									serializedLore = plainLore;
-								}
-							}
-						}
-
-						// Use alternative color codes:
-						metaValue = TextUtils.decolorizeUnknown(serializedLore);
-					}
-				}
-
-				// Insert the entry into the data container:
-				// A deep copy is assumed to not be needed.
-				itemDataData.set(metaKey, metaValue);
-			}
-			return itemDataData.serialize();
+			// Like ItemStackSerializers.UNMODIFIABLE#serialize, but omits COUNT and DATA_VERSION:
+			// The data version is loaded and injected from a shared config setting before
+			// deserialization.
+			var dataContainer = DataContainer.create();
+			dataContainer.set(ItemStackSerializers.ID, itemTypeKey);
+			dataContainer.set(ItemStackSerializers.COMPONENTS, componentsData);
+			return dataContainer.serialize();
 		}
 
 		@Override
 		public ItemData deserialize(Object data) throws InvalidDataException {
 			Validate.notNull(data, "data is null");
+			try {
+				var dataVersion = SERIALIZER_DATA_VERSION; // Can be null
+
+				// Unmodifiable item: Avoids creating another item copy during ItemData
+				// construction.
+				UnmodifiableItemStack dataItem;
+				if (data instanceof String dataString) {
+					// Reconstruct from compact representation (no additional item metadata):
+					var dataContainer = DataContainer.create();
+					dataContainer.set(ItemStackSerializers.ID.getName(), dataString);
+					dataContainer.set(ItemStackSerializers.DATA_VERSION.getName(), dataVersion);
+					dataItem = ItemStackSerializers.UNMODIFIABLE.deserialize(dataContainer);
+				} else {
+					var dataContainer = DataContainer.of(data);
+					if (dataContainer != null) {
+						// Ensure that the data container is mutable:
+						// For example, the output of serialize(ItemData) is immutable, which can be
+						// encountered when the default value for a missing ItemData setting is
+						// inserted into the config.
+						dataContainer = DataContainer.ofNonNull(dataContainer.getValuesCopy());
+						dataContainer.set(ItemStackSerializers.DATA_VERSION.getName(), dataVersion);
+						dataItem = ItemStackSerializers.UNMODIFIABLE.deserialize(dataContainer);
+					} else {
+						// Unexpected. Forward as-is.
+						dataItem = ItemStackSerializers.UNMODIFIABLE.deserialize(data);
+					}
+				}
+				return new ItemData(dataItem);
+			} catch (InvalidDataException e) {
+				try {
+					return this.legacyDeserialize(data);
+				} catch (InvalidDataException legacyException) {
+					// If the legacy deserialization also fails, re-throw the original exception:
+					throw e;
+				}
+			}
+		}
+
+		// TODO This can be removed once we expect all configs to have been updated.
+		private ItemData legacyDeserialize(Object data) throws InvalidDataException {
 			Material itemType;
 			DataContainer itemDataData = null;
 			if (data instanceof String) {
@@ -279,20 +208,6 @@ public final class ItemData {
 				// Insert meta type:
 				itemMetaData.put(META_TYPE_KEY, metaType);
 
-				// Convert color codes for display name and lore:
-				Object displayNameData = itemMetaData.get(DISPLAY_NAME_KEY);
-				if (displayNameData instanceof String) { // Also checks for null
-					itemMetaData.put(
-							DISPLAY_NAME_KEY,
-							TextUtils.colorize((String) displayNameData)
-					);
-				}
-				// Null if the data is not a list:
-				List<?> loreData = itemDataData.getList(LORE_KEY);
-				if (loreData != null) {
-					itemMetaData.put(LORE_KEY, TextUtils.colorizeUnknown(loreData));
-				}
-
 				// Deserialize the ItemMeta (can be null):
 				ItemMeta itemMeta = ItemSerialization.deserializeItemMeta(itemMetaData);
 
@@ -310,9 +225,9 @@ public final class ItemData {
 	/////
 
 	private final UnmodifiableItemStack dataItem; // Has an amount of 1
-	// Cache serialized item metadata, to avoid serializing it again for every comparison:
+	// Cache serialized item meta, to avoid serializing it again for every comparison:
 	// Gets lazily initialized when needed.
-	private @ReadOnly @Nullable Map<? extends String, @ReadOnly @NonNull ?> serializedMetaData = null;
+	private @ReadOnly @Nullable ItemStackMetaTag serializedMetaData = null;
 
 	public ItemData(Material type) {
 		// Unmodifiable wrapper: Avoids creating another item copy during construction.
@@ -386,12 +301,11 @@ public final class ItemData {
 	}
 
 	// Not null.
-	private Map<? extends String, @NonNull ?> getSerializedMetaData() {
+	private ItemStackMetaTag getSerializedMetaData() {
 		// Lazily cache the serialized data:
 		if (serializedMetaData == null) {
-			ItemMeta itemMeta = dataItem.getItemMeta();
 			// Not null after initialization:
-			serializedMetaData = ItemSerialization.serializeItemMetaOrEmpty(itemMeta);
+			serializedMetaData = ItemStackMetaTag.of(ItemUtils.asItemStack(dataItem));
 		}
 		assert serializedMetaData != null;
 		return serializedMetaData;
@@ -428,7 +342,7 @@ public final class ItemData {
 	}
 
 	public boolean matches(@ReadOnly @Nullable ItemStack item) {
-		return this.matches(item, false); // Not matching partial lists
+		return this.matches(item, true); // Matching partial lists
 	}
 
 	public boolean matches(@Nullable UnmodifiableItemStack item) {
@@ -450,7 +364,7 @@ public final class ItemData {
 	}
 
 	public boolean matches(@Nullable ItemData itemData) {
-		return this.matches(itemData, false); // Not matching partial lists
+		return this.matches(itemData, true); // Matching partial lists
 	}
 
 	// Given ItemData is of same type and has data matching this ItemData.

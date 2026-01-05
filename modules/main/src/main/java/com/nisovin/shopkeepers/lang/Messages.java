@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.nisovin.shopkeepers.SKShopkeepersPlugin;
 import com.nisovin.shopkeepers.config.Settings;
 import com.nisovin.shopkeepers.config.lib.Config;
@@ -41,7 +43,7 @@ public class Messages extends Config {
 	public static String shopTypeDescTrading = c("trades items with players");
 	public static String shopTypeDescBook = c("sells book copies");
 
-	public static String shopObjectTypeLiving = c("{type}");
+	public static String shopObjectTypeEntity = c("{type}");
 	public static String shopObjectTypeSign = c("sign");
 	public static String shopObjectTypeHangingSign = c("hanging sign");
 	public static String shopObjectTypeNpc = c("npc");
@@ -50,12 +52,13 @@ public class Messages extends Config {
 	public static Text selectedShopObjectType = Text.parse("&aSelected object type: &6{type}");
 
 	public static Text creationItemSelected = Text.parse("&aShop creation:\n"
-			+ "&e  Do not aim at any block. Then:\n"
-			+ "&e  Left/Right-click to select the shop type.\n"
-			+ "&e  Sneak + left/right-click to select the object type.\n"
+			+ "&e  Do not aim at any block. Then:{shopTypeSelection}{objectTypeSelection}\n"
 			+ "&e  Right-click a container to select it.\n"
 			+ "&e  Then right-click a block to place the shopkeeper."
 	);
+
+	public static Text creationItemShopTypeSelection = Text.parse("\n&e  Left/Right-click to select the shop type.");
+	public static Text creationItemObjectTypeSelection = Text.parse("\n&e  Sneak + left/right-click to select the object type.");
 
 	public static String stateEnabled = c("&2Enabled");
 	public static String stateDisabled = c("&4Disabled");
@@ -69,6 +72,18 @@ public class Messages extends Config {
 	public static String buttonCurrentPage = c("&6Page {page} of {max_page}");
 	public static List<String> buttonCurrentPageLore = c(Arrays.asList());
 
+	public static String buttonShopOpen = c("&aClose shop");
+	public static List<String> buttonShopOpenLore = c(Arrays.asList(
+			"Temporarily closes the shop.",
+			"Currently: &2Open",
+			"&2Players can trade."
+	));
+	public static String buttonShopClosed = c("&aOpen shop");
+	public static List<String> buttonShopClosedLore = c(Arrays.asList(
+			"Re-opens the shop.",
+			"Currently: &4Closed",
+			"&4Players cannot trade."
+	));
 	public static String buttonName = c("&aSet shop name");
 	public static List<String> buttonNameLore = c(Arrays.asList(
 			"Lets you rename",
@@ -326,6 +341,66 @@ public class Messages extends Config {
 	public static List<String> buttonSaddleLore = c(Arrays.asList(
 			"Toggles the mob's saddle"
 	));
+	public static String buttonCopperGolemWeatherState = c("&aChoose oxidation level");
+	public static List<String> buttonCopperGolemWeatherStateLore = c(Arrays.asList(
+			"Changes the copper golem's",
+			"oxidation level"
+	));
+	public static String buttonArmorStandBasePlate = c("&aToggle base plate");
+	public static List<String> buttonArmorStandBasePlateLore = c(Arrays.asList(
+			"Toggles the base plate",
+			"of the armor stand"
+	));
+	public static String buttonArmorStandShowArms = c("&aToggle arms");
+	public static List<String> buttonArmorStandShowArmsLore = c(Arrays.asList(
+			"Toggles the arms",
+			"of the armor stand"
+	));
+	public static String buttonArmorStandSmall = c("&aToggle size");
+	public static List<String> buttonArmorStandSmallLore = c(Arrays.asList(
+			"Toggles the size",
+			"of the armor stand"
+	));
+	public static String buttonMannequinMainHand = c("&aToggle main hand");
+	public static List<String> buttonMannequinMainHandLore = c(Arrays.asList(
+			"Toggles the main hand",
+			"of the mannequin"
+	));
+	public static String buttonMannequinPose = c("&aToggle pose");
+	public static List<String> buttonMannequinPoseLore = c(Arrays.asList(
+			"Toggles the pose",
+			"of the mannequin"
+	));
+	public static String buttonMannequinProfile = c("&aChange skin");
+	public static List<String> buttonMannequinProfileLore = c(Arrays.asList(
+			"Changes the skin",
+			"of the mannequin"
+	));
+	public static String buttonNautilusArmor = c("&aChoose armor");
+	public static List<String> buttonNautilusArmorLore = c(Arrays.asList(
+			"Changes the armor",
+			"of the nautilus"
+	));
+	public static String buttonZombieNautilusVariant = c("&aChoose variant");
+	public static List<String> buttonZombieNautilusVariantLore = c(Arrays.asList(
+			"Changes the look of",
+			"the zombie nautilus."
+	));
+	public static String buttonEndCrystalBottomSlab = c("&aToggle bottom slab");
+	public static List<String> buttonEndCrystalBottomSlabLore = c(Arrays.asList(
+			"Toggles the bottom slab",
+			"of the end crystal"
+	));
+
+	public static Text mannequinEnterProfile = Text.parse(
+			"&aPlease enter in chat the name or id of the player whose profile you want to apply to"
+					+ " the mannequin.\n"
+					+ "&a  Enter a dash (-) to clear the current profile.\n"
+					+ "&a  Enter an exclamation mark (!) to keep the current profile.");
+	public static Text mannequinEnterProfileCanceled = Text.parse("&7Canceled: The mannequin's profile was not changed.");
+	public static Text mannequinProfileSet = Text.parse("&aThe mannequin's profile has been set to '&e{profileName}&a'!");
+	public static Text mannequinProfileCleared = Text.parse("&aThe mannequin's profile has been cleared!");
+	public static Text mannequinProfileInvalid = Text.parse("&cFailed to fetch the profile for '&e{input}&c'!");
 
 	public static String equipmentEditorTitle = c("Equipment Editor");
 	public static List<String> equipmentSlotLore = c(Arrays.asList(
@@ -365,10 +440,13 @@ public class Messages extends Config {
 	public static Text mustTargetBlock = Text.parse("&7You must look at a block to place the shopkeeper.");
 	public static Text missingSpawnLocation = Text.parse("&7You must specify a spawn location for this type of shop.");
 	public static Text spawnBlockNotEmpty = Text.parse("&7The spawn location must be empty.");
+	public static Text cannotSpawnMidair = Text.parse("&7The selected shop object cannot be placed in midair.");
 	public static Text invalidSpawnBlockFace = Text.parse("&7The shopkeeper cannot be placed on this side of the block.");
 	public static Text mobCannotSpawnOnPeacefulDifficulty = Text.parse("&7The selected mob type cannot spawn here on peaceful difficulty.");
 	public static Text restrictedArea = Text.parse("&7You cannot place a shopkeeper in this area.");
 	public static Text locationAlreadyInUse = Text.parse("&7This location is already used by another shopkeeper.");
+	public static Text endCrystalDisabledInTheEnd = Text.parse("&7End crystal shops cannot be placed in the end.");
+	public static Text cannotSpawn = Text.parse("&7The shopkeeper cannot spawn here.");
 
 	public static Text containerSelected = Text.parse("&aContainer selected! Right-click a block to place your shopkeeper.");
 	public static Text unsupportedContainer = Text.parse("&7This type of container cannot be used for shops.");
@@ -380,7 +458,6 @@ public class Messages extends Config {
 	public static Text containerAlreadyInUse = Text.parse("&7Another shopkeeper is already using the selected container!");
 	public static Text noContainerAccess = Text.parse("&7You cannot access the selected container!");
 	public static Text tooManyShops = Text.parse("&7You have already reached the limit of how many shops you can own!");
-	public static Text noPlayerShopsViaCommand = Text.parse("&7Player shops can only be created via the shop creation item!");
 
 	public static Text typeNewName = Text.parse("&aPlease enter the shop's new name in chat.\n"
 			+ "  &aEnter a dash (-) to remove the current name.");
@@ -414,7 +491,6 @@ public class Messages extends Config {
 	public static Text currencyItemsReceived = Text.parse("&aYou have received &6{amount}x&a currency item '&e{currency}&a'!");
 	public static Text mustHoldItemInMainHand = Text.parse("&7You must hold an item in your main hand.");
 	public static Text currencyItemSetToMainHandItem = Text.parse("&aThe currency item '&e{currencyId}&a' has been set to the &eitem in your main hand&a!");
-	public static Text itemsConverted = Text.parse("&aConverted &e{count}&a item stack(s)!");
 	public static Text itemsUpdated = Text.parse("&aUpdated &e{count}&a item(s)!");
 	public static String unknownBookAuthor = c("Unknown");
 
@@ -439,6 +515,7 @@ public class Messages extends Config {
 
 	public static Text missingTradePerm = Text.parse("&7You do not have the permission to trade with this shop.");
 	public static Text missingCustomTradePerm = Text.parse("&7You do not have the permission to trade with this shop.");
+	public static Text shopCurrentlyClosed = Text.parse("&7This shop is currently closed. Check again later!");
 	public static Text cannotTradeNoOffers = Text.parse("&7This shop currently has no offers. Check again later!");
 	public static String noOffersOpenEditorDescription = c("&eYou can edit this shop by right clicking it while sneaking.");
 	public static Text cannotTradeWithOwnShop = Text.parse("&7You cannot trade with your own shop.");
@@ -644,6 +721,19 @@ public class Messages extends Config {
 			"Left/Right click to adjust the amount."
 	));
 
+	public static String shopInformationHeader = c("&6Details");
+	public static List<String> shopInformation = c(Arrays.asList(
+			"Id: &e{shop_id}",
+			"Unique id: &e{shop_uuid}",
+			"Name: &e{shop_name}",
+			"Type: &e{shop_type}",
+			"Object: &e{shop_object_type}",
+			"Location: &e{shop_location}"
+	));
+	public static List<String> playerShopInformation = c(Arrays.asList(
+			"Owner: &e{shop_owner_name} &8({shop_owner_uuid})"
+	));
+
 	public static Text missingEditVillagersPerm = Text.parse("&7You do not have the permission to edit villagers.");
 	public static Text missingEditWanderingTradersPerm = Text.parse("&7You do not have the permission to edit wandering traders.");
 	public static Text mustTargetEntity = Text.parse("&7You have to target an entity.");
@@ -658,6 +748,14 @@ public class Messages extends Config {
 			"Bottom rows: Cost items",
 			"Edited trades have infinite",
 			"uses and no XP rewards."
+	));
+
+	public static String villagerEditorInformationHeader = c("&6Details");
+	public static List<String> villagerEditorInformation = c(Arrays.asList(
+			"Id: &e{entity_id}",
+			"Unique id: &e{entity_uuid}",
+			"Name: &e{entity_name}",
+			"Location: &e{entity_location}"
 	));
 
 	public static String buttonDeleteVillager = c("&4Delete");
@@ -774,7 +872,28 @@ public class Messages extends Config {
 	public static Text snapshotRestoreFailed = Text.parse("&cFailed to restore snapshot: &e({id}) &2{name} &8(&7{timestamp}&8)");
 	public static Text snapshotRestored = Text.parse("&aSnapshot restored: &e({id}) &2{name} &8(&7{timestamp}&8)");
 
+	public static Text historyHeader = Text.parse("&9Trades of {players}&9 with {shops}&9: &e{tradesCount} &e(Page {page} of {maxPage})");
+	public static Text historyHeaderAllPlayers = Text.parse("&eall players");
+	public static Text historyHeaderSpecificPlayer = Text.parse("&e{player}");
+	public static Text historyHeaderAllShops = Text.parse("&eall shops");
+	public static Text historyHeaderAdminShops = Text.parse("all &eadmin shops");
+	public static Text historyHeaderPlayerShops = Text.parse("all &eplayer shops");
+	public static Text historyHeaderAllOwnedShops = Text.parse("shops owned by &e{owner}");
+	public static Text historyHeaderSpecificShop = Text.parse("shop &e\"{shop}\"");
+	public static Text historyHeaderSpecificOwnedShop = Text.parse("shop &e\"{shop}\"&9 owned by &e{owner}");
+
+	public static Text historyDisabled = Text.parse("&7The trading history is disabled.");
+	public static Text historyNoTradesFound = Text.parse("&7No trades found.");
+
+	public static Text historyEntryOneItem = Text.parse("  &f{index}) &e{player}&7 [&6{item1Amount}x &a{item1}&7] \u279e [&6{resultItemAmount}x &a{resultItem}&7] {shop}{trade_count} &7(&f{timeAgo} ago&7)");
+	public static Text historyEntryTwoItems = Text.parse("  &f{index}) &e{player}&7 [&6{item1Amount}x &a{item1}&7] [&6{item2Amount}x &a{item2}&7] \u279e [&6{resultItemAmount}x &a{resultItem}&7] {shop}{trade_count} &7(&f{timeAgo} ago&7)");
+	public static Text historyEntryPlayerShop = Text.parse("&e{owner}");
+	public static Text historyEntryAdminShop = Text.parse("&eAdmin Shop");
+	public static Text historyEntryTradeCount = Text.parse("&7 (&6{count}x&7)");
+
 	public static Text noPermission = Text.parse("&cYou don't have the permission to do that.");
+	public static Text commandCreateNoPermission = Text.parse("&cYou don't have the permission to do that.\n"
+			+ "&eIf you are trying to create a player shop, use the shop creation item instead.");
 
 	public static Text commandUnknown = Text.parse("&cUnknown command '&e{command}&c'!");
 	public static Text commandArgumentUnexpected = Text.parse("&cUnexpected argument '&e{argument}&c'.");
@@ -784,6 +903,8 @@ public class Messages extends Config {
 	public static Text commandPlayerArgumentMissing = Text.parse("&cNo player specified for '&e{argumentFormat}&c'.");
 	public static Text commandPlayerArgumentInvalid = Text.parse("&cNo player found for '&e{argument}&c'.");
 	public static Text commandShopTypeArgumentInvalid = Text.parse("&cUnknown shop type '&e{argument}&c'.");
+	public static Text commandShopTypeArgumentNoAdminShop = Text.parse("&cShop type '&e{argument}&c' is no admin shop.");
+	public static Text commandShopTypeArgumentNoPlayerShop = Text.parse("&cShop type '&e{argument}&c' is no player shop.");
 	public static Text commandShopObjectTypeArgumentInvalid = Text.parse("&cUnknown shop object type '&e{argument}&c'.");
 	public static Text commandShopkeeperArgumentInvalid = Text.parse("&cNo shopkeeper found for '&e{argument}&c'.");
 	public static Text commandShopkeeperArgumentNoAdminShop = Text.parse("&cShopkeeper '&e{argument}&c' is no admin shopkeeper.");
@@ -813,12 +934,12 @@ public class Messages extends Config {
 	public static Text commandDescriptionDebug = Text.parse("Toggles debug mode on and off.");
 	public static Text commandDescriptionNotify = Text.parse("Turns trade notifications for you on or off.");
 	public static Text commandDescriptionList = Text.parse("Lists all shops of a specific player, or all admin shops.");
+	public static Text commandDescriptionHistory = Text.parse("Shows the trading history.");
 	public static Text commandDescriptionRemove = Text.parse("Removes a specific shop.");
 	public static Text commandDescriptionRemoveAll = Text.parse("Removes all shops of a specific player, all players, or all admin shops.");
 	public static Text commandDescriptionGive = Text.parse("Gives shop creation item(s) to the specified player.");
 	public static Text commandDescriptionGiveCurrency = Text.parse("Gives currency item(s) to the specified player.");
 	public static Text commandDescriptionSetCurrency = Text.parse("Changes the currency item to the item held in hand.");
-	public static Text commandDescriptionConvertItems = Text.parse("Converts the held (or all) items to conform to Spigot's data format.");
 	public static Text commandDescriptionUpdateItems = Text.parse("Updates third-party items (if they support it).");
 	public static Text commandDescriptionRemote = Text.parse("Remotely opens a shop (Optionally: For another player).");
 	public static Text commandDescriptionRemoteEdit = Text.parse("Remotely edits a shop.");
@@ -872,12 +993,8 @@ public class Messages extends Config {
 		plugin.saveResource(languageFilePath, true);
 	}
 
-	public static void loadLanguageFile() {
-		// Create default language file:
-		saveDefaultLanguageFile();
-
+	private static @Nullable ConfigData loadLanguageFile(String language) {
 		SKShopkeepersPlugin plugin = SKShopkeepersPlugin.getInstance();
-		String language = Settings.language;
 
 		// Create language file if it is missing and there exists a default:
 		String languageFilePath = getLanguageFilePath(language);
@@ -886,24 +1003,62 @@ public class Messages extends Config {
 			plugin.saveResource(languageFilePath, false);
 		}
 
-		// Load messages from language config:
+		// Load language file:
 		if (!languageFile.exists()) {
 			Log.warning("Could not find language file '" + languageFile.getName() + "'!");
-		} else {
-			Log.info("Loading language file: " + languageFile.getName());
-			try {
-				// Load the language config:
-				DataStore languageConfig = BukkitConfigDataStore.ofNewYamlConfig();
-				languageConfig.load(languageFile);
+			return null;
+		}
 
-				// Load messages:
-				INSTANCE.load(ConfigData.of(languageConfig));
+		Log.info("Loading language file: " + languageFile.getName());
+		try {
+			// Load the language config:
+			DataStore languageConfig = BukkitConfigDataStore.ofNewYamlConfig();
+			languageConfig.load(languageFile);
+			return ConfigData.of(languageConfig);
+		} catch (Exception e) {
+			Log.warning("Could not load language file '" + languageFile.getName() + "'!", e);
+			return null;
+		}
+	}
 
-				// Also update the derived settings:
-				Settings.onSettingsChanged();
-			} catch (Exception e) {
-				Log.warning("Could not load language file '" + languageFile.getName() + "'!", e);
+	private static @Nullable ConfigData loadDefaultLanguageFile() {
+		return loadLanguageFile(DEFAULT_LANGUAGE);
+	}
+
+	public static void loadLanguageFile() {
+		// Create the default language file, updating any existing one:
+		saveDefaultLanguageFile();
+
+		// Load the default language file (used for defaults when values are missing):
+		var defaultLanguageConfigData = loadDefaultLanguageFile();
+		if (defaultLanguageConfigData == null) {
+			// Failed to load the default language file (already logged elsewhere):
+			return;
+		}
+
+		String language = Settings.language;
+
+		ConfigData languageConfigData = defaultLanguageConfigData;
+		if (!language.equals(DEFAULT_LANGUAGE)) {
+			// Else: No need to load the default language file again.
+			languageConfigData = loadLanguageFile(language);
+			if (languageConfigData == null) {
+				// Failed to load the language file (already logged elsewhere):
+				return;
 			}
+
+			// Use the default language file as defaults:
+			languageConfigData.setDefaults(defaultLanguageConfigData);
+		}
+
+		// Load messages:
+		try {
+			INSTANCE.load(languageConfigData);
+
+			// Also update the derived settings:
+			Settings.onSettingsChanged();
+		} catch (Exception e) {
+			Log.warning("Could not load language file for language '" + language + "'!", e);
 		}
 	}
 

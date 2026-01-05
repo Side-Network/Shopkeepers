@@ -9,6 +9,8 @@ import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
 import com.nisovin.shopkeepers.util.annotations.ReadOnly;
 import com.nisovin.shopkeepers.util.java.Validate;
 
+// TODO Can be removed once all servers are expected to have updated to our new item stack
+// serialization format.
 /**
  * Handles Minecraft-native item data migrations.
  */

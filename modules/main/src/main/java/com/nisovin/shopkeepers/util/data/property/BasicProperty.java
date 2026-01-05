@@ -120,7 +120,7 @@ public class BasicProperty<T> implements Property<T> {
 				// to catch errors with the values produced by the supplier early.
 				this.validateValue(this.getDefaultValue());
 			} catch (Exception e) {
-				Validate.State.error("The default value for property '" + this.getName()
+				throw Validate.State.error("The default value for property '" + this.getName()
 						+ "' is invalid: " + e.getMessage());
 			}
 		}
@@ -128,7 +128,7 @@ public class BasicProperty<T> implements Property<T> {
 			try {
 				this.validateValue(null);
 			} catch (Exception e) {
-				Validate.State.error("Null is considered an invalid value, even though property '"
+				throw Validate.State.error("Null is considered an invalid value, even though property '"
 						+ this.getName() + "' is nullable: " + e.getMessage());
 			}
 		}
