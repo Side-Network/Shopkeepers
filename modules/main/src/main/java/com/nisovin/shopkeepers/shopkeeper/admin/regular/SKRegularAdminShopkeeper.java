@@ -57,9 +57,6 @@ public class SKRegularAdminShopkeeper
 		this.registerViewProviderIfMissing(DefaultUITypes.EDITOR(), () -> {
 			return new RegularAdminShopEditorViewProvider(this);
 		});
-		this.registerUIHandlerIfMissing(DefaultUITypes.TRADING(), () -> {
-			return new RegularAdminShopTradingHandler(this);
-		});
 		super.setup();
 	}
 
