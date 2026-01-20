@@ -4,17 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.nisovin.shopkeepers.api.shopkeeper.offers.PriceOffer;
-import com.nisovin.shopkeepers.api.util.UnmodifiableItemStack;
-import com.nisovin.shopkeepers.config.Settings;
-import com.nisovin.shopkeepers.currency.Currencies;
-import com.nisovin.shopkeepers.currency.Currency;
-import com.nisovin.shopkeepers.shopkeeper.SKTradingRecipe;
-import com.nisovin.shopkeepers.ui.trading.Trade;
-import com.nisovin.shopkeepers.util.inventory.InventoryUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import com.nisovin.shopkeepers.api.shopkeeper.TradingRecipe;
@@ -54,6 +44,9 @@ public class SKRegularAdminShopkeeper
 
 	@Override
 	protected void setup() {
+		this.registerViewProviderIfMissing(DefaultUITypes.TRADING(), () -> {
+			return new RegularAdminShopTradingViewProvider(this);
+		});
 		this.registerViewProviderIfMissing(DefaultUITypes.EDITOR(), () -> {
 			return new RegularAdminShopEditorViewProvider(this);
 		});
