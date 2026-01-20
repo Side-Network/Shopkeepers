@@ -20,6 +20,9 @@ repositories {
 dependencies {
 	implementation project(':shopkeepers-main')
 	paperweight.paperDevBundle(craftbukkitVersion) // Includes CraftBukkit and PaperAPI
+	
+	// Explicitly add adventure-text-serializer-ansi to fix missing version in Paper dev bundle
+	implementation 'net.kyori:adventure-text-serializer-ansi:4.25.0'
 
 	testImplementation libs.junit
 	testImplementation libs.asm
